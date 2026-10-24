@@ -1,0 +1,89 @@
+--- a/app/helpers/application_helper.rb
++++ b/app/helpers/application_helper.rb
+@@ -452,14 +452,33 @@
+     end
+   end
+ 
++  # Returns the given projects in tree order, the projects under the same
++  # parent (or at the root) sorted by name
++  # The given collection may be a subset of the whole project tree
++  def sort_project_tree(projects)
++    roots = []
++    children = Hash.new {|h, k| h[k] = []}
++    ancestors = []
++    projects.sort_by(&:lft).each do |project|
++      ancestors.pop while ancestors.any? && !project.is_descendant_of?(ancestors.last)
++      (ancestors.any? ? children[ancestors.last.id] : roots) << project
++      ancestors << project
++    end
++    flatten = lambda do |nodes|
++      nodes.sort_by {|p| [p.name.to_s.downcase, p.lft]}.flat_map {|p| [p] + flatten.call(children[p.id])}
++    end
++    flatten.call(roots)
++  end
++
+   # Renders a tree of projects as a nested set of unordered lists
+   # The given collection may be a subset of the whole project tree
+   # (eg. some intermediate nodes are private and can not be seen)
++  # The projects under the same parent are sorted by name
+   def render_project_nested_lists(projects, &block)
+     s = +''
+     if projects.any?
+       ancestors = []
+-      projects.sort_by(&:lft).each do |project|
++      sort_project_tree(projects).each do |project|
+         if ancestors.empty? || project.is_descendant_of?(ancestors.last)
+           s << "<ul class='projects #{ancestors.empty? ? 'root' : nil}'>\n"
+         else
+--- a/app/views/trackers/_form.html.erb
++++ b/app/views/trackers/_form.html.erb
+@@ -23,7 +23,7 @@
+ </p>
+ <%= hidden_field_tag 'tracker[core_fields][]', '' %>
+ 
+-<% @issue_custom_fields = IssueCustomField.sorted %>
++<% @issue_custom_fields = IssueCustomField.sorted.to_a.sort_by {|field| [field.name.downcase, field.position.to_i]} %>
+ <% if @issue_custom_fields.present? %>
+ <p>
+   <label><%= l(:label_custom_field_plural) %></label>
+--- a/test/functional/trackers_controller_test.rb
++++ b/test/functional/trackers_controller_test.rb
+@@ -52,6 +52,14 @@
+     end
+   end
+ 
++  def test_new_should_list_custom_fields_by_name
++    get :new
++    assert_response :success
++
++    names = css_select('input[type=checkbox][name="tracker[custom_field_ids][]"]').map {|input| input.parent.text.strip}
++    assert_equal IssueCustomField.all.map(&:name).sort_by(&:downcase), names
++  end
++
+   def test_new_should_set_archived_class_for_archived_projects
+     project = Project.find(2)
+     project.update_attribute(:status, Project::STATUS_ARCHIVED)
+--- a/test/helpers/application_helper_test.rb
++++ b/test/helpers/application_helper_test.rb
+@@ -2383,6 +2383,21 @@
+     end
+   end
+ 
++  def test_render_project_nested_lists_should_sort_projects_by_name_under_their_parent
++    html = render_project_nested_lists(Project.where(:id => [1, 3, 4, 5, 6]))
++    doc = Nokogiri::HTML.fragment(html)
++    assert_equal ['eCookbook'], doc.css('ul.projects.root > li.root > div.root').map(&:text)
++    assert_equal ['eCookbook Subproject 1', 'eCookbook Subproject 2', 'Private child of eCookbook'],
++                 doc.css('li.root > ul.projects > li.child > div.child').map(&:text)
++    assert_equal ['Child of private child'],
++                 doc.css('li.child > ul.projects > li.child > div.child').map(&:text)
++  end
++
++  def test_sort_project_tree_should_keep_children_under_their_parent
++    projects = sort_project_tree(Project.where(:id => [1, 2, 3, 4, 5, 6]))
++    assert_equal [1, 3, 4, 5, 6, 2], projects.map(&:id)
++  end
++
+   def test_time_tag
+     user = User.find(1)
+     user.pref.update(time_zone: 'UTC')

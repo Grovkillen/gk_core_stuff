@@ -1,0 +1,15 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -1297,6 +1297,12 @@
+   color: #A6750C;
+ }
+ 
++/* A box without an icon at its start (a flash or a conflict without one keeps the space for its png icon):
++   the same space on both sides, and no margin of the first and last child added to the padding */
++:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) {padding-inline: 12px;}
++:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) > :first-child {margin-block-start: 0;}
++:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) > :last-child {margin-block-end: 0;}
++
+ .warning .oauth-permissions { display:inline-block;text-align:left; }
+ .warning .oauth-permissions p { margin-top:0;-webkit-margin-before:0;}
+ 

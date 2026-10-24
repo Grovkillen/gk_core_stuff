@@ -1,0 +1,9 @@
+/* gk_core_stuff block_icons: core's move handle and the icons in a box's heading on My page.
+   The move handle (in a box's heading on My page and in core's sortable lists: custom fields, trackers, statuses,
+   enumerations, roles) is a span, not a link, so core's icon colour (a.icon-only) never reaches it: it gets the same
+   colour and hover as the other icons beside it. A box on My page has two groups of icons side by side (move and
+   remove, then the settings) with no space between the groups: they get the same 5 px core sets between icons in one
+   group. */
+span.icon-only.sort-handle .icon-svg { stroke: var(--oc-blue-9); fill: none; }
+span.icon-only.sort-handle:hover .icon-svg { stroke: var(--oc-red-9); }
+.mypage-box > .contextual + .contextual { margin-inline-end: 5px; }

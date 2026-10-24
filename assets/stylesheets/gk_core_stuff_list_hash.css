@@ -1,0 +1,2 @@
+/* gk_core_stuff list_hash: the number in issue lists is written as it is everywhere else, with its # */
+table.list tr.issue > td.id > a::before { content: "#"; }

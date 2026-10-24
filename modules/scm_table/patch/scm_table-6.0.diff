@@ -1,0 +1,18 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -1077,8 +1077,13 @@
+ .tabular.settings label{ margin-left: -300px; width: 295px; }
+ .tabular.settings textarea, .tabular.settings .wiki-preview, .tabular.settings .jstTabs { width: 99%; }
+ 
+-.settings.enabled_scm table {width:100%}
+-.settings.enabled_scm td.scm_name{ font-weight: bold; }
++/* drawn as core's lists: a heading row, lines between the rows, names and commands at the start */
++.settings.enabled_scm table {width:100%; border-collapse: collapse; margin-block-end: 8px;}
++.settings.enabled_scm th {background-color: #EEEEEE; padding: 4px; white-space: nowrap; text-align: start; border-block-end: 2px solid #d0d7de;}
++.settings.enabled_scm td {padding-block: 3px; padding-inline: 4px 10px; vertical-align: middle; border-block-start: 1px solid #d0d7de;}
++.settings.enabled_scm td.scm_name{ font-weight: bold; inline-size: 20%; white-space: nowrap; }
++.settings.enabled_scm td.scm_name label {display: inline-flex; align-items: center; gap: 4px;}
++.settings.enabled_scm th:last-child, .settings.enabled_scm td:last-child {inline-size: 15%;}
+ 
+ fieldset.settings label { display: block; }
+ fieldset#notified_events .parent { padding-left: 20px; }

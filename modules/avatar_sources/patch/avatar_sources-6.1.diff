@@ -1,0 +1,75 @@
+--- a/app/helpers/avatars_helper.rb
++++ b/app/helpers/avatars_helper.rb
+@@ -40,6 +40,12 @@
+     # "avatar" class should be added to all avatars
+     options[:class] = ['avatar', options[:class]].compact.join(' ')
+ 
++    # A source registered by a plugin (Redmine::AvatarSources) answers first
++    if user.is_a?(Principal) && !user.is_a?(AnonymousUser)
++      html = Redmine::AvatarSources.render(user, options, self)
++      return html if html
++    end
++
+     if user.is_a?(AnonymousUser)
+       anonymous_avatar(options)
+     elsif user.is_a?(Group)
+--- /dev/null
++++ b/lib/redmine/avatar_sources.rb
+@@ -0,0 +1,57 @@
++# frozen_string_literal: true
++
++# Redmine - project management software
++# Copyright (C) 2006-  Jean-Philippe Lang
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License
++# as published by the Free Software Foundation; either version 2
++# of the License, or (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++
++module Redmine
++  # A register of sources for the picture of a user or a group. A plugin adds a
++  # source with a position; AvatarsHelper#avatar asks the sources in order, before
++  # Gravatar, and the first one that returns HTML wins. A source is a block called
++  # with (principal, options, view) that returns the HTML of the picture, or nil to
++  # let the next source answer. Anonymous users never ask the sources.
++  #
++  #   Redmine::AvatarSources.register(:my_pictures, position: 10) do |user, options, view|
++  #     view.image_tag(...) if MyPicture.exists?(user_id: user.id)
++  #   end
++  module AvatarSources
++    Source = Struct.new(:name, :position, :block)
++
++    @sources = {}
++
++    class << self
++      def register(name, position: 100, &block)
++        @sources[name.to_s] = Source.new(name.to_s, position.to_i, block)
++      end
++
++      def unregister(name)
++        @sources.delete(name.to_s)
++      end
++
++      def sources
++        @sources.values.sort_by {|s| [s.position, s.name]}
++      end
++
++      def render(principal, options, view)
++        sources.each do |source|
++          html = source.block.call(principal, options, view)
++          return html if html.present?
++        end
++        nil
++      end
++    end
++  end
++end

@@ -1,0 +1,11 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -1937,6 +1937,8 @@
+   text-decoration: none;
+   user-select: none;
+ }
++/* In a list's cell a badge stands in the middle of the row, as the text beside it */
++table.list td .badge {inset-block-end: 2px; vertical-align: middle;}
+ .badge-private {
+   background: #d22;
+   color: #fff;

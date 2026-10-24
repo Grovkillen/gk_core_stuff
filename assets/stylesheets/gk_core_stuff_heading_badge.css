@@ -1,0 +1,3 @@
+/* gk_core_stuff heading_badge: the badges after a page's heading (the issue's status, Private) stand in the middle of
+   the heading's capitals instead of core's 4 px lift */
+#content > h2.inline-block ~ .badge { inset-block-end: 2px; }

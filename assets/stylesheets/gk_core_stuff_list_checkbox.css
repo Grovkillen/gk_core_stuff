@@ -1,0 +1,4 @@
+/* gk_core_stuff list_checkbox: core gives the row's check box 2 px above and none below, and as a part of the line it stands
+   on the text's middle, a little below the row's; as a block the cell's own middle places it in the middle of the row */
+table.list td.checkbox { padding-block: 0; }
+table.list td.checkbox input { display: block; margin-block: 0; margin-inline: auto; }

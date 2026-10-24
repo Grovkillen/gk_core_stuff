@@ -1,0 +1,1182 @@
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -1367,7 +1367,101 @@
+   };
+ }(jQuery));
+ 
++/* The browser's validation messages in the language of the page */
++function validationMessage(field) {
++  var validity = field.validity;
++  var t = rm.I18n;
++  if (validity.valueMissing) {
++    if (field.type === 'checkbox') {return t.validationValueMissingCheckbox;}
++    if (field.tagName === 'SELECT' || field.type === 'radio') {return t.validationValueMissingSelect;}
++    return t.validationValueMissing;
++  }
++  if (validity.typeMismatch) {
++    if (field.type === 'email') {return t.validationTypeMismatchEmail;}
++    if (field.type === 'url') {return t.validationTypeMismatchUrl;}
++    return t.validationBadFormat;
++  }
++  if (validity.tooShort) {return t.validationTooShort.replace('%{count}', field.minLength);}
++  if (validity.tooLong) {return t.validationTooLong.replace('%{count}', field.maxLength);}
++  if (validity.rangeUnderflow) {return t.validationRangeUnderflow.replace('%{value}', field.min);}
++  if (validity.rangeOverflow) {return t.validationRangeOverflow.replace('%{value}', field.max);}
++  if (validity.patternMismatch || validity.stepMismatch || validity.badInput) {
++    return field.title || t.validationBadFormat;
++  }
++  return '';
++}
++
++function setValidationMessage(field) {
++  if (!field.willValidate || !window.rm || !rm.I18n || !rm.I18n.validationValueMissing) {return;}
++  /* a message set by another script is kept */
++  if (field.validity.customError && !$(field).data('validation-message')) {return;}
++  field.setCustomValidity('');
++  var message = validationMessage(field);
++  $(field).data('validation-message', message);
++  field.setCustomValidity(message);
++}
++
++function setupValidationMessages() {
++  var fields = 'input, select, textarea';
++  /* invalid does not bubble: listen in the capture phase */
++  document.addEventListener('invalid', function(event) {
++    if ($(event.target).is(fields)) {setValidationMessage(event.target);}
++  }, true);
++  $(document).on('input change focusin mouseover', fields, function() {
++    setValidationMessage(this);
++  });
++}
++
++/* File fields with a button and a text in the language of the page instead of
++   the browser's. The browser's field stays in the form, without its own button
++   and text. */
++function setupFileFields() {
++  if (!window.rm || !rm.I18n || !rm.I18n.labelFileChoose) {return;}
++  $('input[type=file]:not(.file-field-input)').each(function() {
++    var button = $('<button type="button" class="file-field-button"></button>')
++      .text(this.multiple ? rm.I18n.labelFilesChoose : rm.I18n.labelFileChoose);
++    var name = $('<span class="file-field-name"></span>').text(rm.I18n.labelNoFileChosen);
++    $(this).addClass('file-field-input').attr('tabindex', '-1').after(button, name);
++  });
++}
++
++$(document).on('click', '.file-field-button', function() {
++  $(this).prevAll('input[type=file]').first().click();
++});
++$(document).on('change', 'input.file-field-input', function() {
++  var count = this.files ? this.files.length : 0;
++  var text = rm.I18n.labelNoFileChosen;
++  if (count === 1) {
++    text = this.files[0].name;
++  } else if (count > 1) {
++    text = rm.I18n.labelXFilesChosen.replace('%{count}', count);
++  }
++  $(this).nextAll('.file-field-name').first().text(text);
++});
++/* a file dropped on the button or the text goes into the field, unless the
++   form has its own drop zone for attachments */
++$(document).on('dragover', '.file-field-button, .file-field-name', function(event) {
++  if ($(this).closest('.filedroplistner, .custom-field-filedroplistner').length) {return;}
++  event.preventDefault();
++  $(this).addClass('fileover');
++});
++$(document).on('dragleave drop', '.file-field-button, .file-field-name', function() {
++  $(this).removeClass('fileover');
++});
++$(document).on('drop', '.file-field-button, .file-field-name', function(event) {
++  if ($(this).closest('.filedroplistner, .custom-field-filedroplistner').length) {return;}
++  var files = event.originalEvent.dataTransfer && event.originalEvent.dataTransfer.files;
++  if (!files || files.length === 0) {return;}
++  event.preventDefault();
++  var input = $(this).prevAll('input[type=file]').first();
++  input[0].files = files;
++  input.trigger('change');
++});
++
+ $(document).ready(setupAjaxIndicator);
++$(document).ready(setupValidationMessages);
++$(document).ready(setupFileFields);
++$(document).ajaxComplete(setupFileFields);
+ $(document).ready(hideOnLoad);
+ $(document).ready(addFormObserversForDoubleSubmit);
+ $(document).ready(defaultFocus);
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -611,6 +611,10 @@
+   padding-right: 20px;
+ }
+ input[type="file"] {border: 0; padding-left: 0; padding-right: 0; height: initial; background-color: initial; }
++input[type="file"].file-field-input {width: 1px; height: 1px; padding: 0; border: 0; color: transparent; overflow: hidden;}
++input[type="file"].file-field-input::file-selector-button {display: none;}
++.file-field-name {margin-left: 0.5em; color: #888;}
++.file-field-button.fileover, .file-field-name.fileover {outline: 2px dashed currentColor; outline-offset: 2px;}
+ input[type="submit"], button[type="submit"] {
+   -webkit-appearance: button;
+   cursor: pointer;
+--- a/app/helpers/application_helper.rb
++++ b/app/helpers/application_helper.rb
+@@ -1910,6 +1910,31 @@
+     end
+   end
+ 
++  # Texts for the javascripts, in the language of the page
++  def heads_for_i18n
++    texts = {
++      validationValueMissing: l(:text_validation_value_missing),
++      validationValueMissingSelect: l(:text_validation_value_missing_select),
++      validationValueMissingCheckbox: l(:text_validation_value_missing_checkbox),
++      validationTypeMismatchEmail: l(:text_validation_type_mismatch_email),
++      validationTypeMismatchUrl: l(:text_validation_type_mismatch_url),
++      validationBadFormat: l(:text_validation_bad_format),
++      validationTooShort: l(:text_validation_too_short),
++      validationTooLong: l(:text_validation_too_long),
++      validationRangeUnderflow: l(:text_validation_range_underflow),
++      validationRangeOverflow: l(:text_validation_range_overflow),
++      labelFileChoose: l(:label_file_choose),
++      labelFilesChoose: l(:label_files_choose),
++      labelNoFileChosen: l(:label_no_file_chosen),
++      labelXFilesChosen: l(:label_x_files_chosen)
++    }
++    javascript_tag(
++      "rm = window.rm || {};" \
++      "rm.I18n = rm.I18n || {};" \
++      "rm.I18n = Object.freeze(#{texts.to_json});"
++    )
++  end
++
+   def heads_for_auto_complete(project)
+     data_sources = autocomplete_data_sources(project)
+     javascript_tag(
+--- a/app/views/layouts/base.html.erb
++++ b/app/views/layouts/base.html.erb
+@@ -12,6 +12,7 @@
+ <%= stylesheet_link_tag 'rtl', :media => 'all' if l(:direction) == 'rtl' %>
+ <%= javascript_heads %>
+ <%= heads_for_theme %>
++<%= heads_for_i18n %>
+ <%= heads_for_auto_complete(@project) %>
+ <%= call_hook :view_layouts_base_html_head %>
+ <!-- page specific tags -->
+--- a/config/locales/ar.yml
++++ b/config/locales/ar.yml
+@@ -1499,3 +1499,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/az.yml
++++ b/config/locales/az.yml
+@@ -1591,3 +1591,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/bg.yml
++++ b/config/locales/bg.yml
+@@ -1444,3 +1444,17 @@
+   text_project_destroy_enter_identifier: За да потвърдите действието, въведете идентификатора на проекта (%{identifier}) по-долу.
+   field_name_or_email_or_login: Име, e-mail или login име
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/bs.yml
++++ b/config/locales/bs.yml
+@@ -1485,3 +1485,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/ca.yml
++++ b/config/locales/ca.yml
+@@ -1486,3 +1486,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/cs.yml
++++ b/config/locales/cs.yml
+@@ -1481,3 +1481,17 @@
+     one: "%{filename} a 1 soubor"
+     other: "%{filename} a %{count} soubory(ů)"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/da.yml
++++ b/config/locales/da.yml
+@@ -1516,3 +1516,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/de.yml
++++ b/config/locales/de.yml
+@@ -1463,3 +1463,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/el.yml
++++ b/config/locales/el.yml
+@@ -1499,3 +1499,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/en-GB.yml
++++ b/config/locales/en-GB.yml
+@@ -1500,3 +1500,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/en.yml
++++ b/config/locales/en.yml
+@@ -1425,3 +1425,17 @@
+   text_user_destroy_confirmation: "Are you sure you want to delete this user and remove all references to them? This cannot be undone. Often, locking a user instead of deleting them is the better solution. To confirm, please enter their login (%{login}) below."
+   text_project_destroy_enter_identifier: "To confirm, please enter the project's identifier (%{identifier}) below."
+   field_name_or_email_or_login: Name, email or login
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/es-PA.yml
++++ b/config/locales/es-PA.yml
+@@ -1529,3 +1529,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/es.yml
++++ b/config/locales/es.yml
+@@ -1565,3 +1565,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/et.yml
++++ b/config/locales/et.yml
+@@ -1504,3 +1504,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/eu.yml
++++ b/config/locales/eu.yml
+@@ -1500,3 +1500,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/fa.yml
++++ b/config/locales/fa.yml
+@@ -1427,3 +1427,17 @@
+   text_project_destroy_enter_identifier: برای تایید، لطفا شناسه پروژه (%{identifier}) را وارد کنید.
+   field_name_or_email_or_login: نام، رایانامه یا شناسه کاربری
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/fi.yml
++++ b/config/locales/fi.yml
+@@ -1520,3 +1520,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/fr.yml
++++ b/config/locales/fr.yml
+@@ -1479,3 +1479,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/gl.yml
++++ b/config/locales/gl.yml
+@@ -1504,3 +1504,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/he.yml
++++ b/config/locales/he.yml
+@@ -1504,3 +1504,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/hr.yml
++++ b/config/locales/hr.yml
+@@ -1496,3 +1496,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/hu.yml
++++ b/config/locales/hu.yml
+@@ -1491,3 +1491,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/id.yml
++++ b/config/locales/id.yml
+@@ -1501,3 +1501,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/it.yml
++++ b/config/locales/it.yml
+@@ -1438,3 +1438,17 @@
+   text_project_destroy_enter_identifier: "Per confermare, inserisci l'identificativo del progetto (%{identifier}) qui sotto."
+   field_name_or_email_or_login: Nome, email o login
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/ja.yml
++++ b/config/locales/ja.yml
+@@ -1450,3 +1450,17 @@
+     zero: "%{filename}"
+     other: "%{filename} ほか%{count}件"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/ko.yml
++++ b/config/locales/ko.yml
+@@ -1519,3 +1519,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/lt.yml
++++ b/config/locales/lt.yml
+@@ -1460,3 +1460,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/lv.yml
++++ b/config/locales/lv.yml
+@@ -1493,3 +1493,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/mk.yml
++++ b/config/locales/mk.yml
+@@ -1499,3 +1499,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/mn.yml
++++ b/config/locales/mn.yml
+@@ -1499,3 +1499,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/nl.yml
++++ b/config/locales/nl.yml
+@@ -1474,3 +1474,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/no.yml
++++ b/config/locales/no.yml
+@@ -1489,3 +1489,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/pl.yml
++++ b/config/locales/pl.yml
+@@ -1443,3 +1443,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/pt-BR.yml
++++ b/config/locales/pt-BR.yml
+@@ -1504,3 +1504,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/pt.yml
++++ b/config/locales/pt.yml
+@@ -1492,3 +1492,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/ro.yml
++++ b/config/locales/ro.yml
+@@ -1494,3 +1494,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/ru.yml
++++ b/config/locales/ru.yml
+@@ -1569,3 +1569,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/sk.yml
++++ b/config/locales/sk.yml
+@@ -1488,3 +1488,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/sl.yml
++++ b/config/locales/sl.yml
+@@ -1499,3 +1499,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/sq.yml
++++ b/config/locales/sq.yml
+@@ -1461,3 +1461,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/sr-YU.yml
++++ b/config/locales/sr-YU.yml
+@@ -1501,3 +1501,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/sr.yml
++++ b/config/locales/sr.yml
+@@ -1500,3 +1500,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/sv.yml
++++ b/config/locales/sv.yml
+@@ -1464,3 +1464,17 @@
+     one: '%{filename} och 1 fil'
+     other: '%{filename} och %{count} filer'
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fyll i fältet."
++  text_validation_value_missing_select: "Välj något i listan."
++  text_validation_value_missing_checkbox: "Kryssa i rutan för att fortsätta."
++  text_validation_type_mismatch_email: "Skriv en hel e-postadress, med @ och en domän efter."
++  text_validation_type_mismatch_url: "Skriv en hel adress som börjar med https:// eller http://."
++  text_validation_bad_format: "Värdet har inte den form fältet tar emot."
++  text_validation_too_short: "Skriv minst %{count} tecken."
++  text_validation_too_long: "Skriv högst %{count} tecken."
++  text_validation_range_underflow: "Värdet måste vara minst %{value}."
++  text_validation_range_overflow: "Värdet får vara högst %{value}."
++  label_file_choose: "Välj fil"
++  label_files_choose: "Välj filer"
++  label_no_file_chosen: "Ingen fil vald"
++  label_x_files_chosen: "%{count} filer valda"
+--- a/config/locales/ta-IN.yml
++++ b/config/locales/ta-IN.yml
+@@ -1454,3 +1454,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/th.yml
++++ b/config/locales/th.yml
+@@ -1495,3 +1495,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/tr.yml
++++ b/config/locales/tr.yml
+@@ -1498,3 +1498,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/uk.yml
++++ b/config/locales/uk.yml
+@@ -1487,3 +1487,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/vi.yml
++++ b/config/locales/vi.yml
+@@ -1504,3 +1504,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/zh-TW.yml
++++ b/config/locales/zh-TW.yml
+@@ -1516,3 +1516,17 @@
+     one: "%{filename} 與另 1 個檔案"
+     other: "%{filename} 與另外 %{count} 個檔案"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/config/locales/zh.yml
++++ b/config/locales/zh.yml
+@@ -1435,3 +1435,17 @@
+     one: "%{filename} and 1 file"
+     other: "%{filename} and %{count} files"
+   twofa_already_setup: Two-factor authentication already set up
++  text_validation_value_missing: "Fill in the field."
++  text_validation_value_missing_select: "Choose something in the list."
++  text_validation_value_missing_checkbox: "Tick the box to go on."
++  text_validation_type_mismatch_email: "Write a whole email address, with @ and a domain after it."
++  text_validation_type_mismatch_url: "Write a whole address that starts with https:// or http://."
++  text_validation_bad_format: "The value is not in the form the field takes."
++  text_validation_too_short: "Write at least %{count} characters."
++  text_validation_too_long: "Write at most %{count} characters."
++  text_validation_range_underflow: "The value must be at least %{value}."
++  text_validation_range_overflow: "The value may be at most %{value}."
++  label_file_choose: "Choose a file"
++  label_files_choose: "Choose files"
++  label_no_file_chosen: "No file chosen"
++  label_x_files_chosen: "%{count} files chosen"
+--- a/test/helpers/application_helper_test.rb
++++ b/test/helpers/application_helper_test.rb
+@@ -2396,6 +2396,18 @@
+     end
+   end
+ 
++  def test_heads_for_i18n_should_include_validation_and_file_field_texts
++    with_locale 'en' do
++      heads = heads_for_i18n
++      assert_include '"validationValueMissing":"Fill in the field."', heads
++      assert_include '"validationTooShort":"Write at least %{count} characters."', heads
++      assert_include '"labelNoFileChosen":"No file chosen"', heads
++    end
++    with_locale 'sv' do
++      assert_include '"labelNoFileChosen":"Ingen fil vald"', heads_for_i18n
++    end
++  end
++
+   def test_time_tag
+     user = User.find(1)
+     user.pref.update(time_zone: 'UTC')

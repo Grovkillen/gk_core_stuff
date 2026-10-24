@@ -1,0 +1,11 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -1812,6 +1812,8 @@
+ .badge-issues-count {
+   background: #EEEEEE;
+ }
++/* The badges after a page's heading (the issue's status, Private) stand in the middle of its capitals */
++#content > h2.inline-block ~ .badge {inset-block-end: 2px;}
+ 
+ /***** Tooltips *****/
+ .ui-tooltip {

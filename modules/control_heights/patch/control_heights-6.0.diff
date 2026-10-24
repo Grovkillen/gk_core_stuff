@@ -1,0 +1,15 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -625,6 +625,12 @@
+   background-color: #ddd;
+ }
+ 
++/* Fields and buttons that stand beside a submit button in the same box get the submit button's height */
++:is(p, div, span, td, li, fieldset):has(> input[type="submit"], > button[type="submit"]) > :is(input:not([type="hidden"], [type="checkbox"], [type="radio"], [type="file"], [type="image"], [type="range"], [type="color"]), select:not([multiple]), button),
++:is(p, div, span, td, li, fieldset):has(> input[type="submit"], > button[type="submit"]) > :is(label, span) > :is(input:not([type="hidden"], [type="checkbox"], [type="radio"], [type="file"], [type="image"], [type="range"], [type="color"]), select:not([multiple]), button) {
++  min-block-size: 28px;
++}
++
+ input[type="text"]:focus, input[type="text"]:active,
+ input[type="password"]:focus, input[type="password"]:active,
+ input[type="date"]:focus, input[type="date"]:active,

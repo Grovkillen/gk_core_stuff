@@ -1,0 +1,53 @@
+--- a/app/views/layouts/base.html.erb
++++ b/app/views/layouts/base.html.erb
+@@ -152,7 +152,7 @@
+     </div>
+ </div>
+ <div id="footer">
+-    Powered by <%= link_to Redmine::Info.app_name, Redmine::Info.url, :target => '_blank', :rel => 'noopener' %> &copy; 2006-2026 Jean-Philippe Lang
++    Powered by <%= link_to Redmine::Info.app_name, Redmine::Info.url, :target => '_blank', :rel => 'noopener' %><%= " #{Redmine::VERSION::MAJOR}.#{Redmine::VERSION::MINOR}.#{Redmine::VERSION::TINY}" if Setting.footer_show_version? %> &copy; 2006-2026 Jean-Philippe Lang
+ </div>
+ 
+ <div id="ajax-indicator" style="display:none;">
+--- a/config/settings.yml
++++ b/config/settings.yml
+@@ -357,6 +357,8 @@
+   default:
+   - '6'
+   - '7'
++footer_show_version:
++  default: 0
+ new_item_menu_tab:
+   default: 2
+ timelog_required_fields:
+--- a/app/views/settings/_display.html.erb
++++ b/app/views/settings/_display.html.erb
+@@ -36,6 +36,8 @@
+ <p><%= setting_select :new_item_menu_tab, [[l(:label_none), '0'], [l(:label_new_project_issue_tab_enabled), '1'], [l(:label_new_object_tab_enabled), '2']] %></p>
+ 
+ <p><%= setting_check_box :wiki_tablesort_enabled %></p>
++
++<p><%= setting_check_box :footer_show_version %></p>
+ </div>
+ 
+ <%= submit_tag l(:button_save) %>
+--- a/config/locales/en.yml
++++ b/config/locales/en.yml
+@@ -522,6 +522,7 @@
+   setting_attachment_extensions_allowed: Allowed extensions
+   setting_attachment_extensions_denied: Disallowed extensions
+   setting_new_item_menu_tab: Project menu tab for creating new objects
++  setting_footer_show_version: Show the Redmine version in the footer
+   setting_commit_logs_formatting: Apply text formatting to commit messages
+   setting_timelog_required_fields: Required fields for time logs
+   setting_close_duplicate_issues: Close duplicate issues automatically
+--- a/config/locales/sv.yml
++++ b/config/locales/sv.yml
+@@ -1198,6 +1198,7 @@
+   label_tracker_all: All ärendetyper
+   label_new_project_issue_tab_enabled: Visa fliken "Nya ärenden"
+   setting_new_item_menu_tab: Projektmenyflik för att skapa nya objekt
++  setting_footer_show_version: Visa Redmines version i sidfoten
+   label_new_object_tab_enabled: Visa "+" rullgardinsmenyn
+   error_no_projects_with_tracker_allowed_for_new_issue: Inga projekt med ärendetyper tillåtna för nya ärenden
+   field_textarea_font: Font som används för textytor

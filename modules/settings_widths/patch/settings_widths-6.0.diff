@@ -1,0 +1,79 @@
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -954,6 +954,76 @@
+   }
+ }
+ 
++// On the settings pages every list and text field in one box (or one fieldset of it) gets the width of the
++// widest of them, whatever stands between them; a field made short on purpose (a size under 10) keeps its width.
++// Only min-width is set, never more than the row has room for; a box in a tab not shown yet is measured once
++// it shows.
++var settingsFieldWidthsObserver = null;
++function setupSettingsFieldWidths() {
++  if (!$('body').hasClass('controller-settings')) return;
++  var skip = /^(hidden|checkbox|radio|submit|button|reset|image|file|color|range)$/i;
++  function shown(el) {
++    return !el.hidden && window.getComputedStyle(el).display !== 'none';
++  }
++  // the row's one list or text field, or null when the row has none, several or other controls
++  function singleField(row) {
++    if ($(row).find('textarea, input[type=checkbox], input[type=radio]').length > 0) return null;
++    var fields = $(row).find('select, input').filter(function(){
++      return this.tagName === 'SELECT' || !skip.test(this.type || 'text');
++    });
++    return fields.length === 1 ? fields[0] : null;
++  }
++  function equalize(group) {
++    var widths = group.map(function(field){ return field.getBoundingClientRect().width; });
++    if (widths.some(function(width){ return !width; })) return false;
++    // the room a field has in its row: tabular rows keep the label's place as padding
++    var fills = group.map(function(field, i){
++      var row = field.parentElement, style = window.getComputedStyle(row);
++      var room = row.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
++      return room > 0 && widths[i] >= room * 0.9;
++    });
++    var target = 0;
++    group.forEach(function(field, i){ if (!fills[i] && widths[i] > target) target = widths[i]; });
++    group.forEach(function(field, i){
++      if (target && !fills[i] && widths[i] < target - 0.5) {
++        field.style.minWidth = 'min(' + Math.ceil(target) + 'px, 100%)';
++      }
++    });
++    return true;
++  }
++  function take(group) {
++    if (group.length < 2 || group.some(function(field){ return $(field).data('field-width'); })) return;
++    group.forEach(function(field){ $(field).data('field-width', true); });
++    if (equalize(group) || !window.IntersectionObserver) return;
++    if (!settingsFieldWidthsObserver) {
++      settingsFieldWidthsObserver = new IntersectionObserver(function(entries){
++        entries.forEach(function(entry){
++          if (!entry.isIntersecting && !entry.target.offsetWidth) return;
++          if (equalize($(entry.target).data('field-width-group'))) {
++            settingsFieldWidthsObserver.unobserve(entry.target);
++          }
++        });
++      });
++    }
++    $(group[0]).data('field-width-group', group);
++    settingsFieldWidthsObserver.observe(group[0]);
++  }
++  $('.box.tabular.settings').each(function(i, box){
++    $(box).find('fieldset').addBack().each(function(j, part){
++      var group = [];
++      $(part).find('p').each(function(k, row){
++        // a row of a fieldset inside this part belongs to the fieldset
++        if ($(row.parentElement).closest('fieldset, .box.tabular.settings')[0] !== part || !shown(row)) return true;
++        var field = singleField(row);
++        if (!field || (field.tagName === 'INPUT' && Number(field.getAttribute('size') || 99) < 10)) return true;
++        group.push(field);
++      });
++      take(group);
++    });
++  });
++}
++$(document).ready(setupSettingsFieldWidths);
++
+ function setupFilePreviewNavigation() {
+   // only bind arrow keys when preview navigation is present
+   const element = $('.pagination.filepreview').first();

@@ -1,0 +1,10 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -346,6 +346,7 @@
+ table.list td {text-align:center; vertical-align:middle; padding-top: 3px; padding-right: 10px; padding-bottom: 3px; border-top: 1px solid #d0d7de;}
+ table.list td.icon {width: 100%;} /* Prevents border from disappearing due to inline-flex shrinking */
+ table.list td.id { width: 2%; text-align: center;}
++table.list tr.issue > td.id > a::before {content: "#";} /* the issue number with its #, as everywhere else */
+ table.list td.name, table.list td.description, table.list td.subject, table.list td.parent-subject, table.list td.comments, table.list td.roles, table.list td.attachments, table.list td.text,  table.list td.short_description {text-align: left;}
+ 
+ table.list td.attachments span {display: block; height: 16px;}

@@ -1,0 +1,11 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -158,6 +158,8 @@
+ @media screen and (min-width: 2560px) {#sidebar{width: 380px;}}
+ #sidebar h3{ font-size: 0.875rem; margin-top: 14px; color: #555; }
+ #sidebar h3:first-child{ margin-top: 0; }
++/* A block of its own (a div with its heading, as a plugin's) after another block keeps the space above its heading */
++#sidebar-wrapper > :is(h3, ul, p, div, form, table) ~ div > h3:first-child { margin-block-start: 14px; }
+ #sidebar hr{ width: 100%; margin: 0 auto; height: 1px; background: #ccc; border: 0; }
+ #sidebar .contextual { margin-right: 1em; }
+ #sidebar ul, ul.flat {margin: 0;  padding: 0;}

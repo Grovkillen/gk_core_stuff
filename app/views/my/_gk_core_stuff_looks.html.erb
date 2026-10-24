@@ -1,0 +1,11 @@
+<%# gk_core_stuff: the looks the administrator lets each person switch off, in core's Preferences on My account %>
+<% chosen = pref.gk_core_stuff_looks %>
+<p><label><%= l(:label_gk_core_stuff_looks_mine) %></label>
+  <% looks.each do |look| %>
+    <label class="block">
+      <%= hidden_field_tag "pref[gk_core_stuff_looks][#{look.key}]", '0', id: nil %>
+      <%= check_box_tag "pref[gk_core_stuff_looks][#{look.key}]", '1', chosen[look.key] != '0', id: "pref_gk_core_stuff_looks_#{look.key}" %>
+      <%= l(:"label_gk_core_stuff_#{look.key}") %>
+    </label>
+  <% end %>
+  <em class="info"><%= l(:text_gk_core_stuff_looks_mine) %></em></p>

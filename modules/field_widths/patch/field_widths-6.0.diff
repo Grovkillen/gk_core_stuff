@@ -1,0 +1,99 @@
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -1023,6 +1023,96 @@
+   }
+ }
+ 
++// Lists and text fields that stand straight under each other in a form, one per row, get the width of the
++// widest of them, so that they read as one column. An explaining text (em.info) in a row does not end the run;
++// a heading, a section or a row of another kind does, and the fields elsewhere keep their own widths. A field
++// that fills its row neither sets nor takes the width. Only min-width is set, never more than the row has room
++// for; a run in a part not shown yet (another tab, a collapsed fieldset) is measured once it shows.
++// In a table in a form the fields that stand right in the cells of one column are one run.
++var fieldWidthsObserver = null;
++function setupFieldWidths() {
++  var skip = /^(hidden|checkbox|radio|submit|button|reset|image|file|color|range)$/i;
++  function shown(el) {
++    return !el.hidden && window.getComputedStyle(el).display !== 'none';
++  }
++  // the row's one list or text field, or null when the row has none, several or other controls
++  function singleField(row) {
++    if (row.tagName !== 'P' || $(row).find('textarea, input[type=checkbox], input[type=radio]').length > 0) return null;
++    var fields = $(row).find('select, input').filter(function(){
++      return this.tagName === 'SELECT' || !skip.test(this.type || 'text');
++    });
++    return fields.length === 1 ? fields[0] : null;
++  }
++  function equalize(group) {
++    var widths = group.map(function(field){ return field.getBoundingClientRect().width; });
++    if (widths.some(function(width){ return !width; })) return false;
++    // the room a field has in its row: tabular rows keep the label's place as padding
++    var fills = group.map(function(field, i){
++      var row = field.parentElement, style = window.getComputedStyle(row);
++      var room = row.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
++      return !group.column && room > 0 && widths[i] >= room * 0.9;
++    });
++    var target = 0;
++    group.forEach(function(field, i){ if (!fills[i] && widths[i] > target) target = widths[i]; });
++    group.forEach(function(field, i){
++      if (target && !fills[i] && widths[i] < target - 0.5) {
++        field.style.minWidth = 'min(' + Math.ceil(target) + 'px, 100%)';
++      }
++    });
++    return true;
++  }
++  function take(group) {
++    if (group.length < 2 || group.some(function(field){ return $(field).data('field-width'); })) return;
++    group.forEach(function(field){ $(field).data('field-width', true); });
++    if (equalize(group) || !window.IntersectionObserver) return;
++    if (!fieldWidthsObserver) {
++      fieldWidthsObserver = new IntersectionObserver(function(entries){
++        entries.forEach(function(entry){
++          if (!entry.isIntersecting && !entry.target.offsetWidth) return;
++          if (equalize($(entry.target).data('field-width-group'))) {
++            fieldWidthsObserver.unobserve(entry.target);
++          }
++        });
++      });
++    }
++    $(group[0]).data('field-width-group', group);
++    fieldWidthsObserver.observe(group[0]);
++  }
++  $('form p').each(function(i, row){
++    if (!singleField(row) || !shown(row)) return true;
++    // a run starts where the row before it is not of the kind
++    var prev = row.previousElementSibling;
++    while (prev && !shown(prev)) prev = prev.previousElementSibling;
++    if (prev && singleField(prev)) return true;
++    var group = [];
++    for (var r = row; r; r = r.nextElementSibling) {
++      if (!shown(r)) continue;
++      var field = singleField(r);
++      if (!field) break;
++      group.push(field);
++    }
++    take(group);
++  });
++  // a column of a table in a form: the one list or text field that stands right in each cell of the column gets
++  // the width of the widest; a field inside a part of its own in the cell keeps its width
++  $('form table').each(function(i, table){
++    var cols = {};
++    $(table).children('tbody').children('tr').each(function(j, tr){
++      if (!shown(tr)) return true;
++      $(tr).children('td').each(function(k, td){
++        var fields = $(td).find('select, input').filter(function(){
++          return this.tagName === 'SELECT' || !skip.test(this.type || 'text');
++        });
++        if (fields.length !== 1 || fields[0].parentElement !== td || $(td).find('textarea').length > 0) return true;
++        (cols[td.cellIndex] = cols[td.cellIndex] || []).push(fields[0]);
++      });
++    });
++    $.each(cols, function(k, group){ group.column = true; take(group); });
++  });
++}
++$(document).ready(setupFieldWidths);
++$(document).on('ajaxComplete', setupFieldWidths);
++
+ function blockEventPropagation(event) {
+   event.stopPropagation();
+   event.preventDefault();

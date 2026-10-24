@@ -1,0 +1,51 @@
+--- a/app/assets/javascripts/application-legacy.js
++++ b/app/assets/javascripts/application-legacy.js
+@@ -990,6 +990,7 @@
+   $(document).bind('ajaxSend', function(event, xhr, settings) {
+     if ($('.ajax-loading').length === 0 && settings.contentType != 'application/octet-stream') {
+       $('#ajax-indicator').show();
++      positionAjaxIndicator();
+     }
+   });
+   $(document).bind('ajaxStop', function() {
+@@ -997,6 +998,40 @@
+   });
+ }
+ 
++/* Places the ajax indicator over the selected rows of a list, when the request
++   comes from its context menu or a bulk change. Without selected rows on the
++   screen, the indicator stays where the stylesheet puts it. */
++function positionAjaxIndicator() {
++  var indicator = $('#ajax-indicator');
++  var rows = $('table.list tr.context-menu-selection:visible');
++  indicator.css({left: '', top: '', right: '', transform: ''});
++  if (rows.length === 0) {return;}
++  var list = rows.first().closest('table')[0].getBoundingClientRect();
++  var top = Infinity;
++  var bottom = -Infinity;
++  rows.each(function() {
++    var rect = this.getBoundingClientRect();
++    top = Math.min(top, rect.top);
++    bottom = Math.max(bottom, rect.bottom);
++  });
++  /* the visible part of the selected rows, else the visible part of the list */
++  top = Math.max(top, 0);
++  bottom = Math.min(bottom, window.innerHeight);
++  if (bottom <= top) {
++    top = Math.max(list.top, 0);
++    bottom = Math.min(list.bottom, window.innerHeight);
++  }
++  var left = Math.max(list.left, 0);
++  var right = Math.min(list.right, window.innerWidth);
++  if (bottom <= top || right <= left) {return;}
++  indicator.css({
++    left: Math.round((left + right - indicator.outerWidth()) / 2) + 'px',
++    top: Math.round((top + bottom - indicator.outerHeight()) / 2) + 'px',
++    right: 'auto',
++    transform: 'none'
++  });
++}
++
+ function setupTabs() {
+   if($('.tabs').length > 0) {
+     displayTabsButtons();

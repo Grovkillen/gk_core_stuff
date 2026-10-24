@@ -1,0 +1,21 @@
+/* done_ratio_text */
+/* The value as text beside, on or below a progress bar (#5284). The bar keeps core's 80 px in every position, so
+   every bar in a column has the same width, with or without its text; a value whose text is left out (0 % or
+   100 %) keeps an empty place for it. In a list's cell the bar stands in the middle, as core's heading. */
+div.progress-with-text table.progress {float: none; margin: 0; inline-size: 80px;}
+div.progress-text-right, div.progress-text-over, div.progress-text-under {vertical-align: middle;}
+div.progress-text-right {display: inline-flex; align-items: center; gap: 4px;}
+div.progress-text-right table.progress {flex: none;}
+div.progress-text-right .progress-text {flex: none; min-inline-size: 2.6em; text-align: end; font-size: 86%; line-height: 1;}
+div.progress-text-over {display: inline-grid; inline-size: 80px;}
+div.progress-text-over > * {grid-area: 1 / 1;}
+div.progress-text-over .progress-text {align-self: center; text-align: center; font-size: 75%; line-height: 1; color: #222; text-shadow: 0 0 2px #fff, 0 0 2px #fff;}
+/* the plate behind the text on the bar, chosen in the settings (done_ratio_text_plate) */
+div.progress-text-over .progress-text.gk-core-stuff-progress-plate {background-color: rgba(255, 255, 255, 0.85); border-radius: 2px; padding-inline: 2px; text-shadow: none;}
+div.progress-text-under {display: inline-block; inline-size: 80px;}
+div.progress-text-under .progress-text {display: block; text-align: center; font-size: 86%;}
+div.progress-text-under .progress-text-none::before {content: "\00a0";}
+td.done_ratio > div.progress-with-text {margin-inline: auto;}
+
+/* the looks: their explanation above the table stands at the box's start, not in the place of a label (core's tabular p) */
+.tabular p.gk-core-stuff-looks-intro { padding-inline-start: 0; }

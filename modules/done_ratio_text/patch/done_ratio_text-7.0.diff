@@ -1,0 +1,199 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -1801,6 +1801,22 @@
+ table.progress td.done { background: var(--oc-green-4) none repeat scroll 0%; }
+ table.progress td.todo { background: var(--oc-gray-3) none repeat scroll 0%; }
+ p.percent {font-size: 86%; margin:0;}
++
++/* The value as text beside, on or below a progress bar (#5284). The bar
++   keeps its 80 px in every position, so that every bar in a column has the
++   same width; a value whose text is left out keeps an empty place for it. */
++div.progress-with-text table.progress {float: none; margin: 0; inline-size: 80px;}
++div.progress-text-right, div.progress-text-over, div.progress-text-under {vertical-align: middle;}
++div.progress-text-right {display: inline-flex; align-items: center; gap: 4px;}
++div.progress-text-right table.progress {flex: none;}
++div.progress-text-right .progress-text {flex: none; min-inline-size: 2.6em; text-align: end; font-size: 86%; line-height: 1;}
++div.progress-text-over {display: inline-grid; inline-size: 80px;}
++div.progress-text-over > * {grid-area: 1 / 1;}
++div.progress-text-over .progress-text {align-self: center; text-align: center; font-size: 75%; line-height: 1; color: #222; text-shadow: 0 0 2px #fff, 0 0 2px #fff;}
++div.progress-text-under {display: inline-block; inline-size: 80px;}
++div.progress-text-under .progress-text {display: block; text-align: center; font-size: 86%;}
++div.progress-text-under .progress-text-none::before {content: "\00a0";}
++td.done_ratio > div.progress-with-text {margin-inline: auto;}
+ p.progress-info {clear: inline-start; font-size: 86%; margin-block-start: -4px; color: var(--oc-gray-6);}
+ 
+ .version-overview table.progress {inline-size: 40em;}
+--- a/app/helpers/application_helper.rb
++++ b/app/helpers/application_helper.rb
+@@ -1651,7 +1651,7 @@
+     titles = options[:titles].to_a
+     titles[0] = "#{pcts[0]}%" if titles[0].blank?
+     legend = options[:legend] || ''
+-    content_tag(
++    bar = content_tag(
+       'table',
+       content_tag(
+         'tr',
+@@ -1673,8 +1673,30 @@
+          else
+            ''.html_safe
+          end)
+-      ), :class => "progress progress-#{pcts[0]}").html_safe +
+-      content_tag('p', legend, :class => 'percent').html_safe
++      ), :class => "progress progress-#{pcts[0]}").html_safe
++    return progress_bar_with_text(bar, pcts[0]) if options[:text]
++
++    bar + content_tag('p', legend, :class => 'percent').html_safe
++  end
++
++  # Shows the value of a progress bar as text, placed as set in
++  # Administration > Settings > Issue tracking (#5284). A value whose text
++  # is left out (0 % or 100 %) keeps an empty place for it, so that every
++  # bar in a column has the same width and place.
++  def progress_bar_with_text(bar, pct)
++    position = Setting.progress_bar_text.to_s
++    return bar + content_tag('p', '', :class => 'percent') if position.blank?
++
++    css = (position == 'hidden') ? 'progress-text hidden-for-sighted' : 'progress-text'
++    text =
++      if (pct == 0 && !Setting.progress_bar_text_zero?) ||
++         (pct == 100 && !Setting.progress_bar_text_full?)
++        content_tag('span', '', :class => "#{css} progress-text-none", 'aria-hidden' => 'true')
++      else
++        content_tag('span', "#{pct}%", :class => css)
++      end
++    content_tag('div', bar + text,
++                :class => "progress-with-text progress-text-#{position}")
+   end
+ 
+   def checked_image(checked=true)
+--- a/app/helpers/queries_helper.rb
++++ b/app/helpers/queries_helper.rb
+@@ -266,7 +266,7 @@
+       when :last_notes
+         item.last_notes.present? ? content_tag('div', textilizable(item, :last_notes), :class => "wiki") : ''
+       when :done_ratio
+-        progress_bar(value)
++        progress_bar(value, :text => true)
+       when :relations
+         content_tag(
+           'span',
+--- a/app/views/settings/_issues.html.erb
++++ b/app/views/settings/_issues.html.erb
+@@ -50,6 +50,12 @@
+ 
+ <p><%= setting_select :issue_done_ratio_interval, [5, 10].collect {|i| ["#{i} %", i]} %></p>
+ 
++<p><%= setting_select :progress_bar_text, %w(right over under hidden).collect {|p| [l("label_progress_bar_text_#{p}"), p]}, :blank => :label_none %></p>
++
++<p><%= setting_check_box :progress_bar_text_zero %></p>
++
++<p><%= setting_check_box :progress_bar_text_full %></p>
++
+ <p><%= setting_multiselect :non_working_week_days, (1..7).map {|d| [day_name(d), d.to_s]}, :inline => true %></p>
+ 
+ <p><%= setting_text_field :issues_export_limit, :size => 6 %></p>
+--- a/config/locales/en.yml
++++ b/config/locales/en.yml
+@@ -488,6 +488,13 @@
+   setting_issue_done_ratio: Calculate the issue done ratio with
+   setting_issue_done_ratio_issue_field: Use the issue field
+   setting_issue_done_ratio_interval: Done ratio options interval
++  setting_progress_bar_text: Progress bar value as text
++  setting_progress_bar_text_zero: Show 0% as text
++  setting_progress_bar_text_full: Show 100% as text
++  label_progress_bar_text_right: Beside the bar
++  label_progress_bar_text_over: On the bar
++  label_progress_bar_text_under: Below the bar
++  label_progress_bar_text_hidden: Hidden (screen readers and copying)
+   setting_issue_done_ratio_issue_status: Use the issue status
+   setting_start_of_week: Start calendars on
+   setting_rest_api_enabled: Enable REST web service
+--- a/config/locales/sv.yml
++++ b/config/locales/sv.yml
+@@ -1441,6 +1441,13 @@
+   field_estimated_remaining_hours: Beräknad återstående tid
+   field_last_activity_date: Senaste aktivitet
+   setting_issue_done_ratio_interval: 'Alternativ för intervall för "% Klar"'
++  setting_progress_bar_text: Stapelns värde som text
++  setting_progress_bar_text_zero: Visa 0 % som text
++  setting_progress_bar_text_full: Visa 100 % som text
++  label_progress_bar_text_right: Bredvid stapeln
++  label_progress_bar_text_over: På stapeln
++  label_progress_bar_text_under: Under stapeln
++  label_progress_bar_text_hidden: Dold (skärmläsare och kopiering)
+   setting_copy_attachments_on_issue_copy: Kopiera bilagor vid kopiering
+   field_thousands_delimiter: Tusenavgränsare
+   label_involved_principals: 'Skapare / Tidigare tilldelad'
+--- a/config/settings.yml
++++ b/config/settings.yml
+@@ -275,6 +275,12 @@
+ issue_done_ratio_interval:
+   format: int
+   default: 10
++progress_bar_text:
++  default: 'right'
++progress_bar_text_zero:
++  default: 1
++progress_bar_text_full:
++  default: 1
+ default_projects_public:
+   default: 1
+ default_projects_modules:
+--- a/lib/redmine/field_format.rb
++++ b/lib/redmine/field_format.rb
+@@ -1157,7 +1157,11 @@
+         if html
+           value_i = value.to_i
+           text = "#{value_i}%"
+-          view.progress_bar(value_i, legend: (text if view.action_name == 'show'))
++          if view.action_name == 'show'
++            view.progress_bar(value_i, legend: text)
++          else
++            view.progress_bar(value_i, text: true)
++          end
+         else
+           value.to_s
+         end
+--- a/test/helpers/application_helper_test.rb
++++ b/test/helpers/application_helper_test.rb
+@@ -2373,4 +2373,39 @@
+       assert_equal({}, wiki_textarea_stimulus_attributes)
+     end
+   end
++
++  def test_progress_bar_with_text
++    with_settings :progress_bar_text => 'right' do
++      assert_select_in progress_bar(40, :text => true), 'div.progress-with-text.progress-text-right' do
++        assert_select 'table.progress'
++        assert_select 'span.progress-text', :text => '40%'
++      end
++    end
++  end
++
++  def test_progress_bar_with_text_hidden
++    with_settings :progress_bar_text => 'hidden' do
++      assert_select_in progress_bar(40, :text => true), 'span.progress-text.hidden-for-sighted', :text => '40%'
++    end
++  end
++
++  def test_progress_bar_with_text_respects_zero_and_full
++    with_settings :progress_bar_text => 'right', :progress_bar_text_zero => '0', :progress_bar_text_full => '0' do
++      assert_select_in progress_bar(0, :text => true), 'div.progress-text-right span.progress-text.progress-text-none', :text => ''
++      assert_select_in progress_bar(100, :text => true), 'div.progress-text-right span.progress-text.progress-text-none', :text => ''
++      assert_select_in progress_bar(50, :text => true), 'span.progress-text', :text => '50%'
++    end
++  end
++
++  def test_progress_bar_with_text_off
++    with_settings :progress_bar_text => '' do
++      assert_not_include 'progress-text', progress_bar(40, :text => true)
++    end
++  end
++
++  def test_progress_bar_without_text_option_is_unchanged
++    with_settings :progress_bar_text => 'over' do
++      assert_not_include 'progress-text', progress_bar(40)
++    end
++  end
+ end

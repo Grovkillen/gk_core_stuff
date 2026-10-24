@@ -1,0 +1,13 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -569,8 +569,9 @@
+ table.list td.attachments span.attachment-filename a.icon-download {visibility: hidden;}
+ table.list td.attachments span.attachment-filename:hover a.icon-download {visibility: visible;}
+ table.list td.tick {inline-size: 15%}
+-table.list td.checkbox { inline-size: 15px; padding-block: 2px 0; padding-inline: 0;}
++table.list td.checkbox { inline-size: 15px; padding-block: 0; padding-inline: 0;}
+ table.list .checkbox input {padding: 0; block-size: initial;}
++table.list td.checkbox input {display: block; margin-block: 0; margin-inline: auto;} /* in the middle of the row */
+ table.list td.buttons, div.buttons { white-space:nowrap; text-align: end; }
+ table.list td.buttons a, div.buttons a, table.list td.buttons span.icon-only { margin-inline-end: 0.6em; }
+ table.list td.buttons a:last-child, div.buttons a:last-child { margin-inline-end: 0; }

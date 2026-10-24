@@ -1,0 +1,29 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -2073,6 +2073,7 @@
+ 
+ .mypage-box>.contextual {opacity:0.001; transition: opacity 0.2s;}
+ .mypage-box:hover>.contextual {opacity:1;}
++.mypage-box>.contextual + .contextual {margin-inline-end: 5px;} /* the block's own icons as far from move and remove as those from each other */
+ 
+ .handle {cursor: move;}
+ 
+@@ -2204,14 +2205,16 @@
+ 
+ a.icon .icon-svg,
+ a.icon-only .icon-svg,
+-span.icon-actions .icon-svg {
++span.icon-actions .icon-svg,
++span.icon-only.sort-handle .icon-svg {
+   stroke: var(--oc-blue-9);
+   fill: none;
+ }
+ 
+ a.icon:hover .icon-svg,
+ a.icon-only:hover .icon-svg,
+-span.icon-actions:hover .icon-svg {
++span.icon-actions:hover .icon-svg,
++span.icon-only.sort-handle:hover .icon-svg {
+   stroke: var(--oc-red-9);
+ }
+ 

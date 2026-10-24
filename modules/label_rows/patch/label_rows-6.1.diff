@@ -1,0 +1,12 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -1039,6 +1039,9 @@
+   clear:left;
+ }
+ html>body .tabular p {overflow:hidden;}
++/* A row with only text or a link (no field) stands on its label's line; an explaining text keeps its own */
++.tabular p:not(:has(input:not([type=hidden]), select, textarea, button)) {line-height: 24px;}
++.tabular p:not(:has(input:not([type=hidden]), select, textarea, button)) > :is(em.info, .info) {line-height: 1.5;}
+ 
+ .tabular input, .tabular select {max-width:95%}
+ .tabular textarea {width:95%; resize:vertical;}

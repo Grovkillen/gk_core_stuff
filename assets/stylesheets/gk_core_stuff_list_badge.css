@@ -1,0 +1,4 @@
+/* gk_core_stuff list_badge: core lifts a badge 4 px (inset-block-end) to sit beside a heading; in a list's cell it
+   stands in the middle of the row, as the text beside it (vertical-align middle sets it a little low for capitals:
+   2 px up) */
+table.list td .badge { inset-block-end: 2px; vertical-align: middle; }

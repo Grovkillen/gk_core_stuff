@@ -1,0 +1,8 @@
+/* gk_core_stuff scm_table: the version control table in Administration > Settings > Repositories as core's other
+   lists: a heading row, lines between the rows, the names and commands at the start */
+.settings.enabled_scm table { border-collapse: collapse; margin-block-end: 8px; }
+.settings.enabled_scm th { background-color: var(--oc-gray-2); padding: 4px; white-space: nowrap; text-align: start; border-block-end: 2px solid var(--oc-gray-4); }
+.settings.enabled_scm td { padding-block: 3px; padding-inline: 4px 10px; vertical-align: middle; border-block-start: 1px solid var(--oc-gray-4); }
+.settings.enabled_scm td.scm_name { inline-size: 20%; white-space: nowrap; }
+.settings.enabled_scm td.scm_name label { display: inline-flex; align-items: center; gap: 4px; }
+.settings.enabled_scm th:last-child, .settings.enabled_scm td:last-child { inline-size: 15%; }

@@ -1,0 +1,7 @@
+/* gk_core_stuff warning_balance: core keeps 30 px at the start of a warning or a "no data" box for an icon; without
+   one, the same on every side (the first and last paragraph's own margin taken away, so the text sits 12 px from each
+   edge). A flash message and a conflict box are left as core draws them: core may draw their icon as a background
+   picture in that place. */
+:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) { padding-inline: 12px; }
+:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) > :first-child { margin-block-start: 0; }
+:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) > :last-child { margin-block-end: 0; }

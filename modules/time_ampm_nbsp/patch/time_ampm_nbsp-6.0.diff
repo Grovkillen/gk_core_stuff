@@ -1,0 +1,93 @@
+--- a/app/helpers/queries_helper.rb
++++ b/app/helpers/queries_helper.rb
+@@ -313,6 +313,9 @@
+         case value.class.name
+         when 'Float', 'Rational'
+           sprintf("%.2f", value).gsub('.', l(:general_csv_decimal_separator))
++        when 'Time', 'ActiveSupport::TimeWithZone'
++          # a spreadsheet reads the time with an ordinary space before AM/PM
++          format_time(value).tr("\u00A0", ' ')
+         when 'IssueRelation'
+           value.to_s(object)
+         when 'Issue'
+--- a/lib/redmine/i18n.rb
++++ b/lib/redmine/i18n.rb
+@@ -83,7 +83,9 @@
+ 
+       user ||= User.current
+       options = {}
+-      options[:format] = (Setting.time_format.blank? ? :time : Setting.time_format)
++      format = (Setting.time_format.blank? ? ::I18n.t('time.formats.time') : Setting.time_format).to_s
++      # The clock time and its AM/PM marker on one line: a no-break space before %p or %P
++      options[:format] = format.gsub(/ +(?=%\^?[pP])/, "\u00A0")
+       time = time.to_time if time.is_a?(String)
+       local = user.convert_time_to_user_timezone(time)
+       (include_date ? "#{format_date(local)} " : "") + ::I18n.l(local, **options)
+--- a/test/helpers/application_helper_test.rb
++++ b/test/helpers/application_helper_test.rb
+@@ -2404,10 +2404,10 @@
+     assert_nil time_tag(nil)
+     with_locale 'en' do
+       travel_to Time.zone.parse('2022-12-30T01:00:00Z') do
+-        assert_equal "<abbr title=\"12/28/2022 01:00 AM\">2 days</abbr>", time_tag(2.days.ago)
++        assert_equal "<abbr title=\"12/28/2022 01:00\u00A0AM\">2 days</abbr>", time_tag(2.days.ago)
+ 
+         @project = Project.find(1)
+-        assert_equal "<a title=\"12/28/2022 01:00 AM\" href=\"/projects/ecookbook/activity?from=2022-12-28\">2 days</a>", time_tag(2.days.ago)
++        assert_equal "<a title=\"12/28/2022 01:00\u00A0AM\" href=\"/projects/ecookbook/activity?from=2022-12-28\">2 days</a>", time_tag(2.days.ago)
+       end
+     end
+   end
+--- a/test/helpers/queries_helper_test.rb
++++ b/test/helpers/queries_helper_test.rb
+@@ -98,6 +98,16 @@
+     end
+   end
+ 
++  def test_query_to_csv_should_keep_an_ordinary_space_before_am_pm
++    issue = Issue.find(1)
++    with_locale 'en' do
++      with_settings :time_format => '' do
++        csv = query_to_csv([issue], IssueQuery.new(:column_names => ['id', 'created_on']))
++        assert_include format_time(issue.created_on).tr("\u00A0", ' '), csv
++      end
++    end
++  end
++
+   def test_filters_options_for_select_should_group_custom_field_relations
+     i_cf = IssueCustomField.generate!(field_format: 'user', name: 'User', is_for_all: true, trackers: Tracker.all, is_filter: true)
+     u_cf = UserCustomField.find(4)
+--- a/test/unit/lib/redmine/i18n_test.rb
++++ b/test/unit/lib/redmine/i18n_test.rb
+@@ -106,16 +106,27 @@
+     now = Time.parse('2011-02-20 15:45:22')
+     with_settings :time_format => '' do
+       with_settings :date_format => '' do
+-        assert_equal '02/20/2011 03:45 PM', format_time(now)
+-        assert_equal '03:45 PM', format_time(now, false)
++        assert_equal "02/20/2011 03:45\u00A0PM", format_time(now)
++        assert_equal "03:45\u00A0PM", format_time(now, false)
+       end
+       with_settings :date_format => '%Y-%m-%d' do
+-        assert_equal '2011-02-20 03:45 PM', format_time(now)
+-        assert_equal '03:45 PM', format_time(now, false)
++        assert_equal "2011-02-20 03:45\u00A0PM", format_time(now)
++        assert_equal "03:45\u00A0PM", format_time(now, false)
+       end
+     end
+   end
+ 
++  def test_time_format_should_keep_am_pm_with_the_time
++    set_language_if_valid 'en'
++    now = Time.parse('2011-02-20 15:45:22')
++    with_settings :time_format => '%I:%M %P', :date_format => '%Y-%m-%d' do
++      assert_equal "2011-02-20 03:45\u00A0pm", format_time(now)
++    end
++    with_settings :time_format => '%H:%M', :date_format => '%Y-%m-%d' do
++      assert_equal '2011-02-20 15:45', format_time(now)
++    end
++  end
++
+   def test_utc_time_format
+     set_language_if_valid 'en'
+     now = Time.now

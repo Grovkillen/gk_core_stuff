@@ -1,0 +1,53 @@
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -1174,6 +1174,50 @@
+   });
+ }
+ 
++// A list heading follows its column: when all the column's cells stand at the start (or all at the end), the
++// heading is set the same way; a column of centred or mixed cells keeps the centred heading. A column of
++// descriptions or long texts reads from the start, its cells and its heading.
++function setupListHeaderAlignment() {
++  function side(el) {
++    var style = window.getComputedStyle(el);
++    var rtl = style.direction === 'rtl';
++    if (style.textAlign === 'start' || style.textAlign === (rtl ? 'right' : 'left')) return 'start';
++    if (style.textAlign === 'end' || style.textAlign === (rtl ? 'left' : 'right')) return 'end';
++    return 'center';
++  }
++  $('table.list').each(function(i, table){
++    if ($(table).data('header-aligned')) return true;
++    $(table).data('header-aligned', true);
++    var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
++    if (!head) return true;
++    // a heading row with spans does not line up with the cells by index
++    if ($(head.cells).filter(function(){ return this.colSpan > 1; }).length > 0) return true;
++    var count = head.cells.length;
++    var rows = $(table.tBodies).children('tr').filter(function(){ return this.cells.length === count; }).get();
++    if (rows.length === 0) return true;
++    var sample = rows.slice(0, 8);
++    $(head.cells).each(function(index, th){
++      var texts = sample.map(function(row){ return $.trim(row.cells[index].textContent); }).filter(Boolean);
++      var length = texts.reduce(function(sum, text){ return sum + text.length; }, 0);
++      var longText = texts.length > 0 && length / texts.length > 40;
++      if (longText ||sample.some(function(row){ return $(row.cells[index]).hasClass('description'); })) {
++        rows.forEach(function(row){ row.cells[index].style.textAlign = 'start'; });
++        th.style.textAlign = 'start';
++        return true;
++      }
++      if (side(th) !== 'center') return true;
++      var sides = sample.filter(function(row){ return $.trim(row.cells[index].textContent) !== ''; })
++                        .map(function(row){ return side(row.cells[index]); });
++      if (sides.length === 0 || sides[0] === 'center') return true;
++      if (sides.every(function(s){ return s === sides[0]; })) {
++        th.style.textAlign = sides[0];
++      }
++    });
++  });
++}
++$(document).ready(setupListHeaderAlignment);
++$(document).on('ajaxComplete', setupListHeaderAlignment);
++
+ $(function () {
+   $("[title]:not(.no-tooltip)").tooltip({
+     show: {

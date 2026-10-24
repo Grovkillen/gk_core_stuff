@@ -1,0 +1,4 @@
+/* gk_core_stuff label_rows: a row of a form with only text or a link (no field) gets the label's 24 px line, so the
+   text stands on the label's line; an explaining text under it keeps its own */
+.tabular p:not(:has(input:not([type=hidden]), select, textarea, button)) { line-height: 24px; }
+.tabular p:not(:has(input:not([type=hidden]), select, textarea, button)) > :is(em.info, .info) { line-height: 1.5; }

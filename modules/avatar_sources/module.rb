@@ -51,7 +51,7 @@ module GkCoreStuff
   end
 
   # On from the start: a register changes nothing until a plugin adds a source
-  register :avatar_sources, issue: nil, defaults: { 'avatar_sources' => '1' }, in_core: -> { defined?(::Redmine::AvatarSources) } do
+  register :avatar_sources, issue: nil, defaults: { 'avatar_sources' => '1' }, in_core: -> { GkCoreStuff.core_has?(:avatar_sources) } do
     ::AvatarsHelper.prepend(AvatarSources::HelperPatch) unless ::AvatarsHelper < AvatarSources::HelperPatch
   end
 end

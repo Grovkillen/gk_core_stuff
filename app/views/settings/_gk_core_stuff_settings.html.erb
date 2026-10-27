@@ -1,4 +1,4 @@
-<%# gk_core_stuff: one box per module, each switchable; a module core already has says so and cannot be switched on %>
+<%# gk_core_stuff: one box per module, each switchable except settings_tabs and journal_details (always on, other plugins require them); a module core already has says so and cannot be switched on %>
 <% plugin = Redmine::Plugin.find(:gk_core_stuff) %>
 <% changelog = ["CHANGELOG.#{current_language}.md", 'CHANGELOG.md'].map { |f| File.join(plugin.directory, f) }.find { |f| File.exist?(f) } %>
 <% s = GkCoreStuff.defaults.merge((settings || {}).to_h.transform_keys(&:to_s)) %>
@@ -31,21 +31,6 @@
     <em class="info"><%= l(:text_gk_core_stuff_done_ratio_plate) %></em></p>
   <% end %>
 </fieldset>
-<%# export_names: core's exports named by revisions' one rule; the patterns are set on Administration > Filnamn %>
-<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_export_names) %></legend>
-  <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= hidden_field_tag 'settings[export_names]', '0', id: nil %>
-    <%= check_box_tag 'settings[export_names]', '1', s['export_names'].to_s == '1' %>
-    <em class="info"><%= l(:text_gk_core_stuff_export_names_info) %>
-      <% if defined?(GkRevisions::Names) %><%= link_to l(:label_gk_revisions_names), gk_revisions_names_path %><% else %><%= l(:text_gk_core_stuff_export_names_no_engine) %><% end %></em></p>
-</fieldset>
-<%# export_log: every export, download and print as an event in records %>
-<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_export_log) %></legend>
-  <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= hidden_field_tag 'settings[export_log]', '0', id: nil %>
-    <%= check_box_tag 'settings[export_log]', '1', s['export_log'].to_s == '1' %>
-    <em class="info"><%= l(:text_gk_core_stuff_export_log_info) %></em></p>
-</fieldset>
 <%# single_preference: one preference row per user %>
 <fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_single_preference) %></legend>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
@@ -73,17 +58,31 @@
     <em class="info"><%= l(:text_gk_core_stuff_minimagick_path_info) %></em></p>
   <% end %>
 </fieldset>
-<%# view_registries: the tabs and history lines other plugins register (core_proposals/view_hooks) %>
-<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_view_registries) %></legend>
-  <% if GkCoreStuff.in_core?(:view_registries) %>
+<%# settings_tabs: the tabs other plugins register on the settings pages and in an issue's history (core_proposals/view_hooks) %>
+<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_settings_tabs) %></legend>
+  <% if GkCoreStuff.in_core?(:settings_tabs) %>
     <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
   <% else %>
+  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= hidden_field_tag 'settings[view_registries]', '0', id: nil %>
-    <%= check_box_tag 'settings[view_registries]', '1', s['view_registries'].to_s == '1' %>
-    <em class="info"><%= l(:text_gk_core_stuff_view_registries_info) %></em></p>
+    <%= check_box_tag 'gk_core_stuff_settings_tabs_always', '1', true, disabled: true, id: nil %>
+    <em class="info"><%= l(:text_gk_core_stuff_settings_tabs_info) %></em></p>
   <% now = GkCoreStuff::Tabs::PAGES.flat_map { |page| GkCoreStuff::Tabs.registered(page).map { |t| "#{page}: #{t[:name]}" } } %>
-  <p><label><%= l(:label_gk_core_stuff_view_registries_now) %></label>
+  <p><label><%= l(:label_gk_core_stuff_settings_tabs_now) %></label>
+    <%= now.any? ? now.join(', ') : l(:label_none) %></p>
+  <% end %>
+</fieldset>
+<%# journal_details: how other plugins' own lines in an issue's history are drawn (core_proposals/view_hooks) %>
+<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_journal_details) %></legend>
+  <% if GkCoreStuff.in_core?(:journal_details) %>
+    <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
+  <% else %>
+  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
+  <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
+    <%= check_box_tag 'gk_core_stuff_journal_details_always', '1', true, disabled: true, id: nil %>
+    <em class="info"><%= l(:text_gk_core_stuff_journal_details_info) %></em></p>
+  <% now = GkCoreStuff::JournalDetails.registered %>
+  <p><label><%= l(:label_gk_core_stuff_journal_details_now) %></label>
     <%= now.any? ? now.join(', ') : l(:label_none) %></p>
   <% end %>
 </fieldset>

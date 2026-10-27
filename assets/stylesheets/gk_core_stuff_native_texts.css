@@ -1,10 +1,14 @@
 /* gk_core_stuff native_texts: a file field's own button and the chosen files. The browser's field stays shown (a test,
    the keyboard and a dropped file reach it) but draws neither its button nor its text, which are in the browser's
    language */
+/* Colours are colour roles: --gk-role-core-stuff-<name>. Defaults in :where(...) so any rule on html wins. */
+:where(:root) {
+  --gk-role-core-stuff-muted: var(--oc-gray-7, #495057);
+}
 .gk-core-stuff-file { display: inline-flex; align-items: center; gap: 0.5em; }
 .gk-core-stuff-file-native { inline-size: 1px; block-size: 1px; padding: 0; border: 0; color: transparent; overflow: hidden; }
 .gk-core-stuff-file-native::file-selector-button { display: none; }
-.gk-core-stuff-file-name { color: var(--gk-role-muted, #666); }
+.gk-core-stuff-file-name { color: var(--gk-role-core-stuff-muted); }
 .gk-core-stuff-file.gk-core-stuff-file-over { outline: 2px dashed currentColor; outline-offset: 2px; }
 /* the button behaves as core's buttons: pointer, white, core's grey on hover */
 .gk-core-stuff-file-button { cursor: pointer; background-color: var(--oc-white); transition: background-color 100ms linear; }

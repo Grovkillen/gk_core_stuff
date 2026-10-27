@@ -10,6 +10,20 @@ class GkCoreStuffUninstall < ActiveRecord::Migration[6.1]
 
   def down
     Setting.where(name: 'plugin_gk_core_stuff').delete_all
-    GkCoreStuff::Looks.forget_all!
+    strip_preferences('gk_core_stuff_')
+  end
+
+  private
+
+  # Uninstalling (down to 0, this migration last) takes the plugin's own keys out of the users' preferences in core's
+  # user_preferences; the rows and core's own keys stay. In Ruby, so that it is the same on every database.
+  def strip_preferences(prefix)
+    ::UserPreference.reset_column_information
+    ::UserPreference.find_each do |pref|
+      others = pref.read_attribute(:others)
+      next unless others.respond_to?(:keys) && others.keys.any? { |k| k.to_s.start_with?(prefix) }
+
+      pref.update_column(:others, others.reject { |k, _| k.to_s.start_with?(prefix) })
+    end
   end
 end

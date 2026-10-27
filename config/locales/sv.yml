@@ -1,4 +1,3 @@
-# Revision: 0.00.000
 sv:
   label_gk_core_stuff_about: "Om pluginet"
   label_gk_core_stuff_changelog: "Ändringslogg"
@@ -18,10 +17,7 @@ sv:
   label_gk_core_stuff_full: "Visa 100 % som text"
   label_gk_core_stuff_done_ratio_plate: "Platta bakom texten"
   text_gk_core_stuff_done_ratio_plate: "När texten står på stapeln får den en ljus platta bakom sig, så att den läses mot både den gröna och den grå delen. Av: core:s vita skugga runt texten."
-  # export_names
-  label_gk_core_stuff_export_names: "Filnamn för core:s exporter"
-  text_gk_core_stuff_export_names_info: "Det core skriver ut (ärendelistor, ett ärende, tid, användare, projekt, medlemmar, behörigheter, rapporter, gantt, wikisidor och wikin, en version) får sitt namn ur samma regel som pluginens. Bilagor och filer ur kodförråd behåller alltid sina namn. Mönstren sätts under"
-  text_gk_core_stuff_export_names_no_engine: "revisions saknas, så core namnger som förut."
+  # exports: the names of core's exports (GkCoreStuff::Exports), for revisions' rule
   label_gk_core_stuff_export_issues: "Ärendelista"
   label_gk_core_stuff_export_issue: "Ärende"
   label_gk_core_stuff_export_timelog: "Tidrapporter"
@@ -35,17 +31,8 @@ sv:
   label_gk_core_stuff_export_wiki_page: "Wikisida"
   label_gk_core_stuff_export_wiki: "Wiki"
   label_gk_core_stuff_export_version: "Version"
-  # export_log
-  label_gk_core_stuff_export_log: "Logg över exporter, nedladdningar och utskrifter"
-  text_gk_core_stuff_export_log_info: "Varje export (core:s och pluginens), varje nedladdad bilaga och varje utskrift som begärs i webbläsaren blir en händelse på det den gäller: vem, när, filnamn, kontrollsumma (SHA-256), storlek, urval och antal rader, och IP-adress. Utskrift betyder att utskriften begärdes; webbläsaren säger inte om papper kom ut. Syns för den som har behörigheten Se exporter och utskrifter i projektet."
-  permission_gk_core_stuff_view_exports: "Se exporter och utskrifter"
-  label_gk_core_stuff_event_exported: "Exporterad"
-  label_gk_core_stuff_event_attachment_downloaded: "Bilaga nedladdad"
-  label_gk_core_stuff_event_printed: "Utskrift begärd"
   label_gk_core_stuff_single_preference: "En inställningsrad per användare"
   text_gk_core_stuff_single_preference_info: "Redmine kan få två rader med en användares inställningar och läser då den ena och sparar den andra, så att det som sparats går förlorat. Modulen läser alltid den äldsta raden, frågar databasen innan en ny skapas och slår ihop extra rader till en."
-  label_gk_core_stuff_with_manifest: "med manifest"
-  text_gk_core_stuff_with_manifest: "Laddar ned en zip med filen och manifest.json: källa, väg, format, tider, konto, antal rader, storlek och SHA-256."
   # avatar_sources
   label_gk_core_stuff_avatar_sources: "Källor för bilder på användare"
   text_gk_core_stuff_avatar_sources_info: "Andra plugin kan anmäla källor för bilden på en användare (till exempel en egen bild, en ikon eller organisationens bildmapp). Källorna frågas i tur och ordning före Gravatar; den första som har en bild vinner. Utan anmälda källor, eller av, är bilden core:s egen."
@@ -56,10 +43,14 @@ sv:
   # minimagick_path
   label_gk_core_stuff_minimagick_path: "Gantt som PNG med ImageMagick 7"
   text_gk_core_stuff_minimagick_path_info: "Påslagen ritas Gantt som PNG med den ImageMagick som imagemagick_convert_command i configuration.yml pekar på, när den är ImageMagick 7 (magick). Utan den kör Redmine kommandot convert ur sökvägen, som i Windows är ett annat program, och PNG:en ger ett internt fel. Gäller efter omstart."
-  # view_registries
-  label_gk_core_stuff_view_registries: "Register för flikar och historikrader"
-  text_gk_core_stuff_view_registries_info: "Andra plugin kan anmäla flikar på projektets, administrationens, användarens och gruppens inställningar och i ärendets historik, och hur deras egna rader i ärendets historik ritas, i stället för att skriva över core:s hjälpmetoder. Utan anmälningar, eller av, är sidorna core:s egna."
-  label_gk_core_stuff_view_registries_now: "Anmälda flikar och rader"
+  # settings_tabs
+  label_gk_core_stuff_settings_tabs: "Register för flikar"
+  text_gk_core_stuff_settings_tabs_info: "Andra plugin kan anmäla flikar på projektets, administrationens, användarens och gruppens inställningar och i ärendets historik, i stället för att skriva över core:s hjälpmetoder. Modulen går inte att stänga av, eftersom andra GK-plugin visar sina flikar genom registret. Utan anmälningar är sidorna core:s egna."
+  label_gk_core_stuff_settings_tabs_now: "Anmälda flikar"
+  # journal_details
+  label_gk_core_stuff_journal_details: "Register för historikrader"
+  text_gk_core_stuff_journal_details_info: "Andra plugin kan anmäla hur deras egna rader i ärendets historik ritas, på sidan, i mejlet och som text, i stället för att skriva över core:s hjälpmetod. Modulen går inte att stänga av, eftersom andra GK-plugin visar sina rader genom registret. Utan anmälningar är raderna core:s egna."
+  label_gk_core_stuff_journal_details_now: "Anmälda rader"
   # time_ampm_nbsp
   label_gk_core_stuff_time_ampm_nbsp: "AM/PM på samma rad som klockslaget"
   text_gk_core_stuff_time_ampm_nbsp_info: "Ett klockslag med 12-timmarsklocka (10:44 AM) får ett hårt mellanslag före AM eller PM, så att en smal kolumn aldrig lämnar AM eller PM ensamt på nästa rad. En 24-timmarsklocka ändras inte, och en CSV behåller det vanliga mellanslaget så att ett kalkylark läser tiden som förut."

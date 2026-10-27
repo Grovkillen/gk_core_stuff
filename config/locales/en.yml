@@ -1,4 +1,3 @@
-# Revision: 0.00.000
 en:
   label_gk_core_stuff_about: "About the plugin"
   label_gk_core_stuff_changelog: "Changelog"
@@ -18,10 +17,7 @@ en:
   label_gk_core_stuff_full: "Show 100% as text"
   label_gk_core_stuff_done_ratio_plate: "Plate behind the text"
   text_gk_core_stuff_done_ratio_plate: "When the text stands on the bar it gets a light plate behind it, so that it is read against both the green and the grey part. Off: core's white glow around the text."
-  # export_names
-  label_gk_core_stuff_export_names: "File names for core's exports"
-  text_gk_core_stuff_export_names_info: "What core writes out (issue lists, an issue, time, users, projects, members, permissions, reports, gantt, wiki pages and the wiki, a version) gets its name from the same rule as the plugins'. Attachments and files from repositories always keep their names. The patterns are set under"
-  text_gk_core_stuff_export_names_no_engine: "revisions is missing, so core names as before."
+  # exports: the names of core's exports (GkCoreStuff::Exports), for revisions' rule
   label_gk_core_stuff_export_issues: "Issue list"
   label_gk_core_stuff_export_issue: "Issue"
   label_gk_core_stuff_export_timelog: "Time entries"
@@ -35,17 +31,8 @@ en:
   label_gk_core_stuff_export_wiki_page: "Wiki page"
   label_gk_core_stuff_export_wiki: "Wiki"
   label_gk_core_stuff_export_version: "Version"
-  # export_log
-  label_gk_core_stuff_export_log: "Log of exports, downloads and prints"
-  text_gk_core_stuff_export_log_info: "Every export (core's and the plugins'), every attachment downloaded and every print asked for in the browser becomes an event on what it is about: who, when, file name, checksum (SHA-256), size, query and number of rows, and IP address. A print means the print was asked for; the browser does not say whether paper came out. Seen by those with the permission View exports and prints in the project."
-  permission_gk_core_stuff_view_exports: "View exports and prints"
-  label_gk_core_stuff_event_exported: "Exported"
-  label_gk_core_stuff_event_attachment_downloaded: "Attachment downloaded"
-  label_gk_core_stuff_event_printed: "Print asked for"
   label_gk_core_stuff_single_preference: "One preference row per user"
   text_gk_core_stuff_single_preference_info: "Redmine can get two rows of a user's preferences and then reads one and saves the other, so what was saved is lost. The module always reads the oldest row, asks the database before a new one is made and merges extra rows into one."
-  label_gk_core_stuff_with_manifest: "with manifest"
-  text_gk_core_stuff_with_manifest: "Downloads a zip with the file and manifest.json: source, route, format, times, account, rows, size and SHA-256."
   # avatar_sources
   label_gk_core_stuff_avatar_sources: "Sources for pictures of users"
   text_gk_core_stuff_avatar_sources_info: "Other plugins can register sources for a user's picture (for example an uploaded picture, an icon or the organization's folder of photos). The sources are asked in order before Gravatar; the first that has a picture wins. With no source registered, or off, the picture is core's own."
@@ -56,10 +43,14 @@ en:
   # minimagick_path
   label_gk_core_stuff_minimagick_path: "Gantt as PNG with ImageMagick 7"
   text_gk_core_stuff_minimagick_path_info: "When on, the Gantt chart as PNG is drawn with the ImageMagick that imagemagick_convert_command in configuration.yml names, when it is ImageMagick 7 (magick). Without it Redmine runs the command convert from the path, which on Windows is another program, and the PNG fails with an internal error. Applies after a restart."
-  # view_registries
-  label_gk_core_stuff_view_registries: "Registers for tabs and history lines"
-  text_gk_core_stuff_view_registries_info: "Other plugins can register tabs on the project, administration, user and group settings and in an issue's history, and how their own lines in an issue's history are drawn, instead of overriding core's helpers. With nothing registered, or off, the pages are core's own."
-  label_gk_core_stuff_view_registries_now: "Registered tabs and lines"
+  # settings_tabs
+  label_gk_core_stuff_settings_tabs: "Register for tabs"
+  text_gk_core_stuff_settings_tabs_info: "Other plugins can register tabs on the project, administration, user and group settings and in an issue's history, instead of overriding core's helpers. The module cannot be switched off, since other GK plugins show their tabs through the register. With nothing registered the pages are core's own."
+  label_gk_core_stuff_settings_tabs_now: "Registered tabs"
+  # journal_details
+  label_gk_core_stuff_journal_details: "Register for history lines"
+  text_gk_core_stuff_journal_details_info: "Other plugins can register how their own lines in an issue's history are drawn, on the page, in the email and as text, instead of overriding core's helper. The module cannot be switched off, since other GK plugins show their lines through the register. With nothing registered the lines are core's own."
+  label_gk_core_stuff_journal_details_now: "Registered lines"
   # time_ampm_nbsp
   label_gk_core_stuff_time_ampm_nbsp: "AM/PM on the same line as the time"
   text_gk_core_stuff_time_ampm_nbsp_info: "A time in the 12-hour clock (10:44 AM) gets a no-break space before AM or PM, so a narrow column never leaves AM or PM alone on the next line. A 24-hour clock is not changed, and a CSV keeps the ordinary space so a spreadsheet reads the time as before."

@@ -1,18 +1,16 @@
 # frozen_string_literal: true
 
 module GkCoreStuff
-  # view_registries. Core has no register for the tabs of its settings pages or for the lines of an issue's history,
-  # so a plugin overrides ProjectsHelper#project_settings_tabs or IssuesHelper#show_detail, and several plugins chain
-  # over the same helper. The upstream form is the proposal view_hooks (redmine/core_proposals/view_hooks): the
-  # registers Redmine::Tabs and Redmine::JournalDetails and the plugin DSL project_settings_tab,
-  # administration_settings_tab, user_settings_tab, group_settings_tab, issue_history_tab and journal_detail.
-  # Here the same registers are GkCoreStuff::Tabs and GkCoreStuff::JournalDetails with the same methods, hooked in
-  # with prepend, and the same DSL on Redmine::Plugin while core has none. A plugin registers after all plugins are
-  # loaded (core_stuff loads after plugins earlier in the alphabet), through its own Redmine::Plugin object, so the
-  # same lines work with core's DSL the day core has it:
+  # settings_tabs. Core has no register for the tabs of its settings pages or of an issue's history, so a plugin
+  # overrides ProjectsHelper#project_settings_tabs (or the helper of another page), and several plugins chain over the
+  # same helper. The upstream form is the proposal view_hooks (redmine/core_proposals/view_hooks): the register
+  # Redmine::Tabs and the plugin DSL settings_tab, project_settings_tab, administration_settings_tab,
+  # user_settings_tab, group_settings_tab and issue_history_tab. Here the same register is GkCoreStuff::Tabs with the
+  # same methods, hooked in with prepend, and the same DSL on Redmine::Plugin while core has none. A plugin registers
+  # after all plugins are loaded (core_stuff loads after plugins earlier in the alphabet), through its own
+  # Redmine::Plugin object, so the same line works with core's DSL the day core has it:
   #   Rails.configuration.after_initialize do
   #     Redmine::Plugin.find(:gk_a).project_settings_tab :a, partial: 'gk_a/settings', permission: :manage_a
-  #     Redmine::Plugin.find(:gk_a).journal_detail property: 'gk_a', renderer: GkA::JournalDetail
   #   end
   module Tabs
     PAGES = %i[project_settings administration_settings user group issue_history].freeze
@@ -52,7 +50,7 @@ module GkCoreStuff
         tabs
       end
 
-      def on? = GkCoreStuff.on?(:view_registries)
+      def on? = GkCoreStuff.on?(:settings_tabs)
 
       private
 
@@ -103,60 +101,26 @@ module GkCoreStuff
         Tabs.on? ? Tabs.add_to(:issue_history, super, { issue: @issue }) : super
       end
     end
-  end
 
-  # The renderer of a journal detail property: responds to call(detail, view, no_html, options) and returns the line
-  # as HTML, or as text when no_html (the text is also used in emails). One registered with a prop_key comes first.
-  module JournalDetails
-    @renderers = {}
-
-    class << self
-      def register(property, renderer, prop_key: nil)
-        raise ArgumentError, "Invalid renderer for journal detail property '#{property}'" unless renderer.respond_to?(:call)
-
-        @renderers[[property.to_s, prop_key&.to_s]] = renderer
-      end
-
-      def renderer_for(detail)
-        property = detail.property.to_s
-        @renderers[[property, detail.prop_key.to_s]] || @renderers[[property, nil]]
-      end
-
-      def clear = @renderers.clear
-    end
-
-    module IssuesHelperPatch
-      def show_detail(detail, no_html = false, options = {})
-        renderer = Tabs.on? && JournalDetails.renderer_for(detail)
-        return renderer.call(detail, self, no_html, options) if renderer
-
-        super
-      end
+    # The tabs part of the proposal's DSL on Redmine::Plugin, for as long as core has none
+    module PluginDsl
+      def settings_tab(page, name, options = {}) = GkCoreStuff::Tabs.register(page, name, options)
+      def project_settings_tab(name, options = {}) = settings_tab(:project_settings, name, options)
+      def administration_settings_tab(name, options = {}) = settings_tab(:administration_settings, name, options)
+      def user_settings_tab(name, options = {}) = settings_tab(:user, name, options)
+      def group_settings_tab(name, options = {}) = settings_tab(:group, name, options)
+      def issue_history_tab(name, options = {}) = settings_tab(:issue_history, name, options)
     end
   end
 
-  # The DSL of the proposal on Redmine::Plugin, for as long as core has none
-  module PluginDsl
-    def settings_tab(page, name, options = {}) = GkCoreStuff::Tabs.register(page, name, options)
-    def project_settings_tab(name, options = {}) = settings_tab(:project_settings, name, options)
-    def administration_settings_tab(name, options = {}) = settings_tab(:administration_settings, name, options)
-    def user_settings_tab(name, options = {}) = settings_tab(:user, name, options)
-    def group_settings_tab(name, options = {}) = settings_tab(:group, name, options)
-    def issue_history_tab(name, options = {}) = settings_tab(:issue_history, name, options)
-
-    def journal_detail(property:, renderer:, prop_key: nil)
-      GkCoreStuff::JournalDetails.register(property, renderer, prop_key: prop_key)
-    end
-  end
-
-  # On from the start: a register changes nothing until a plugin adds to it
-  register :view_registries, issue: nil, defaults: { 'view_registries' => '1' }, in_core: -> { defined?(::Redmine::Tabs) } do
-    ::Redmine::Plugin.include(PluginDsl) unless ::Redmine::Plugin.method_defined?(:settings_tab)
+  # Always on, without a setting: other plugins require the register for their tabs, and the register changes nothing
+  # until a plugin adds to it
+  register :settings_tabs, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:settings_tabs) }, always: true do
+    ::Redmine::Plugin.include(Tabs::PluginDsl) unless ::Redmine::Plugin.include?(Tabs::PluginDsl)
     ::ProjectsHelper.prepend(Tabs::ProjectsHelperPatch) unless ::ProjectsHelper < Tabs::ProjectsHelperPatch
     ::SettingsHelper.prepend(Tabs::SettingsHelperPatch) unless ::SettingsHelper < Tabs::SettingsHelperPatch
     ::UsersHelper.prepend(Tabs::UsersHelperPatch) unless ::UsersHelper < Tabs::UsersHelperPatch
     ::GroupsHelper.prepend(Tabs::GroupsHelperPatch) unless ::GroupsHelper < Tabs::GroupsHelperPatch
     ::IssuesHelper.prepend(Tabs::IssuesHelperPatch) unless ::IssuesHelper < Tabs::IssuesHelperPatch
-    ::IssuesHelper.prepend(JournalDetails::IssuesHelperPatch) unless ::IssuesHelper < JournalDetails::IssuesHelperPatch
   end
 end

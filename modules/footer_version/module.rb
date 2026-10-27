@@ -37,7 +37,7 @@ module GkCoreStuff
   end
 
   # in_core: core has the setting (the patch is in)
-  register :footer_version, issue: nil, defaults: { 'footer_version' => '0' }, in_core: -> { ::Setting.respond_to?(:footer_show_version?) } do
+  register :footer_version, issue: nil, defaults: { 'footer_version' => '0' }, in_core: -> { GkCoreStuff.core_has?(:footer_version_setting) } do
     # nothing to prepend: the head hook (hooks.rb) asks FooterVersion.head_tags
   end
 end

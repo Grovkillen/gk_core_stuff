@@ -12,13 +12,20 @@ module GkCoreStuff
 
     def render(inline, locals) = ::IssuesController.renderer.render(inline: inline, locals: locals)
 
+    # Core's own method of a helper, under every module prepended to it (this plugin's and any other's)
+    def core_method(helper, name)
+      m = helper.instance_method(name)
+      m = m.super_method while m && m.owner != helper
+      m
+    end
+
     def list_cell(value)
       col = ::IssueQuery.available_columns.detect { |c| c.name == :done_ratio }
       render('<%= column_content(c, i) %>', c: col, i: ::Issue.new(done_ratio: value))
     end
 
     def cf_cell(value)
-      return nil unless defined?(::GkCompat) && ::GkCompat.can?(:progressbar_field_format)
+      return nil unless GkCoreStuff.core_has?(:progressbar_field_format)
 
       cf = ::IssueCustomField.new(name: 'gk_core_stuff_field', field_format: 'progressbar')
       render('<%= cf.format.formatted_value(self, cf, v, nil, true) %>', cf: cf, v: value.to_s)
@@ -52,19 +59,6 @@ module GkCoreStuff
   def self.register_scenarios!
     return unless defined?(::GkScenarios::Expect)
 
-    # The permissions the roles get (core_stuff: permissions: - { role: manager, may: [view_exports] }): a role made
-    # before the permission existed has not got it from "all"
-    if defined?(::GkScenarios::Steps)
-      ::GkScenarios::Steps.register('core_stuff_permissions', plugin: :gk_core_stuff, order: 150) do |ctx|
-        Array((ctx.scenario.data['core_stuff'] || {})['permissions']).each do |row|
-          role = ctx.get(:role, row['role'])
-          missing = Array(row['may']).map { |m| :"gk_core_stuff_#{m}" } - role.permissions
-          missing.each { |perm| role.add_permission!(perm) }
-          ctx.note(:cst_permission, row['role'], role, missing.any?)
-        end
-      end
-    end
-
     ::GkScenarios::Expect.register('cst_done_ratio_text') do |_ctx, e|
       want = ScenarioRender.want(e, 'cst_done_ratio_text')
       html = DoneRatioText.with(**ScenarioRender.overrides(e)) { ScenarioRender.list_cell(e['value'].to_i) }
@@ -89,25 +83,6 @@ module GkCoreStuff
       got = { 'wrapped' => html.include?('progress-with-text'), 'legend' => html.include?(%(<p class="percent">#{v}%</p>)) }
       want = { 'wrapped' => false, 'legend' => true }
       { 'ok' => got == want, 'want' => want.to_json, 'got' => got.to_json }
-    end
-
-    # export_names: the name core's export gets for a controller and action as core gives it the file
-    # (cst_export_name: "issues#show"), with the project and the objects core has at that point; in want, {date} is
-    # today and {export} the kind's name. keep: an action not in the table (an attachment) keeps core's own name.
-    ::GkScenarios::Expect.register('cst_export_name') do |ctx, e|
-      path, action = e['cst_export_name'].to_s.split('#', 2)
-      ivars = {}
-      ivars[:@project] = ::Project.find_by(id: ::GkScenarios::Expect.project_id(ctx, e['project'])) if e['project']
-      ivars[:@issue] = ::GkScenarios::Expect.issue_for(ctx, e['issue']) if e['issue']
-      fake = Struct.new(:controller_path, :action_name, :params, :ivars) do
-        def instance_variable_get(name) = ivars[name]
-      end.new(path, action, ActionController::Parameters.new(e['params'] || {}), ivars)
-      given = e['given'].to_s
-      got = ExportNames.rename(fake, { filename: given })[:filename]
-      kind = ExportNames::TABLE["#{path}##{action}"]&.first
-      word = kind && defined?(::GkRevisions::Names) ? ::GkRevisions::NameFormat.clean_value(::GkRevisions::Names.export_word(kind), ::GkRevisions::Names.options) : ''
-      want = e['keep'] ? given : e['want'].to_s.gsub('{date}', ::User.current.today.strftime('%Y-%m-%d')).gsub('{export}', word)
-      { 'ok' => got == want, 'want' => want, 'got' => got.to_s }
     end
 
     # single_preference: cst_single_preference: cycle, with a user of its own made for the check in a transaction that
@@ -143,85 +118,6 @@ module GkCoreStuff
         checks << ['duplicates merged into the oldest', pref.id == first.id && pref[:gk_core_stuff_probe] == '2' && pref[:gk_core_stuff_other] == 'x']
         checks << ['one row left', ::UserPreference.where(user_id: u.id).count == 1]
         raise ActiveRecord::Rollback
-      end
-      failed = checks.reject { |_k, ok| ok }.map(&:first)
-      { 'ok' => failed.empty?, 'want' => checks.map(&:first).join(', '), 'got' => failed.empty? ? 'ok' : "not: #{failed.join(', ')}" }
-    end
-
-    # export_log: an export of the scenario's issue (cst_export_logged: s4) by the scenario's user in by, or with print:
-    # true the issue's page printed (ExportLog.printed! from its path, as the browser's beacon gives it), and whether
-    # the scenario's user in as sees the event (GkRecordsEvent.readable_by: the permission gk_core_stuff_view_exports in
-    # the issue's project). Written in a transaction that is rolled back, so no event stays.
-    ::GkScenarios::Expect.register('cst_export_logged') do |ctx, e|
-      issue = ::GkScenarios::Expect.issue_for(ctx, e['cst_export_logged'].to_s)
-      actor = ::User.find_by(login: ::GkScenarios::Expect.login(ctx, e['by'] || e['as']))
-      viewer = e['as'] && ::User.find_by(login: ::GkScenarios::Expect.login(ctx, e['as']))
-      next({ 'ok' => false, 'want' => 'issue, by, as', 'got' => issue ? 'no user in by or as' : 'no issue' }) unless issue && actor && viewer
-      next({ 'ok' => false, 'want' => 'equals: true | false', 'got' => '-' }) unless e.key?('equals')
-      next({ 'ok' => false, 'want' => 'export_log on, records', 'got' => 'off' }) unless ExportLog.on?
-
-      result = nil
-      ::GkRecordsEvent.transaction(requires_new: true) do
-        last_id = ::GkRecordsEvent.maximum(:id).to_i
-        ctx.as(actor) do
-          if e['print']
-            ExportLog.printed!("#{Redmine::Utils.relative_url_root}/issues/#{issue.id}", Struct.new(:remote_ip).new('127.0.0.1'))
-          else
-            ExportLog.write(issue, 'exported', { 'file' => 'scenario.csv', 'format' => 'csv', 'rows' => 1, 'ip' => '127.0.0.1' }, issue.project)
-          end
-        end
-        kind = e['print'] ? 'printed' : 'exported'
-        event = ::GkRecordsEvent.where('id > ?', last_id).where(kind: kind).order(:id).last
-        if event.nil? || event.target_type != 'issue' || event.target_id != issue.id || event.project_id != issue.project_id
-          result = { 'ok' => false, 'want' => "#{kind} on the issue in its project", 'got' => event ? "#{event.target_type}:#{event.target_id} p#{event.project_id}" : 'no event' }
-        else
-          got = ::GkRecordsEvent.readable_by(viewer).exists?(event.id)
-          want = e['equals'].to_s == 'true'
-          result = { 'ok' => got == want, 'want' => want.to_s, 'got' => got.to_s }
-        end
-        raise ::ActiveRecord::Rollback
-      end
-      result || { 'ok' => false, 'want' => 'event', 'got' => '-' }
-    end
-
-    # export_log with a manifest: cst_export_manifest: zip. A made-up CSV is wrapped as an export asked for with
-    # with_manifest=1 would be: the zip holds the file under its name and manifest.json, whose file entry names the file
-    # with its SHA-256 and size and the instance as source, in the keys records reads and without the account; the
-    # request without the choice is not wrapped.
-    # Nothing is written.
-    ::GkScenarios::Expect.register('cst_export_manifest') do |_ctx, e|
-      next({ 'ok' => false, 'want' => 'cst_export_manifest: zip', 'got' => e['cst_export_manifest'].to_s }) unless e['cst_export_manifest'].to_s == 'zip'
-
-      require 'zip'
-      data = "Nr;Ämne\n1;Prov\n".b
-      name = 'scenario_export_manifest.csv'
-      checks = []
-      begin
-        man = ExportLog.manifest_doc(file: name, data: data, kind: 'core.issues', source_ref: 'issues#index', url: '/issues.csv', format: 'CSV',
-                                     rows: 1)
-        zip = ExportLog.zip_with_manifest(name, data, man)
-        entries = {}
-        ::Zip::InputStream.open(::StringIO.new(zip)) do |zis|
-          while (entry = zis.get_next_entry)
-            entries[entry.name] = zis.read
-          end
-        end
-        read = JSON.parse(entries['manifest.json'].to_s)
-        f = Array(read['files']).first || {}
-        sum = Digest::SHA256.hexdigest(data)
-        checks << ['a zip with the file and manifest.json', entries.keys.sort == [name, 'manifest.json'].sort]
-        checks << ['the file as it was', entries[name].to_s.b == data]
-        checks << ['manifest names the file', f['file'] == name && f['size'] == data.bytesize]
-        checks << ['manifest has its SHA-256', f['sha256'] == sum]
-        checks << ['the instance as source', f['source'] == ExportLog.instance_name && read['source'] == ExportLog.instance_name && read['plugin'] == 'gk_core_stuff']
-        checks << ['the keys records reads, no account', read['retrieved'].present? && f['source_ref'] == 'issues#index' && !f.key?('konto') && !f.key?('account')]
-        checks << ['zip name', ExportLog.zip_name('issues_2026-10-06.csv') == 'issues_2026-10-06.zip']
-        fake = Struct.new(:controller_path, :action_name, :params).new('issues', 'index', ActionController::Parameters.new({}))
-        checks << ['without the choice nothing changes', !ExportLog.manifest_wanted?(fake)]
-        fake.params = ActionController::Parameters.new('with_manifest' => '1')
-        checks << ['with the choice', ExportLog.manifest_wanted?(fake) == ExportLog.on?]
-      rescue StandardError => ex
-        checks << ["#{ex.class}: #{ex.message}"[0, 200], false]
       end
       failed = checks.reject { |_k, ok| ok }.map(&:first)
       { 'ok' => failed.empty?, 'want' => checks.map(&:first).join(', '), 'got' => failed.empty? ? 'ok' : "not: #{failed.join(', ')}" }
@@ -316,6 +212,67 @@ module GkCoreStuff
             else html.strip[0, 80]
             end
       { 'ok' => got == (want == 'on' ? "on #{v}" : 'off'), 'want' => want == 'on' ? "on #{v}" : 'off', 'got' => got }
+    end
+
+    # settings_tabs: cst_settings_tabs: <tab name>, project:, as:, equals: (true when left out). The project's settings
+    # tabs as the person gets them (ProjectsHelper#project_settings_tabs, which the settings page renders): a tab a
+    # plugin registered is there for the one who may see it and not in core's own list, so it comes through the
+    # register; with equals: false it is not there for that person. Nothing written.
+    ::GkScenarios::Expect.register('cst_settings_tabs') do |ctx, e|
+      name = e['cst_settings_tabs'].to_s
+      want = e.key?('equals') ? e['equals'].to_s == 'true' : true
+      next({ 'ok' => true, 'want' => name, 'got' => 'core has the register' }) if GkCoreStuff.in_core?(:settings_tabs)
+      next({ 'ok' => false, 'want' => "#{name} registered", 'got' => Tabs.registered(:project_settings).map { |t| t[:name] }.join(', ') }) unless Tabs.registered(:project_settings).any? { |t| t[:name] == name }
+
+      project = ::Project.find_by(id: ::GkScenarios::Expect.project_id(ctx, e['project']))
+      user = ::User.find_by(login: ::GkScenarios::Expect.login(ctx, e['as']))
+      next({ 'ok' => false, 'want' => 'a project and a person', 'got' => '-' }) unless project && user
+
+      core = ScenarioRender.core_method(::ProjectsHelper, :project_settings_tabs)
+      out = {}
+      ctx.as(user) do
+        ::ProjectsController.renderer.render(inline: '<% @project = p; out[:all] = project_settings_tabs; out[:core] = core.bind_call(self) %>',
+                                             locals: { p: project, out: out, core: core })
+      end
+      names = ->(tabs) { Array(tabs).map { |t| t[:name].to_s } }
+      got = names.(out[:all]).include?(name)
+      checks = [["#{name} #{want ? 'shown' : 'not shown'}", got == want]]
+      checks << ["#{name} not in core's own list", !names.(out[:core]).include?(name)]
+      failed = checks.reject(&:last).map(&:first)
+      { 'ok' => failed.empty?, 'want' => checks.map(&:first).join(', '), 'got' => failed.empty? ? names.(out[:all]).join(', ') : "not: #{failed.join(', ')}" }
+    end
+
+    # journal_details: cst_journal_details: <issue>, property:, prop_key:, as:. The issue's history line of that
+    # property as IssuesHelper#show_detail draws it, on the page and as text (the text is also the email's): the line
+    # is the registered renderer's and not core's own, so it comes through the register. Nothing written.
+    ::GkScenarios::Expect.register('cst_journal_details') do |ctx, e|
+      property = e['property'].to_s
+      key = e['prop_key']&.to_s
+      want = "#{property}#{key ? ": #{key}" : ''} drawn by the registered renderer"
+      next({ 'ok' => true, 'want' => want, 'got' => 'core has the register' }) if GkCoreStuff.in_core?(:journal_details)
+
+      issue = ::GkScenarios::Expect.issue_for(ctx, e['cst_journal_details'])
+      user = e['as'] ? ::User.find_by(login: ::GkScenarios::Expect.login(ctx, e['as'])) : ::User.active.where(admin: true).order(:id).first
+      detail = issue && ::JournalDetail.where(journal_id: issue.journals.select(:id), property: property).then { |s| key ? s.where(prop_key: key) : s }.order(:id).last
+      next({ 'ok' => false, 'want' => "a history line #{property} on #{e['cst_journal_details']}", 'got' => '-' }) unless detail && user
+
+      renderer = JournalDetails.renderer_for(detail)
+      next({ 'ok' => false, 'want' => want, 'got' => 'nothing registered for it' }) unless renderer
+
+      core = ScenarioRender.core_method(::IssuesHelper, :show_detail)
+      out = {}
+      ctx.as(user) do
+        ::IssuesController.renderer.render(inline: '<% [false, true].each { |t| out[t] = [show_detail(d, t), r.call(d, self, t, {}), core.bind_call(self, d, t)] } %>',
+                                           locals: { d: detail, r: renderer, core: core, out: out })
+      end
+      checks = []
+      { false => 'page', true => 'text' }.each do |t, label|
+        mine, theirs, core_line = out[t]
+        checks << ["#{label}: the renderer's line", mine.to_s == theirs.to_s]
+        checks << ["#{label}: not core's own", mine.to_s != core_line.to_s]
+      end
+      failed = checks.reject(&:last).map(&:first)
+      { 'ok' => failed.empty?, 'want' => want, 'got' => failed.empty? ? out[true].first.to_s : "not: #{failed.join(', ')}" }
     end
   end
 end

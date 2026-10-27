@@ -5,11 +5,11 @@ GK Core Stuff makes small fixes and additions to Redmine's own behaviour, one sw
 ## Features
 
 - **% done as text** (redmine.org #5284): shows the percentage as text with the progress bar in issue lists and for Progress bar custom fields in lists, so the value can be copied and read by screen readers. The text can be placed beside the bar, on the bar, below the bar or hidden (still read by screen readers and kept when copying), and 0% and 100% can each be shown or not. If core already has the setting, the module does not hook in and the settings page says so. Off by default.
-- **File names for core's exports**: issue lists, an issue, time entries, the time report, users, projects, members, permissions, the issue report, the gantt chart, wiki pages and the wiki, and a version get their file names from the file name rule in gk_revisions. Attachments and files from repositories always keep their names. Without gk_revisions core names files as before. On by default.
-- **Log of exports, downloads and prints**: every export (core's and the GK plugins'), every attachment downloaded and every print asked for in the browser is written as an event in gk_records on what it is about, with who, when, file name, SHA-256 checksum, size, query and number of rows, and IP address. A print means the browser started printing; it does not say whether paper came out. Events are seen by users with the project permission "View exports and prints" (administrators see all). Without gk_records nothing is logged. On by default.
-- **Exports with manifest**: with the export log on, a named export can be downloaded as a zip with the file and a `manifest.json` (source, route, format, times, account, rows, size and SHA-256), offered as a check box in core's CSV dialog and a "with manifest" link beside the other formats.
+- **The list of core's exports**: which of Redmine's pages send an export (issue lists, an issue, time entries, the time report, users, projects, members, permissions, the issue report, the gantt chart, wiki pages and the wiki, and a version), and what each is about. It hooks nothing into Redmine; gk_revisions names these exports by its file name rule and gk_records logs them, both from this one list. The file names and the log of exports, downloads and prints were modules of this plugin up to 1.00.000.
 - **One preference row per user**: Redmine can get two rows of a user's preferences and then read one and save the other. The module always reads the oldest row, checks the database before a new row is made, and merges extra rows into one. On by default.
 - **AM/PM on the same line as the time**: a time in the 12-hour clock gets a no-break space before AM or PM, so a narrow column never leaves AM or PM alone on the next line. A 24-hour clock is not changed, and CSV exports keep the ordinary space. On by default.
+- **Register for tabs**: other plugins add their tabs to the settings pages of projects, the administration, users and groups and to an issue's history, without overriding Redmine's helpers. Several GK plugins require it, so it is always on and cannot be switched off; with nothing registered the pages are Redmine's own. If core already has the register, the module does not hook in.
+- **Register for history lines**: other plugins say how their own lines in an issue's history are drawn, on the page, in the email and as text, without overriding Redmine's helper. Several GK plugins require it, so it is always on and cannot be switched off; with nothing registered the lines are Redmine's own. If core already has the register, the module does not hook in.
 - **Looks**: small fixes of how Redmine's own pages look or read, each with a patch for every supported Redmine series: badges in the middle of a list's row and level with a page's heading, the row's check box in the middle of the row, a plugin's sidebar block with core's space above it, text rows in line with their label, the repositories table drawn as a list, equal margins in warning and "no data" boxes without an icon, the move handle in the icons' colour, `#` before issue numbers in lists, list headings aligned like their columns, equal widths for fields under each other and for the fields of a box on Redmine's settings pages, buttons and fields of one height on one line, "Save" instead of "Submit" on the button that saves a form, the loading box in the middle of the list it loads for, the browser's own texts (a field's message, a file field's button) in the page's language, and check boxes Redmine shows in its own order in alphabetical order. Each is off, optional (on, and each person may switch it off) or forced; most are optional from the start, and `#` before issue numbers, "Save" instead of "Submit" and the loading box are off. A look the running Redmine already has is not hooked in.
 
 ## Requirements
@@ -23,11 +23,15 @@ This plugin is developed and tested on Windows 11 with PostgreSQL only. That is 
 GK plugins:
 
 - Required: none.
-- Optional: gk_revisions (file names for core's exports from its file name rule), gk_records (the log of exports, downloads and prints), gk_compat ("% done as text" also in custom fields with the progress bar format, where the Redmine series has them), gk_scenarios (the plugin's scenario steps and checks).
+- Optional: gk_compat 1.01.000 or later (whether the running Redmine already has what a module adds, so that the module stands aside; and "% done as text" also in custom fields with the progress bar format, where the Redmine series has them), gk_scenarios (the plugin's scenario steps and checks).
+
+This version is released as one package with GK Records 1.04.000, GK GUI Stuff 1.01.000, GK Revisions 1.00.000, GK Compat 1.01.000, and GK Icons and the other GK plugins that declare functions, in the versions released at the same time: install them together.
 
 ## Installation
 
 The plugin directory must be named `gk_core_stuff` (it is the plugin id): `plugins/gk_core_stuff/`.
+
+This version is installed anew and does not upgrade an earlier one: uninstall the earlier version first (as under Uninstall below, while its own files are in place), then install this one. Nothing is carried over from the earlier installation.
 
 1. Unpack the release package into Redmine's `plugins` directory.
 2. Run the migrations: `bundle exec rake redmine:plugins:migrate RAILS_ENV=production`
@@ -42,16 +46,11 @@ Uninstall:
 
 ## Configuration
 
-Administration > Plugins > Configure (GK Core Stuff) has one box per module with a check box to switch it on or off, plus the position and 0%/100% options for "% done as text". The file name patterns for core's exports are set on gk_revisions' File names page in Administration. The box Looks gives each look its mode: Off, Optional or Forced.
-
-Grant the project permission "View exports and prints" under Administration > Roles and permissions to the roles that should see the export log events.
+Administration > Plugins > Configure (GK Core Stuff) has one box per module with a check box to switch it on or off (the registers for tabs and for history lines are always on and their boxes are locked), plus the position and 0%/100% options for "% done as text". The box Looks gives each look its mode: Off, Optional or Forced.
 
 ## Usage
 
 - With "% done as text" on, the percentage appears next to the progress bars in issue lists.
-- Exports from issue lists, issues, time entries, wiki pages and the other core pages listed above download under names from the file name rule.
-- Export, download and print events appear among the gk_records events on the issue, wiki page, project or user they concern, for users with the permission.
-- The "with manifest" option appears in core's CSV export dialog and beside the other export formats.
 - Each person switches off the optional looks they do not want under My account, Preferences.
 
 ## Changelog

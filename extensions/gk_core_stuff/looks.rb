@@ -109,15 +109,5 @@ module GkCoreStuff
 
       ::UserPreference.safe_attributes('gk_core_stuff_looks')
     end
-
-    # Uninstall: every person's choices taken out of core's preferences (the first migration's down)
-    def self.forget_all!
-      ::UserPreference.find_each do |pref|
-        next unless pref.others.is_a?(Hash) && pref.others.keys.any? { |k| k.to_s.start_with?('gk_core_stuff_') }
-
-        pref.others = pref.others.reject { |k, _| k.to_s.start_with?('gk_core_stuff_') }
-        pref.save(validate: false)
-      end
-    end
   end
 end

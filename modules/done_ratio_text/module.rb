@@ -96,11 +96,11 @@ module GkCoreStuff
   register :done_ratio_text, issue: 5284,
            defaults: { 'done_ratio_text' => '0', 'done_ratio_text_position' => 'right',
                        'done_ratio_text_zero' => '1', 'done_ratio_text_full' => '1', 'done_ratio_text_plate' => '0' },
-           in_core: -> { ::Setting.respond_to?(:available_settings) && ::Setting.available_settings.key?('progress_bar_text') } do
+           in_core: -> { GkCoreStuff.core_has?(:progress_bar_text) } do
     ::ApplicationHelper.prepend(DoneRatioText::ApplicationHelperPatch) unless ::ApplicationHelper < DoneRatioText::ApplicationHelperPatch
     ::QueriesHelper.prepend(DoneRatioText::QueriesHelperPatch) unless ::QueriesHelper < DoneRatioText::QueriesHelperPatch
     # compat knows whether core has the format; without compat the format is left alone
-    if defined?(::GkCompat) && ::GkCompat.can?(:progressbar_field_format) && !(::Redmine::FieldFormat::ProgressbarFormat < DoneRatioText::ProgressbarFormatPatch)
+    if GkCoreStuff.core_has?(:progressbar_field_format) && !(::Redmine::FieldFormat::ProgressbarFormat < DoneRatioText::ProgressbarFormatPatch)
       ::Redmine::FieldFormat::ProgressbarFormat.prepend(DoneRatioText::ProgressbarFormatPatch)
     end
   end

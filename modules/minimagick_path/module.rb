@@ -26,9 +26,9 @@ module GkCoreStuff
     end
   end
 
-  # in_core: core's own cli_path still works (a MiniMagick that has it)
+  # in_core: core's own cli_path still works (compat: a MiniMagick that has it)
   register :minimagick_path, issue: nil, defaults: { 'minimagick_path' => '1' },
-                             in_core: -> { defined?(::MiniMagick) && ::MiniMagick.respond_to?(:cli_path=) } do
+                             in_core: -> { GkCoreStuff.core_has?(:minimagick_cli_path) } do
     Rails.configuration.after_initialize { MinimagickPath.apply! }
   end
 end

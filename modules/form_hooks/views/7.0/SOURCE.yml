@@ -1,0 +1,20 @@
+# core_views.ps1 05 (form_hooks): ur redmine-7.0.2.zip och 05_form_hooks.patch; ändras aldrig för hand
+zip: redmine-7.0.2.zip
+zip_sha256: 525999c44e3ec264db74fe64a1e2b317ed371abfba8cb93de36f9655e5b562e0
+patch: 05_form_hooks.patch
+patch_sha256: 913fd0efd51baad54a75ae6edecdb836e0b38ecab02a610bc11493d9c18f6697
+views:
+  - path: app/views/groups/_form.html.erb
+    sha256: f103c522edf97936b7a65dbcb3c03bd477251c9048a5c97c2cd36a2392bd0e5b
+  - path: app/views/issues/_form_custom_fields.html.erb
+    sha256: bcabe48b246db16b980e90ed5cfd0a0d92d776b40bd60529cbda578efe2ab92d
+  - path: app/views/issues/_form.html.erb
+    sha256: 01dac40ab4117f654d8c17a7e501021c1c3c76fa21812096dac673b1df4e8010
+  - path: app/views/projects/_form.html.erb
+    sha256: 3a93798e301560e4f0be4acb1d7d822c6f211af01c39504a18c492f0677aace5
+  - path: app/views/trackers/_form.html.erb
+    sha256: f198bdf07ea2cbecf50c8d8388c11398d526ec9938b3f7d16554b3c9f31e9167
+  - path: app/views/users/_form.html.erb
+    sha256: 16e261683e8140e2a3768d8b437802522313e156596c4306b1fb5091cebf16ca
+  - path: app/views/versions/_form.html.erb
+    sha256: 5746a20430786b5406d203c42a2ea0226d09c7e2e735df762391cf4031fc1f22

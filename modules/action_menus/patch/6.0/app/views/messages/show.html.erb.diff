@@ -1,0 +1,10 @@
+--- a/app/views/messages/show.html.erb
++++ b/app/views/messages/show.html.erb
+@@ -22,6 +22,7 @@
+           :data => {:confirm => l(:text_are_you_sure)},
+           :class => 'icon icon-del'
+          ) if @message.destroyable_by?(User.current) %>
++    <%= call_hook(:view_messages_show_contextual, {:topic => @topic, :message => @message, :project => @project}) %>
+ </div>
+ 
+ <h2><%= avatar(@topic.author) %><%= @topic.subject %></h2>

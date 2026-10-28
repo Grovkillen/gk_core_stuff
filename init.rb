@@ -21,7 +21,11 @@ require_relative 'modules/footer_version/module'
 require_relative 'modules/minimagick_path/module'
 require_relative 'modules/settings_tabs/module'
 require_relative 'modules/journal_details/module'
-# The looks: fixes of how core's own pages look or read, moved here from gui_stuff 2026-10-22 (Looks)
+require_relative 'modules/layout_hooks/module'
+require_relative 'modules/action_menus/module'
+require_relative 'modules/form_hooks/module'
+require_relative 'modules/list_hooks/module'
+# The looks: fixes of how core's own pages look or read (Looks)
 %w[list_badge list_hash heading_badge list_checkbox sidebar_spacing label_rows scm_table warning_balance block_icons
    list_align field_widths settings_widths control_heights submit_word ajax_indicator native_texts list_sort].each { |m| require_relative "modules/#{m}/module" }
 require_relative 'extensions/gk_core_stuff/hooks'
@@ -31,7 +35,7 @@ Redmine::Plugin.register :gk_core_stuff do
   name        'GK Core Stuff'
   author      'Jimmy Westberg'
   description "Small fixes and additions to Redmine's own behaviour, one switchable module each, written as patches to core"
-  version     '1.01.000'
+  version     '1.02.000'
   requires_redmine version_or_higher: '6.0.0'
 
   settings default: GkCoreStuff.defaults, partial: 'settings/gk_core_stuff_settings'
@@ -40,3 +44,5 @@ end
 # The core patches (extensions/gk_core_stuff/patches.rb), applied here and again on every reload
 GkCoreStuff::Patches.apply!
 Redmine::Hook.add_listener(GkCoreStuff::Hooks) unless Redmine::Hook.listeners.any?(GkCoreStuff::Hooks)
+# Which of the hook modules' views a plugin overrides: known only when every plugin has registered its views
+Rails.configuration.after_initialize { GkCoreStuff.log_shadowed_views! }

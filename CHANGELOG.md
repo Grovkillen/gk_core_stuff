@@ -2,6 +2,12 @@
 
 All notable changes to GK Core Stuff are documented in this file.
 
+## 1.02.000 (2026-10-28)
+
+### Added
+
+* Hooks in Redmine's views for other plugins, in four modules that are always on and stand aside when Redmine has the hooks itself: the page's frame (the top and bottom of the header and the footer, the top of the content and the sidebar, after the page title, around the issue on the issue page), the button row and the menus (a hook in the button row of sixteen pages and the actions menu of eight, and menus that plugins add items to for an issue, the issue list's context menu, a project, a user and a version), the forms (the top and bottom of seven forms and after sections of the issue and user forms) and the lists (a row's classes and content after the row in the issue, project and user lists). The views are Redmine's own with the hooks added, one copy per supported Redmine series; where another plugin already overrides one of them, that plugin's view is used. The settings page lists the four with their views and the hooks in use.
+
 ## 1.01.000 (2026-10-27)
 
 ### Added
@@ -15,7 +21,6 @@ All notable changes to GK Core Stuff are documented in this file.
 * The export log and the file names of Redmine's exports have moved to the plugins they always needed: the log of exports, downloads and prints is part of GK Records 1.04.000, and the names from the rule for file names are part of GK Revisions 1.00.000. GK Core Stuff keeps the list of which of Redmine's actions send an export, which both read; without those plugins the two did nothing here either.
 * Whether Redmine itself already has what a module adds is asked of GK Compat 1.01.000 or later instead of looked for in Redmine's classes and settings. Without GK Compat, or with an older one, every module hooks in as before.
 * Uninstalling (migrating the plugin down to 0) takes the plugin's keys out of the users' preferences in the migration itself, without calling the plugin's own code.
-* Released as one package with GK Records 1.04.000, GK GUI Stuff 1.01.000, GK Revisions 1.00.000, GK Compat 1.01.000, and GK Icons and the other GK plugins that declare functions, in the versions released at the same time: install them together.
 
 ## 1.00.000 (2026-10-24)
 

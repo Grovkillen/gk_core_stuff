@@ -1,0 +1,18 @@
+--- a/app/views/projects/_form.html.erb
++++ b/app/views/projects/_form.html.erb
+@@ -2,6 +2,7 @@
+ 
+ <div class="box tabular">
+ <!--[form:project]-->
++<%= call_hook(:view_projects_form_top, :project => @project, :form => f) %>
+ <p><%= f.text_field :name, :required => true, :size => 60 %></p>
+ 
+ <p><%= f.text_area :description, :rows => 8, :class => 'wiki-edit' %></p>
+@@ -42,6 +43,7 @@
+ <%= hidden_field_tag 'project[enabled_module_names][]', '' %>
+ </fieldset>
+ <% end %>
++<%= call_hook(:view_projects_form_bottom, :project => @project, :form => f) %>
+ <!--[eoform:project]-->
+ 
+ <% unless @project.identifier_frozen? %>

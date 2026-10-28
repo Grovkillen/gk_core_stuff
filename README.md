@@ -25,8 +25,6 @@ GK plugins:
 - Required: none.
 - Optional: gk_compat 1.01.000 or later (whether the running Redmine already has what a module adds, so that the module stands aside; and "% done as text" also in custom fields with the progress bar format, where the Redmine series has them), gk_scenarios (the plugin's scenario steps and checks).
 
-This version is released as one package with GK Records 1.04.000, GK GUI Stuff 1.01.000, GK Revisions 1.00.000, GK Compat 1.01.000, and GK Icons and the other GK plugins that declare functions, in the versions released at the same time: install them together.
-
 ## Installation
 
 The plugin directory must be named `gk_core_stuff` (it is the plugin id): `plugins/gk_core_stuff/`.

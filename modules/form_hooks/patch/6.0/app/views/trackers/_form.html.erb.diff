@@ -1,0 +1,18 @@
+--- a/app/views/trackers/_form.html.erb
++++ b/app/views/trackers/_form.html.erb
+@@ -4,6 +4,7 @@
+ <div class="splitcontentleft">
+ <div class="box tabular">
+ <!--[form:tracker]-->
++<%= call_hook(:view_trackers_form_top, :tracker => @tracker, :form => f) %>
+ <p><%= f.text_field :name, :required => true %></p>
+ <p><%= f.select :default_status_id,
+         IssueStatus.sorted.map {|s| [s.name, s.id]},
+@@ -41,6 +42,7 @@
+ <p><label for="copy_workflow_from"><%= l(:label_copy_workflow_from) %></label>
+ <%= select_tag(:copy_workflow_from, content_tag("option") + options_from_collection_for_select(@trackers, :id, :name, params[:copy_workflow_from] || @copy_from.try(:id))) %></p>
+ <% end %>
++<%= call_hook(:view_trackers_form_bottom, :tracker => @tracker, :form => f) %>
+ <!--[eoform:tracker]-->
+ </div>
+ <%= submit_tag l(@tracker.new_record? ? :button_create : :button_save) %>

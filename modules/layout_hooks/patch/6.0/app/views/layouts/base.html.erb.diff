@@ -1,0 +1,43 @@
+--- a/app/views/layouts/base.html.erb
++++ b/app/views/layouts/base.html.erb
+@@ -67,6 +67,7 @@
+ </div>
+ 
+ <div id="header">
++    <%= call_hook :view_layouts_base_header_top %>
+ 
+     <a href="#" class="mobile-toggle-button js-flyout-menu-toggle-button"></a>
+ 
+@@ -98,6 +99,7 @@
+         </div>
+     </div>
+     <% end %>
++    <%= call_hook :view_layouts_base_header_bottom %>
+ </div>
+ 
+ <div id="main" class="<%= sidebar_content? ? 'collapsiblesidebar' : 'nosidebar' %>">
+@@ -111,6 +113,7 @@
+           <%= javascript_tag "$('#sidebar-switch-panel').css('visibility', 'visible');" %>
+         <% end %>
+         <div id="sidebar-wrapper">
++          <%= view_layouts_base_sidebar_top_hook_response %>
+           <%= yield :sidebar %>
+           <%= view_layouts_base_sidebar_hook_response %>
+         </div>
+@@ -118,13 +121,16 @@
+ 
+     <div id="content">
+         <%= render_flash_messages %>
++        <%= call_hook :view_layouts_base_content_top %>
+         <%= yield %>
+         <%= call_hook :view_layouts_base_content %>
+         <div style="clear:both;"></div>
+     </div>
+ </div>
+ <div id="footer">
++    <%= call_hook :view_layouts_base_footer_top %>
+     Powered by <%= link_to Redmine::Info.app_name, Redmine::Info.url, :target => '_blank', :rel => 'noopener' %> &copy; 2006-2026 Jean-Philippe Lang
++    <%= call_hook :view_layouts_base_footer_bottom %>
+ </div>
+ 
+ <div id="ajax-indicator" style="display:none;"><span><%= l(:label_loading) %></span></div>

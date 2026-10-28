@@ -1,0 +1,14 @@
+# core_views.ps1 01 (layout_hooks): ur redmine-6.0.11.zip och 01_layout.patch; ändras aldrig för hand
+zip: redmine-6.0.11.zip
+zip_sha256: ae219a5206b490fc0a4fa8353dd95d1d38ed3df512b08d10c17c14eab5977102
+patch: 01_layout.patch
+patch_sha256: 9b8e75d872ba3c897e1058439d4ed53d2a02bbac95ab73a2a63090056b746240
+views:
+  - path: app/views/issues/show.html.erb
+    sha256: 40a9e299c7e4a929d2fc287303eaa32eb227d354524de949bdf1f4d0248e86a7
+    own_hunk_sha256: a68ef738f9b9e25586aa60468396dc94451596273eab19b73d7bb3fa1c226077
+  - path: app/views/layouts/base.html.erb
+    sha256: 3c99783ad08bb33c011e481b276690c09b9091eca73ed309e1f36015a2560365
+    own_hunk_sha256: 00bf6913fc912efab03d92bc9377d47d286104dd4f910c15c2a3b87c82e939e7
+  - path: app/views/users/edit.html.erb
+    sha256: a8e21b8596188026af698107ff8dff99537db7ba4dd9567f4371c4fc98c23e97

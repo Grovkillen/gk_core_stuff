@@ -242,6 +242,25 @@ module GkCoreStuff
       { 'ok' => failed.empty?, 'want' => checks.map(&:first).join(', '), 'got' => failed.empty? ? names.(out[:all]).join(', ') : "not: #{failed.join(', ')}" }
     end
 
+    # the hooks in core's views (layout_hooks, action_menus, form_hooks, list_hooks): cst_view_hooks: <module>. The
+    # module has views for the running series, and Rails finds the module's copy of a core view no plugin overrides
+    # (the probe below), so the hooks in it are called. Nothing written.
+    view_probes = { 'layout_hooks' => ['layouts/base', false], 'action_menus' => ['news/index', false],
+                    'form_hooks' => ['versions/form', true], 'list_hooks' => ['issues/list', true] }
+    ::GkScenarios::Expect.register('cst_view_hooks') do |_ctx, e|
+      name = e['cst_view_hooks'].to_s
+      next({ 'ok' => false, 'want' => "one of #{view_probes.keys.join(', ')}", 'got' => name }) unless view_probes.key?(name)
+      next({ 'ok' => true, 'want' => name, 'got' => 'core has the hooks' }) if GkCoreStuff.in_core?(name)
+
+      dir = GkCoreStuff.series_views(name)
+      next({ 'ok' => false, 'want' => "#{name}: views for the running series", 'got' => 'none' }) unless dir
+
+      path, partial = view_probes[name]
+      found = ::ActionController::Base.new.lookup_context.find_template(path, [], partial).identifier.to_s
+      ours = File.expand_path(found).start_with?(File.expand_path(dir))
+      { 'ok' => ours, 'want' => "#{path} from #{name}'s views", 'got' => ours ? 'yes' : found }
+    end
+
     # journal_details: cst_journal_details: <issue>, property:, prop_key:, as:. The issue's history line of that
     # property as IssuesHelper#show_detail draws it, on the page and as text (the text is also the email's): the line
     # is the registered renderer's and not core's own, so it comes through the register. Nothing written.

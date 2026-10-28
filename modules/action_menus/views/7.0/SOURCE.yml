@@ -1,0 +1,45 @@
+# core_views.ps1 04 (action_menus): ur redmine-7.0.2.zip och 04_action_menus.patch; ändras aldrig för hand
+zip: redmine-7.0.2.zip
+zip_sha256: 525999c44e3ec264db74fe64a1e2b317ed371abfba8cb93de36f9655e5b562e0
+patch: 04_action_menus.patch
+patch_sha256: 266575d0328a68a5d9162e4caca857e46242b7599ed13eab5d4611c89b64a9e1
+views:
+  - path: app/views/boards/show.html.erb
+    sha256: 1cc40f7db52d8a6046d1d62b3ec06cda51dad05d898b4850dd1e1cb4b46bea1c
+  - path: app/views/context_menus/issues.html.erb
+    sha256: 36992efd99836b27b42f4db29a08ae13aa42615fe2b5da570a9e48ea4c11f148
+  - path: app/views/documents/index.html.erb
+    sha256: 21b7ce41ba7eb582a623cc97c2cc03c14195f317207888a45befb4943ea4ff45
+  - path: app/views/documents/show.html.erb
+    sha256: a9d3e39ce21c23e50e6b5a35a45acdb8babab0ce102d81255a6ee07c90df38e8
+  - path: app/views/groups/show.html.erb
+    sha256: 78a762a4373f6cbf70714c87390620979339d60bd804e36edd3a55e60262c246
+  - path: app/views/issues/_action_menu.html.erb
+    sha256: 2fe665dfd61d45649bb85fa510cd36ec870972c00a1476cf1f240ac0f7bf8b0e
+  - path: app/views/issues/index.html.erb
+    sha256: 4d3da772853c4ba5a7903aa86c9cbdbbd6f7ddfaa85dfb314f9aa59e6e9c00cd
+  - path: app/views/messages/show.html.erb
+    sha256: 889b51551c83a6747597140c5167f525bb3341896402abe87b3aeafeedc05c48
+  - path: app/views/news/index.html.erb
+    sha256: 168c68d390ea8c8db5efd300629ba3ec5055d5531a135cf4b3533df9f85417d7
+  - path: app/views/news/show.html.erb
+    sha256: fca23717c697cf27a63a97789157e60501231e5a65e14f2e23f88d7255897593
+  - path: app/views/projects/index.html.erb
+    sha256: 728082a0aa2b2699caa0b7472dd6b4a819f6b20636c5a2e04f92ea6248190fe6
+  - path: app/views/projects/show.html.erb
+    sha256: 1ed96ffba0b590d24fade063cb9091f55dcf573ddaa5659061329a6668d7bd94
+  - path: app/views/repositories/_navigation.html.erb
+    sha256: dc8fd5df010b8d013956c86ab2e2420292dad6829f5cc780e21c1f87f9d743be
+  - path: app/views/timelog/index.html.erb
+    sha256: ca1b1b8eba21d4492d06bbacecb5c89309a3f3feec82a3023fa27a190df08793
+  - path: app/views/users/index.html.erb
+    sha256: 140717f6294717aae4958fff9f8b927c9d1ea2b51d27a0a57ec699d5feb247fa
+  - path: app/views/users/show.html.erb
+    sha256: 572336370022c438fe8d7a3370c0433504b7c72ba0ee09cfdbb739a7527a5156
+    own_hunk_sha256: 011c2943834acc33bd7d1ea4429f254075928584ee7139c4a17d4d2d387ed516
+  - path: app/views/versions/index.html.erb
+    sha256: e30afd43abe8d838c9a502356262fda95a0aafed243fcbda0d5bc11a612b79e3
+  - path: app/views/versions/show.html.erb
+    sha256: 0b0e5ca2b2a67b68c1a362d76d1b79a5214575618026cabea0e87d70addf17f1
+  - path: app/views/wiki/show.html.erb
+    sha256: 13d71b0e0ff4a34e956f449278c23c8efcb7df734966f35e78c56dcb8c427ae6

@@ -1,0 +1,19 @@
+--- a/app/views/users/_list.html.erb
++++ b/app/views/users/_list.html.erb
+@@ -31,7 +31,7 @@
+       </td>
+     </tr>
+   <% end %>
+-  <tr id="user-<%= user.id %>" class="user <%= cycle("odd", "even") %> hascontextmenu">
++  <tr id="user-<%= user.id %>" class="user <%= cycle("odd", "even") %> hascontextmenu <%= css_classes_from_hook(:view_users_list_row_css_classes, {:user => user, :query => @query}) %>">
+     <td class="checkbox hide-when-print"><%= check_box_tag("ids[]", user.id, false, id: nil) %></td>
+     <% @query.inline_columns.each do |column| %>
+       <% if column.name == :login %>
+@@ -56,6 +56,7 @@
+   </tr>
+   <% end -%>
+   <% end -%>
++  <%= call_hook(:view_users_list_row_after, {:user => user, :query => @query, :colspan => @query.inline_columns.size + 2}) %>
+ <% end -%>
+ </tbody>
+ </table>

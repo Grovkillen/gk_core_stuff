@@ -1,0 +1,10 @@
+--- a/app/views/users/show.html.erb
++++ b/app/views/users/show.html.erb
+@@ -1,5 +1,7 @@
+ <div class="contextual">
+ <%= link_to(sprite_icon('edit', l(:button_edit)), edit_user_path(@user), :class => 'icon icon-edit') if User.current.admin? && @user.logged? %>
++<%= render_object_menu_items(:user_actions, @user) %>
++<%= call_hook(:view_users_show_contextual, {:user => @user}) %>
+ </div>
+ 
+ <h2><%= avatar @user, :size => "50" %> <%= @user.name %></h2>

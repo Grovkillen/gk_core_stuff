@@ -1,0 +1,9 @@
+--- a/app/views/context_menus/issues.html.erb
++++ b/app/views/context_menus/issues.html.erb
+@@ -176,5 +176,6 @@
+   <li><%= context_menu_link sprite_icon('del', l(:button_delete_object, object_name: (@issue_ids.size > 1 ? l(:label_issue_plural) : l(:label_issue))).capitalize), issues_path(:ids => @issue_ids, :back_url => @back),
+                             :method => :delete, :data => {:confirm => issues_destroy_confirmation_message(@issues)}, :class => 'icon icon-del', :disabled => !@can[:delete] %></li>
+ 
++  <%= render_object_menu_items(:issue_context_menu, @issues, @project || @projects, list: true) %>
+   <%= call_hook(:view_issues_context_menu_end, {:issues => @issues, :can => @can, :back => @back }) %>
+ </ul>

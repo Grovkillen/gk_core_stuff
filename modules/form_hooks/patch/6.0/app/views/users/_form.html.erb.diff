@@ -1,0 +1,34 @@
+--- a/app/views/users/_form.html.erb
++++ b/app/views/users/_form.html.erb
+@@ -2,6 +2,7 @@
+ 
+ <div id="user_form">
+ <!--[form:user]-->
++<%= call_hook(:view_users_form_top, :user => @user, :form => f) %>
+ <div class="splitcontent">
+ <div class="splitcontentleft">
+ <fieldset class="box tabular">
+@@ -55,6 +56,7 @@
+   </p>
+   <% end -%>
+ </fieldset>
++<%= call_hook(:view_users_form_after_authentication, :user => @user, :form => f) %>
+ </div>
+ 
+ <div class="splitcontentright">
+@@ -62,6 +64,7 @@
+   <legend><%=l(:field_mail_notification)%></legend>
+   <%= render :partial => 'users/mail_notifications' %>
+ </fieldset>
++<%= call_hook(:view_users_form_after_mail_notifications, :user => @user, :form => f) %>
+ 
+ <fieldset class="box">
+   <legend><%=l(:label_auto_watch_on)%></legend>
+@@ -73,6 +76,7 @@
+   <%= render :partial => 'users/preferences' %>
+   <%= call_hook(:view_users_form_preferences, :user => @user, :form => f) %>
+ </fieldset>
++<%= call_hook(:view_users_form_bottom, :user => @user, :form => f) %>
+ </div>
+ </div>
+ </div>

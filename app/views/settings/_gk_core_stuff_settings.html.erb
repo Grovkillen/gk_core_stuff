@@ -1,4 +1,4 @@
-<%# gk_core_stuff: one box per module, each switchable except settings_tabs and journal_details (always on, other plugins require them); a module core already has says so and cannot be switched on %>
+<%# gk_core_stuff: one box per module, each switchable except settings_tabs, journal_details and layout_hooks (always on, other plugins require them); a module core already has says so and cannot be switched on %>
 <% plugin = Redmine::Plugin.find(:gk_core_stuff) %>
 <% changelog = ["CHANGELOG.#{current_language}.md", 'CHANGELOG.md'].map { |f| File.join(plugin.directory, f) }.find { |f| File.exist?(f) } %>
 <% s = GkCoreStuff.defaults.merge((settings || {}).to_h.transform_keys(&:to_s)) %>
@@ -85,6 +85,27 @@
   <p><label><%= l(:label_gk_core_stuff_journal_details_now) %></label>
     <%= now.any? ? now.join(', ') : l(:label_none) %></p>
   <% end %>
+</fieldset>
+<%# the hooks in core's views (core_proposals/view_hooks steps 01, 04, 05 and 06): always on, one row per step %>
+<fieldset class="box"><legend><%= l(:label_gk_core_stuff_view_hooks) %></legend>
+  <p><em class="info"><%= l(:text_gk_core_stuff_view_hooks_info) %></em></p>
+  <table class="list gk-core-stuff-view-hooks">
+    <thead><tr><th><%= l(:field_name) %></th><th><%= l(:field_status) %></th><th><%= l(:label_gk_core_stuff_view_hooks_views) %></th><th><%= l(:label_gk_core_stuff_view_hooks_used) %></th></tr></thead>
+    <tbody>
+    <% { layout_hooks: GkCoreStuff::LayoutHooks, action_menus: GkCoreStuff::ActionMenus, form_hooks: GkCoreStuff::FormHooks, list_hooks: GkCoreStuff::ListHooks }.each do |key, mod| %>
+      <% heard = mod::HOOKS.select { |h| ::Redmine::Hook.hook_listeners(h).any? } %>
+      <% heard += mod.items.reject { |_, v| v.empty? }.keys if mod.respond_to?(:items) %>
+      <tr class="<%= cycle('odd', 'even') %>">
+        <td class="name"><%= l(:"label_gk_core_stuff_#{key}") %><br><em class="info"><%= l(:"text_gk_core_stuff_#{key}_info") %></em></td>
+        <td class="status"><%= GkCoreStuff.in_core?(key) ? l(:text_gk_core_stuff_in_core) : l(:label_gk_core_stuff_view_hooks_always) %></td>
+        <td><%= mod.views_dir ? l(:text_gk_core_stuff_layout_hooks_views_ok) : l(:text_gk_core_stuff_layout_hooks_views_missing) %>
+          <% shadowed = GkCoreStuff.shadowed_views(key) %>
+          <% if shadowed.any? %><br><em class="info"><%= l(:text_gk_core_stuff_view_hooks_shadowed, views: shadowed.map { |v| v.sub(/\.html\.erb\z/, '') }.join(', ')) %></em><% end %></td>
+        <td><%= heard.any? ? heard.join(', ') : l(:label_none) %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
 </fieldset>
 <%# the looks: fixes of how core's own pages look or read, each off, optional (each person may switch it off) or forced %>
 <fieldset class="box"><legend><%= l(:label_gk_core_stuff_looks) %></legend>

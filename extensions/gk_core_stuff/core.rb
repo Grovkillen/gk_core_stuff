@@ -35,6 +35,64 @@ module GkCoreStuff
       false
     end
 
+    # A module's copies of core's views for the running series (modules/<name>/views/<series>/app/views, made by
+    # core_views.ps1), chosen by compat (GkCompat.series_dir; version checks live only there), or nil when there are
+    # none for the series or compat lacks series_dir
+    def series_views(name)
+      return nil unless defined?(::GkCompat) && ::GkCompat.respond_to?(:series_dir)
+
+      dir = ::GkCompat.series_dir(File.expand_path("../../modules/#{name}/views", __dir__))
+      dir && File.directory?(File.join(dir, 'app', 'views')) ? File.join(dir, 'app', 'views') : nil
+    end
+
+    # Puts the module's views for the running series in the view paths, once: right before core's own app/views, after
+    # every plugin's, so that a plugin that overrides one of the views (fields' issues/_form_custom_fields, people's
+    # groups/show) keeps its own until it uses the hooks instead; every other view gets the hooks.
+    # Without views for the series a warning in the log. Returns the folder, or nil.
+    def prepend_series_views(name)
+      dir = series_views(name)
+      if dir.nil?
+        Rails.logger.warn("[gk_core_stuff] #{name}: no views for the running Redmine series (core_views.ps1, and GK Compat " \
+                          'with series_dir); the hooks in the views are not called')
+        return nil
+      end
+      series_dirs[name.to_s] = dir
+      paths = ::ActionController::Base.view_paths.map(&:to_s)
+      return dir if paths.include?(dir)
+
+      core = Rails.root.join('app', 'views').to_s
+      at = paths.index { |p| File.expand_path(p) == File.expand_path(core) } || paths.size
+      ::ActionController::Base.view_paths = paths.insert(at, dir)
+      dir
+    end
+
+    # The modules' view folders in use, by module name
+    def series_dirs = (@series_dirs ||= {})
+
+    # The views of a module that a plugin overrides (its own copy stands before the module's in the view paths). Asked
+    # after every plugin has registered its views: plugins after core_stuff in the alphabet (fields, people) register
+    # later than core_stuff's own init.
+    def shadowed_views(name)
+      dir = series_dirs[name.to_s]
+      return [] unless dir
+
+      paths = ::ActionController::Base.view_paths.map(&:to_s)
+      at = paths.index(dir)
+      return [] unless at
+
+      Dir.glob(File.join(dir, '**', '*.erb')).map { |f| f.delete_prefix("#{dir}/") }.select do |v|
+        paths.first(at).any? { |p| File.exist?(File.join(p, v)) }
+      end
+    end
+
+    # One line in the log per module whose views a plugin overrides (called after initialization)
+    def log_shadowed_views!
+      series_dirs.each_key do |name|
+        shadowed = shadowed_views(name)
+        Rails.logger.info("[gk_core_stuff] #{name}: a plugin overrides #{shadowed.join(', ')}; its own view is used, without the hooks") if shadowed.any?
+      end
+    end
+
     def in_core?(name) = !!@modules[name.to_s]&.in_core&.call
     def always?(name) = !!@modules[name.to_s]&.always
 

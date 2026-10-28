@@ -103,6 +103,8 @@ en:
   text_gk_core_stuff_scm_table_info: "The Enabled SCM table under Administration, Settings, Repositories is drawn as core's other lists: a heading row, lines between the rows, names and commands at the start of their columns."
   label_gk_core_stuff_warning_balance: "Equal margins in boxes without an icon"
   text_gk_core_stuff_warning_balance_info: "Core keeps 30 px at the start of a warning or info box for an icon. Without an icon the box gets the same margin on both sides."
+  label_gk_core_stuff_menu_icons: "Menu icons in the row's colour"
+  text_gk_core_stuff_menu_icons_info: "In a menu (the button row's and a note's ..., the issue list's right click) the row shows where the pointer is with its frame, background and blue text, but core turns the icon red as in an ordinary link. The icon gets the row's colour."
   label_gk_core_stuff_block_icons: "Move handles in the icons' colour"
   text_gk_core_stuff_block_icons_info: "The move handle in lists that can be sorted (custom fields, trackers, statuses, enumerations, roles) and in a box's heading on My page gets the colour of the icons beside it (core draws it grey), and the two groups of icons in a box on My page get the same space as the icons within a group."
   label_gk_core_stuff_list_align: "Headings like their columns"

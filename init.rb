@@ -27,7 +27,7 @@ require_relative 'modules/form_hooks/module'
 require_relative 'modules/list_hooks/module'
 # The looks: fixes of how core's own pages look or read (Looks)
 %w[list_badge list_hash heading_badge list_checkbox sidebar_spacing label_rows scm_table warning_balance block_icons
-   list_align field_widths settings_widths control_heights submit_word ajax_indicator native_texts list_sort].each { |m| require_relative "modules/#{m}/module" }
+   list_align field_widths settings_widths control_heights submit_word ajax_indicator native_texts list_sort menu_icons].each { |m| require_relative "modules/#{m}/module" }
 require_relative 'extensions/gk_core_stuff/hooks'
 require_relative 'extensions/gk_core_stuff/patches'
 
@@ -35,7 +35,7 @@ Redmine::Plugin.register :gk_core_stuff do
   name        'GK Core Stuff'
   author      'Jimmy Westberg'
   description "Small fixes and additions to Redmine's own behaviour, one switchable module each, written as patches to core"
-  version     '1.02.000'
+  version     '1.03.000'
   requires_redmine version_or_higher: '6.0.0'
 
   settings default: GkCoreStuff.defaults, partial: 'settings/gk_core_stuff_settings'

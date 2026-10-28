@@ -1,0 +1,18 @@
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -2007,6 +2007,15 @@
+   stroke: none;
+   fill: #c61a1a;
+ }
++
++/* In a menu the row shows where the pointer is (its frame and background, its text in the link colour), so the
++   icon keeps the row's colour instead of turning red as a link's icon does */
++.contextual .drdn-items > a.icon:hover .icon-svg,
++.journal-actions .drdn-items > a.icon:hover .icon-svg,
++#context-menu a.icon:hover .icon-svg { stroke: currentColor; }
++.contextual .drdn-items > a.icon:hover .icon-svg-filled,
++.journal-actions .drdn-items > a.icon:hover .icon-svg-filled,
++#context-menu a.icon:hover .icon-svg-filled { fill: currentColor; }
+ 
+ svg.icon-ok {
+   stroke: #5db651;

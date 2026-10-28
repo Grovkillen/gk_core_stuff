@@ -1,0 +1,9 @@
+/* gk_core_stuff menu_icons: in a menu the row shows where the pointer is (its frame and background, its text in the
+   link colour), so the icon keeps the row's colour instead of turning red as a link's icon does (core's
+   a.icon:hover .icon-svg) */
+.contextual .drdn-items > a.icon:hover .icon-svg,
+.journal-actions .drdn-items > a.icon:hover .icon-svg,
+#context-menu a.icon:hover .icon-svg { stroke: currentColor; }
+.contextual .drdn-items > a.icon:hover .icon-svg-filled,
+.journal-actions .drdn-items > a.icon:hover .icon-svg-filled,
+#context-menu a.icon:hover .icon-svg-filled { fill: currentColor; }

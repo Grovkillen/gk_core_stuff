@@ -103,6 +103,8 @@ sv:
   text_gk_core_stuff_scm_table_info: "Tabellen Aktivera SCM under Administration, Inställningar, Versionsarkiv ritas som core:s andra listor: en rubrikrad, linjer mellan raderna, namn och kommandon i början av kolumnerna."
   label_gk_core_stuff_warning_balance: "Lika marginal i rutor utan ikon"
   text_gk_core_stuff_warning_balance_info: "Core håller 30 px i början av en varnings- eller inforuta för en ikon. Utan ikon får rutan samma marginal på båda sidor."
+  label_gk_core_stuff_menu_icons: "Menyernas ikoner i radens färg"
+  text_gk_core_stuff_menu_icons_info: "I en meny (knappradens och anteckningens ..., ärendelistans högerklick) visar raden var pekaren är med ram, bakgrund och blå text, men core gör ikonen röd som i en vanlig länk. Ikonen får radens färg."
   label_gk_core_stuff_block_icons: "Flytthandtag i ikonernas färg"
   text_gk_core_stuff_block_icons_info: "Flytthandtaget i listor som går att sortera (anpassade fält, ärendetyper, statusar, värdelistor, roller) och i ett blocks rubrik på Min sida får samma färg som ikonerna bredvid (core gör det grått), och blockets två grupper av ikoner på Min sida får samma avstånd som ikonerna inom en grupp."
   label_gk_core_stuff_list_align: "Rubriker som sina kolumner"

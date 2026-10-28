@@ -2,6 +2,12 @@
 
 All notable changes to GK Core Stuff are documented in this file.
 
+## 1.03.000 (2026-10-28)
+
+### Added
+
+* Look Menu icons in the row's colour: in a menu (a button row's and a note's ..., the issue list's right click) the icon of the row under the pointer keeps the row's colour, as its text does, instead of turning red as the icon of an ordinary link does (Redmine 6.1 and later; 6.0 already does so).
+
 ## 1.02.000 (2026-10-28)
 
 ### Added

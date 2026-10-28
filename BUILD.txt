@@ -1,8 +1,8 @@
 Package: gk_core_stuff
-Version: 1.02.000
+Version: 1.03.000
 
-Build tag: 1xLxd0
-Build time (UTC): 2026-10-28 06:59:23
+Build tag: 1xMBO7
+Build time (UTC): 2026-10-28 21:40:57
 Git: git version 2.56.0.windows.1
 PowerShell: 7.6.9
 Redmine 6.0 runs on Ruby: 3.2

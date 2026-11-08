@@ -1,0 +1,96 @@
+# core_views.ps1 10 (more_view_hooks): ur redmine-7.0.3.zip och 10_more_view_hooks.patch; ändras aldrig för hand
+zip: redmine-7.0.3.zip
+zip_sha256: ee82a3c405aba179f1b6e27ce8a3b8ae18280778e539493e45c8de3b73229529
+patch: 10_more_view_hooks.patch
+patch_sha256: e4d0a3ee89ab99b97574e7a1e62b5cb67164ce06dd42cf90cf6c507ac3e9cf44
+earlier_patches:
+  - patch: 01_layout.patch
+    patch_sha256: c5ae138b1bd3b3d98503c4d59eabafc702936b28556475432a3b088a62e12ffa
+  - patch: 04_action_menus.patch
+    patch_sha256: e6a43ae9a982ea5569a19aefd49b0fe6b6eab961e40810aca072124424edb0d1
+  - patch: 06_list_hooks.patch
+    patch_sha256: f933fe1393a4b251fe37ccaa61e6b3fab536079894d636eaf1277e38657ad58c
+  - patch: 08_section_marks.patch
+    patch_sha256: 5c340400d235a57982e892e0447e1b38c5e051b646cf795abff77a86f71877d0
+  - patch: 09_anchor_marks.patch
+    patch_sha256: 6acb8cd0f222c7c1ebb560037caa41ee534e4cf0a925b77a2295d379b30195cc
+views:
+  - path: app/views/documents/show.html.erb
+    sha256: ced78830c0e063d783baaa99b97d5a9d3f43aa0eaa65b05b22861eb254a05054
+    earlier:
+      - step: '04'
+  - path: app/views/issues/_list.html.erb
+    sha256: f3c20e5af85bceb947e2ed467e4e2f33e2f2579cdeef2fa635568562d6cc49af
+    earlier:
+      - step: '06'
+  - path: app/views/issues/index.html.erb
+    sha256: 0dc3581718d2b958fe9803a5b393bf9dad494136265c2636d5c58b59c1de1d6d
+    earlier:
+      - step: '04'
+  - path: app/views/issues/show.html.erb
+    sha256: 91e1e9c3532d46d44e01775a47635bf08f894e82aaf8e8a52d375f55dbcf801d
+    earlier:
+      - step: '01'
+      - step: '08'
+        own_hunk_sha256: ff292478e5ced69b0061e5c7b812badbacbe9690cea9e3cc595196dda5cdf185
+      - step: '09'
+  - path: app/views/layouts/base.html.erb
+    sha256: 73e93274f01df3552f8041adf2aa45fde6664f270e1aefdef14830c0e692eda7
+    earlier:
+      - step: '01'
+      - step: '09'
+  - path: app/views/my/account.html.erb
+    sha256: 2c36e31ee7925da047a3cfa71c7b059b5c8c22f9f5c44e01dd158de3f19c2cd7
+  - path: app/views/settings/_api.html.erb
+    sha256: 18edc5ea53d4afdd5790444273ff946037f9b3d80e64b47f10af1560601f383e
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_attachments.html.erb
+    sha256: 797ca641e2120854967d2d41ecb3e4109f94e8042bbae4ed039142d93a9ef3e9
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_authentication.html.erb
+    sha256: 311f9eccc6176bdc708422bac41ee794384fe6ffde8371b045f7f1c303106488
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_display.html.erb
+    sha256: 2bac1fbf462047ca60f52eee786b4ca48dae8d609655f39d5c4d308ec2ea3858
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_general.html.erb
+    sha256: 363ef1bbd7176cc9fd5f054f51b1ff6b46ecd3e7b475a20b96b639c755e64afd
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_issues.html.erb
+    sha256: 34d5c4004e5a8f1bf056f77806c2376db43a5b8ac33d4843c11b9c466672d9b8
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_mail_handler.html.erb
+    sha256: 54e5c0f956d5d26bc3a03a30525d3bf16257fd8e272849ea16f28c758ac847de
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_notifications.html.erb
+    sha256: 7b31f3882baa07604b77dbb2db07d13a8e229908fbdf14c48dfa397c2d8e120b
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_projects.html.erb
+    sha256: 3613c242ebe26ad613c482298e396ac6e8a9ad6186b462809e67fd6a971f2e3f
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_repositories.html.erb
+    sha256: 89c745e407cbe54bb7c51d584be18fa3017bfb01258a42771532d475719a8ce0
+    earlier:
+      - step: '09'
+        own_hunk_sha256: 49d6a8c366dc9bd8639cb9baffd8f6a3e81cfdd9645a088b290d1a3abb7f36ed
+  - path: app/views/settings/_timelog.html.erb
+    sha256: 0c709e4001070d21309eba6b7cf3871e640b2620c656481c8022c3addf9bb1d5
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_users.html.erb
+    sha256: 09d1538ef941f74f763881136a23cd30cc8fe8575aea42c7c837d7d849edb166
+    earlier:
+      - step: '09'
+  - path: app/views/settings/plugin.html.erb
+    sha256: d594fd36daf599fa799c6c2ffa7efd929a5349d99ac389b74a6eaec3aec9a1f9
+    earlier:
+      - step: '09'

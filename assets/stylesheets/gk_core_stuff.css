@@ -9,13 +9,17 @@ div.progress-text-right table.progress {flex: none;}
 div.progress-text-right .progress-text {flex: none; min-inline-size: 2.6em; text-align: end; font-size: 86%; line-height: 1;}
 div.progress-text-over {display: inline-grid; inline-size: 80px;}
 div.progress-text-over > * {grid-area: 1 / 1;}
-div.progress-text-over .progress-text {align-self: center; text-align: center; font-size: 75%; line-height: 1; color: #222; text-shadow: 0 0 2px #fff, 0 0 2px #fff;}
-/* the plate behind the text on the bar, chosen in the settings (done_ratio_text_plate) */
-div.progress-text-over .progress-text.gk-core-stuff-progress-plate {background-color: rgba(255, 255, 255, 0.85); border-radius: 2px; padding-inline: 2px; text-shadow: none;}
+div.progress-text-over .progress-text {align-self: center; text-align: center; font-size: 75%; line-height: 1; color: var(--gk-role-core-stuff-progress-text, #222); text-shadow: 0 0 2px var(--gk-role-core-stuff-progress-plate, #fff), 0 0 2px var(--gk-role-core-stuff-progress-plate, #fff);}
+/* the plate behind the text on the bar, chosen in the settings (done_ratio_text_plate), as wide as the text and in the
+   bar's middle: a grid item stretches over its whole area otherwise. The text and the plate are colour roles, for a
+   theme to set; without them the values here stand */
+div.progress-text-over .progress-text.gk-core-stuff-progress-plate {justify-self: center; background-color: var(--gk-role-core-stuff-progress-plate, rgba(255, 255, 255, 0.85)); border-radius: 2px; padding-inline: 2px; text-shadow: none;}
 div.progress-text-under {display: inline-block; inline-size: 80px;}
 div.progress-text-under .progress-text {display: block; text-align: center; font-size: 86%;}
 div.progress-text-under .progress-text-none::before {content: "\00a0";}
 td.done_ratio > div.progress-with-text {margin-inline: auto;}
+/* core's empty legend under the bar (its class percent) takes no place beside the text */
+div.progress-with-text p.percent {display: none;}
 
 /* the looks: their explanation above the table stands at the box's start, not in the place of a label (core's tabular p) */
 .tabular p.gk-core-stuff-looks-intro { padding-inline-start: 0; }

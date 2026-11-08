@@ -1,8 +1,8 @@
-# core_views.ps1 06 (list_hooks): ur redmine-6.0.11.zip och 06_list_hooks.patch; ändras aldrig för hand
-zip: redmine-6.0.11.zip
-zip_sha256: ae219a5206b490fc0a4fa8353dd95d1d38ed3df512b08d10c17c14eab5977102
+# core_views.ps1 06 (list_hooks): ur redmine-6.0.12.zip och 06_list_hooks.patch; ändras aldrig för hand
+zip: redmine-6.0.12.zip
+zip_sha256: 383eb661a6a91f9217d319e57e8fc8c64f7cfba5adf3929c398c03cc8a0bbe66
 patch: 06_list_hooks.patch
-patch_sha256: 60113c0f36cfd33f26fe3bc6b7a61b71955c73a2b105601bb6dfd1e41274f6d3
+patch_sha256: f933fe1393a4b251fe37ccaa61e6b3fab536079894d636eaf1277e38657ad58c
 views:
   - path: app/views/issues/_list.html.erb
     sha256: f6f96a843c7d61b8ccd4088e7e492761ee0b0f27fc5ed7eeb0010179442f76ad

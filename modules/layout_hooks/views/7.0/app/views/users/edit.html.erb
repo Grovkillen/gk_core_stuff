@@ -5,9 +5,8 @@
 <%= delete_link user_path(@user) if User.current != @user %>
 </div>
 
-<%=
-  page_title = title [l(:label_user_plural), users_path], @user.login
-  page_title.insert(page_title.rindex(' ', page_title.index('</h2>')) + 1, avatar(@user).to_s)
-%>
+<% html_title @user.login, l(:label_user_plural) %>
+<h2><%= link_to l(:label_user_plural), users_path %> &#187; <%= avatar(@user) %><%= @user.login %></h2>
+<%= call_hook(:view_layouts_base_title_after, :title => [[l(:label_user_plural), users_path], @user.login]) %>
 
 <%= render_tabs user_settings_tabs %>

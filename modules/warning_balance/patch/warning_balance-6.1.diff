@@ -4,11 +4,11 @@
    color: #A6750C;
  }
  
-+/* A box without an icon at its start (a flash or a conflict without one keeps the space for its png icon):
-+   the same space on both sides, and no margin of the first and last child added to the padding */
-+:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) {padding-inline: 12px;}
-+:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) > :first-child {margin-block-start: 0;}
-+:is(.nodata, .warning):not(div.flash, :has(> svg.icon-svg)) > :last-child {margin-block-end: 0;}
++/* A warning or a "no data" box draws no icon in the space kept at its start: the same space on both sides, and
++   no margin of the first and last child added to the padding. A flash message keeps its space for its icon. */
++:is(.nodata, .warning):not(div.flash) {padding-inline: 12px;}
++:is(.nodata, .warning):not(div.flash) > :first-child {margin-block-start: 0;}
++:is(.nodata, .warning):not(div.flash) > :last-child {margin-block-end: 0;}
 +
  .warning .oauth-permissions { display:inline-block;text-align:left; }
  .warning .oauth-permissions p { margin-top:0;-webkit-margin-before:0;}

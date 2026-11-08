@@ -8,7 +8,8 @@
 
   function lang() { return document.documentElement.lang || undefined; }
   function compare(a, b) { return a.localeCompare(b, lang(), { sensitivity: 'base', numeric: true }); }
-  function textOf(el) { return (el.textContent || '').replace(/\s+/g, ' ').trim(); }
+  // an item's name as the person reads it, only for the order
+  function textOf(el) { return (el.textContent || '').replace(/\s+/g, ' ').trim(); } // gk-r17 P4r: sorts by the names administrators gave their projects and fields; no word of Redmine is matched or looked for
   // the items of a parent in alphabetical order; whatever stands between them (a hidden field, a line break) goes with
   // the item before it, and what stands before the first item stays where it is
   function sortItems(items) {
@@ -33,35 +34,53 @@
     sorted.forEach(function (g) { g.nodes.forEach(function (n) { parent.insertBefore(n, marker); }); });
     parent.removeChild(marker);
   }
-  // core's nested project list: the projects under each parent in alphabetical order, children kept under theirs
+  // core's nested project list (render_project_nested_lists): the projects under each parent in alphabetical order,
+  // children kept under theirs. Found by the classes core gives it on purpose: ul.projects for a list, li.root or
+  // li.child for a project, and div.root or div.child for the project's own name; a project's own list and name are
+  // the first of their kind inside it, before those of its children.
+  var ITEM = 'li.root, li.child', NAME = 'div.root, div.child';
   function sortTree(ul) {
-    var lis = Array.prototype.filter.call(ul.children, function (n) { return n.tagName === 'LI'; });
-    lis.forEach(function (li) { var sub = li.querySelector(':scope > ul'); if (sub) sortTree(sub); });
+    var lis = Array.prototype.filter.call(ul.children, function (n) { return n.matches(ITEM); });
+    lis.forEach(function (li) { var sub = li.querySelector('ul.projects'); if (sub) sortTree(sub); });
     var sorted = lis.slice().sort(function (a, b) {
-      var x = a.querySelector(':scope > div'), y = b.querySelector(':scope > div');
-      return compare(textOf(x || a), textOf(y || b));
+      var x = a.querySelector(NAME), y = b.querySelector(NAME);
+      if (!x || !y) return 0;
+      return compare(textOf(x), textOf(y));
     });
     sorted.forEach(function (li) { ul.appendChild(li); });
   }
+  // the items of a list of check boxes: the nearest element that holds every box, and of its children the ones that
+  // hold a box. Whatever core wraps a box in (a label, a span, a div) goes with it. Exactly one box per item, else null
+  // and the list keeps core's order.
+  function itemsOf(boxes) {
+    if (boxes.length < 2) return null;
+    var box = boxes[0].parentElement;
+    while (box && !boxes.every(function (b) { return box.contains(b); })) box = box.parentElement;
+    if (!box) return null;
+    var items = Array.prototype.filter.call(box.children, function (c) { return boxes.some(function (b) { return c.contains(b); }); });
+    if (items.length !== boxes.length) return null;
+    return { box: box, items: items };
+  }
   function sorts(root) {
     // a tracker's projects, a custom field's projects
-    root.querySelectorAll('#tracker_project_ids > ul.projects.root, #custom_field_project_ids > ul.projects.root').forEach(function (ul) {
+    root.querySelectorAll('#tracker_project_ids ul.projects.root, #custom_field_project_ids ul.projects.root').forEach(function (ul) {
       if (ul.dataset.gkCoreStuffSorted) return;
       ul.dataset.gkCoreStuffSorted = '1';
       sortTree(ul);
     });
-    // a tracker's custom fields
-    root.querySelectorAll('input[name="tracker[custom_field_ids][]"][type=checkbox]').forEach(function (cb) {
-      var p = cb.closest('p');
-      if (!p || p.dataset.gkCoreStuffSorted) return;
-      p.dataset.gkCoreStuffSorted = '1';
-      sortItems(Array.prototype.filter.call(p.querySelectorAll(':scope > label'), function (l) { return l.querySelector('input[type=checkbox]'); }));
-    });
+    // a tracker's custom fields: found by the name core gives the boxes (the form's own parameter), never by the tags
+    // around them
+    var cfs = Array.prototype.slice.call(root.querySelectorAll('input[type=checkbox][name="tracker[custom_field_ids][]"]'));
+    var list = itemsOf(cfs);
+    if (list && !list.box.dataset.gkCoreStuffSorted) {
+      list.box.dataset.gkCoreStuffSorted = '1';
+      sortItems(list.items);
+    }
     root.querySelectorAll('[data-gk-sort]').forEach(function (box) {
       if (box.dataset.gkCoreStuffSorted) return;
       box.dataset.gkCoreStuffSorted = '1';
       var items = box.querySelectorAll(':scope > [data-gk-sort-item]');
-      if (!items.length) items = box.querySelectorAll(':scope > label');
+      if (!items.length) items = box.querySelectorAll(':scope > label'); // gk-r17 P2r: the labels of a list a plugin marks as its own with data-gk-sort, the plugin's markup and not core's
       sortItems(Array.prototype.slice.call(items));
     });
   }

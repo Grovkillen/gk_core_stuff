@@ -1,0 +1,9 @@
+--- a/app/views/issues/_subtasks.html.erb
++++ b/app/views/issues/_subtasks.html.erb
+@@ -1,5 +1,5 @@
+ <div class="contextual">
+-  <%= link_to_new_subtask(@issue) if User.current.allowed_to?(:manage_subtasks, @project) %>
++  <%= link_to(sprite_icon('add', l(:button_add)), url_for_new_subtask(@issue), :class => 'icon icon-add', :data => {:section_action => 'add'}) if User.current.allowed_to?(:manage_subtasks, @project) %>
+ </div>
+ 
+ <p class="section-heading">

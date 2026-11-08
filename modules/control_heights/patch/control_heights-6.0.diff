@@ -1,15 +1,72 @@
---- a/app/assets/stylesheets/application.css
-+++ b/app/assets/stylesheets/application.css
-@@ -625,6 +625,12 @@
-   background-color: #ddd;
- }
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -1126,6 +1126,69 @@
+   });
+ });
  
-+/* Fields and buttons that stand beside a submit button in the same box get the submit button's height */
-+:is(p, div, span, td, li, fieldset):has(> input[type="submit"], > button[type="submit"]) > :is(input:not([type="hidden"], [type="checkbox"], [type="radio"], [type="file"], [type="image"], [type="range"], [type="color"]), select:not([multiple]), button),
-+:is(p, div, span, td, li, fieldset):has(> input[type="submit"], > button[type="submit"]) > :is(label, span) > :is(input:not([type="hidden"], [type="checkbox"], [type="radio"], [type="file"], [type="image"], [type="range"], [type="color"]), select:not([multiple]), button) {
-+  min-block-size: 28px;
++// The buttons and fields of one form that stand side by side on one line get the height of the highest of them.
++// The controls are grouped by what the browser shows, never by the tags around them: the form a control belongs
++// to, the line its middle stands on, and a gap of at most 24 pixels to the next control on that line. Only
++// min-height is set (with border-box, so that padding is not added). Parts a click opens are measured then.
++function setupControlHeights() {
++  var controls = 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=image])' +
++                 ':not([type=file]):not([type=range]):not([type=color]), select:not([multiple]), button';
++  var gap = 24;
++  function even(els) {
++    if (els.length < 2) return;
++    els.forEach(function(el){ el.style.minHeight = ''; });
++    var heights = els.map(function(el){ return el.getBoundingClientRect().height; });
++    var highest = Math.max.apply(null, heights);
++    if (Math.min.apply(null, heights) >= highest - 0.5) return;
++    els.forEach(function(el, i){
++      if (heights[i] < highest - 0.5) {
++        el.style.boxSizing = 'border-box';
++        el.style.minHeight = highest + 'px';
++      }
++    });
++  }
++  var forms = new Map();
++  $(controls).each(function(i, el){
++    if (el.offsetHeight <= 0) return true;
++    var form = el.form || null;
++    if (!forms.has(form)) forms.set(form, []);
++    forms.get(form).push(el);
++  });
++  forms.forEach(function(els){
++    // per line: the controls whose middles stand within a few pixels of each other
++    var lines = [];
++    els.forEach(function(el){
++      var rect = el.getBoundingClientRect(), middle = rect.top + rect.height / 2;
++      var line = lines.find(function(l){ return Math.abs(l.middle - middle) < 8; });
++      if (line) {
++        line.items.push({el: el, rect: rect});
++      } else {
++        lines.push({middle: middle, items: [{el: el, rect: rect}]});
++      }
++    });
++    // on a line, the controls side by side: a wider gap starts another group
++    lines.forEach(function(line){
++      line.items.sort(function(a, b){ return a.rect.left - b.rect.left; });
++      var run = [];
++      line.items.forEach(function(item, i){
++        if (i > 0 && item.rect.left - line.items[i - 1].rect.right > gap) {
++          even(run);
++          run = [];
++        }
++        run.push(item.el);
++      });
++      even(run);
++    });
++  });
 +}
++var controlHeightsTimer = null;
++$(document).ready(setupControlHeights);
++$(document).on('ajaxComplete', setupControlHeights);
++document.addEventListener('click', function(){
++  clearTimeout(controlHeightsTimer);
++  controlHeightsTimer = setTimeout(setupControlHeights, 80);
++}, true);
 +
- input[type="text"]:focus, input[type="text"]:active,
- input[type="password"]:focus, input[type="password"]:active,
- input[type="date"]:focus, input[type="date"]:active,
+ function keepAnchorOnSignIn(form){
+   var hash = decodeURIComponent(self.document.location.hash);
+   if (hash) {

@@ -1,0 +1,40 @@
+--- a/app/views/settings/_repositories.html.erb
++++ b/app/views/settings/_repositories.html.erb
+@@ -5,9 +5,9 @@
+ <%= hidden_field_tag 'settings[enabled_scm][]', '' %>
+ <table>
+   <tr>
+-    <th></th>
+-    <th><%= l(:text_scm_command)         %></th>
+-    <th><%= l(:text_scm_command_version) %></th>
++    <th class="scm_name"></th>
++    <th class="scm_command"><%= l(:text_scm_command)         %></th>
++    <th class="scm_version"><%= l(:text_scm_command_version) %></th>
+   </tr>
+   <% Redmine::Scm::Base.all.collect do |choice| %>
+     <% scm_class = "Repository::#{choice}".constantize %>
+@@ -21,13 +21,13 @@
+           <%= text.to_s %>
+         </label>
+       </td>
+-      <td>
++      <td class="scm_command">
+         <% if enabled %>
+           <span class="icon <%= (scm_class.scm_available ? 'icon-ok' : 'icon-error') %>"></span>
+           <%= scm_class.scm_command %>
+         <% end %>
+       </td>
+-      <td>
++      <td class="scm_version">
+         <%= scm_class.scm_version_string if enabled %>
+       </td>
+     </tr>
+@@ -140,7 +140,7 @@
+   </tbody>
+ </table>
+ 
+-<p><%= submit_tag l(:button_save) %></p>
++<p><%= submit_tag l(:button_save), :data => {:form_action => 'save'} %></p>
+ <% end %>
+ 
+ <%= javascript_tag do %>

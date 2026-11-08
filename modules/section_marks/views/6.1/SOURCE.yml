@@ -1,0 +1,18 @@
+# core_views.ps1 08 (section_marks): ur redmine-6.1.6.zip och 08_section_marks.patch; ändras aldrig för hand
+zip: redmine-6.1.6.zip
+zip_sha256: 9fb1c4caf380db9b84bd9421f0964a58ad43d218e60841b0d8e263a436ceb792
+patch: 08_section_marks.patch
+patch_sha256: 5c340400d235a57982e892e0447e1b38c5e051b646cf795abff77a86f71877d0
+earlier_patches:
+  - patch: 01_layout.patch
+    patch_sha256: c5ae138b1bd3b3d98503c4d59eabafc702936b28556475432a3b088a62e12ffa
+views:
+  - path: app/views/issues/_relations.html.erb
+    sha256: ed5837e7169363c5a77de243af8a175bf8d8d0081a1f9d3899a97c8a0bb02641
+  - path: app/views/issues/_subtasks.html.erb
+    sha256: d5c79d4459c0f8405816463e97f1c5afa6ef43a51019f7dfd7d116a2c88643ff
+  - path: app/views/issues/show.html.erb
+    sha256: 8ee8149b0d86e02c1d2e95634a8a977f115a86fb6afb54cf72fbe3d2089d2d6b
+    own_hunk_sha256: a4ed59c30175db5a03f7a52c465dedcc194a5bcce1be627d90a0a2d59b6dfb41
+    earlier:
+      - step: '01'

@@ -1,3 +1,8 @@
 /* gk_core_stuff heading_badge: the badges after a page's heading (the issue's status, Private) stand in the middle of
-   the heading's capitals instead of core's 4 px lift */
-#content > h2.inline-block ~ .badge { inset-block-end: 2px; }
+   the heading's capitals instead of core's 4 px lift. The badges are known by the classes core gives them on
+   purpose (badge-status-open, badge-status-closed, badge-private) on the issue page (body.controller-issues.action-show),
+   outside the issue's box (div.issue) and its history (#history), where core uses the same classes for other things;
+   never by standing after the heading. A plugin's own page built like an issue's (GK Tags' tag page) opts in by
+   setting the class gk-heading-badge on its own badge. */
+.controller-issues.action-show #content :is(.badge-status-open, .badge-status-closed, .badge-private):not(.issue *, #history *),
+.badge.gk-heading-badge { inset-block-end: 2px; }

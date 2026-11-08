@@ -1,0 +1,11 @@
+--- a/app/views/issues/_form.html.erb
++++ b/app/views/issues/_form.html.erb
+@@ -41,7 +41,7 @@
+                    },
+                    :no_label => true %>
+   <% end %>
+-  <%= link_to_function content_tag(:span, sprite_icon('edit', l(:button_edit)), :class => 'icon icon-edit'), '$(this).hide(); $("#issue_description_and_toolbar").show()' unless @issue.new_record? %>
++  <%= link_to_function content_tag(:span, sprite_icon('edit', l(:button_edit)), :class => 'icon icon-edit'), '$(this).hide(); $("#issue_description_and_toolbar").show()', :id => 'issue_description_edit_link' unless @issue.new_record? %>
+ </p>
+ <%= wikitoolbar_for 'issue_description', preview_issue_path(:project_id => @issue.project, :issue_id => @issue.id) %>
+ <% end %>

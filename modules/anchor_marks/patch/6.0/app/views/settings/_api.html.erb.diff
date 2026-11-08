@@ -1,0 +1,9 @@
+--- a/app/views/settings/_api.html.erb
++++ b/app/views/settings/_api.html.erb
+@@ -6,5 +6,5 @@
+ <p><%= setting_check_box :jsonp_enabled %></p>
+ </div>
+ 
+-<%= submit_tag l(:button_save) %>
++<%= submit_tag l(:button_save), :data => {:form_action => 'save'} %>
+ <% end %>

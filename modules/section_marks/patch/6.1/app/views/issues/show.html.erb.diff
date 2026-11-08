@@ -1,0 +1,46 @@
+--- a/app/views/issues/show.html.erb
++++ b/app/views/issues/show.html.erb
+@@ -93,12 +93,12 @@
+ 
+ <% if @issue.description? %>
+ <hr />
+-<div class="description" data-controller="quote-reply">
++<div class="description" data-controller="quote-reply" data-section="description">
+   <div class="contextual">
+   <%= quote_reply_button(url: quoted_issue_path(@issue)) if @issue.notes_addable? %>
+   </div>
+ 
+-  <p><strong><%=l(:field_description)%></strong></p>
++  <p class="section-heading"><strong><%=l(:field_description)%></strong></p>
+   <div id="issue_description_wiki" class="wiki" data-quote-reply-target="content">
+   <%= textilizable @issue, :description, :attachments => @issue.attachments %>
+   </div>
+@@ -106,8 +106,10 @@
+ <% end %>
+ <% if @issue.attachments.any? %>
+   <hr />
+-  <p><strong><%=l(:label_attachment_plural)%></strong></p>
++  <div data-section="attachments">
++  <p class="section-heading"><strong><%=l(:label_attachment_plural)%></strong></p>
+   <%= link_to_attachments @issue, :thumbnails => true %>
++  </div>
+ <% end %>
+ 
+ <%= render_full_width_custom_fields_rows(@issue) %>
+@@ -116,14 +118,14 @@
+ 
+ <% if !@issue.leaf? || User.current.allowed_to?(:manage_subtasks, @project) %>
+ <hr />
+-<%= tag.div id: 'issue_tree', class: { 'with-related-issues-table-headers': Setting.display_related_issues_table_headers? } do %>
++<%= tag.div id: 'issue_tree', class: { 'with-related-issues-table-headers': Setting.display_related_issues_table_headers? }, data: { section: 'subtasks' } do %>
+   <%= render :partial => 'subtasks' %>
+ <% end %>
+ <% end %>
+ 
+ <% if @relations.present? || User.current.allowed_to?(:manage_issue_relations, @project) %>
+ <hr />
+-<%= tag.div id: 'relations', class: { 'with-related-issues-table-headers': Setting.display_related_issues_table_headers? } do %>
++<%= tag.div id: 'relations', class: { 'with-related-issues-table-headers': Setting.display_related_issues_table_headers? }, data: { section: 'relations' } do %>
+   <%= render :partial => 'relations' %>
+ <% end %>
+ <% end %>

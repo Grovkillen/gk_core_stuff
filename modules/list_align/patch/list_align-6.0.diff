@@ -1,13 +1,17 @@
 --- a/app/assets/javascripts/application.js
 +++ b/app/assets/javascripts/application.js
-@@ -1174,6 +1174,50 @@
+@@ -1174,6 +1174,51 @@
    });
  }
  
 +// A list heading follows its column: when all the column's cells stand at the start (or all at the end), the
-+// heading is set the same way; a column of centred or mixed cells keeps the centred heading. A column of
-+// descriptions or long texts reads from the start, its cells and its heading.
++// heading is set the same way; a column of centred or mixed cells keeps the centred heading. A column is known by
++// the class its heading and its cells share (QueriesHelper#column_header and the column's css_classes), never by
++// its place in the row or its words; a heading without a class is left as it is. A column of descriptions or
++// texts (description, last_notes, comments and the custom field formats string, text and link) reads from the
++// start, its cells and its heading.
 +function setupListHeaderAlignment() {
++  var texts = ['description', 'last_notes', 'comments', 'string', 'text', 'link'];
 +  function side(el) {
 +    var style = window.getComputedStyle(el);
 +    var rtl = style.direction === 'rtl';
@@ -18,26 +22,23 @@
 +  $('table.list').each(function(i, table){
 +    if ($(table).data('header-aligned')) return true;
 +    $(table).data('header-aligned', true);
-+    var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
-+    if (!head) return true;
-+    // a heading row with spans does not line up with the cells by index
-+    if ($(head.cells).filter(function(){ return this.colSpan > 1; }).length > 0) return true;
-+    var count = head.cells.length;
-+    var rows = $(table.tBodies).children('tr').filter(function(){ return this.cells.length === count; }).get();
-+    if (rows.length === 0) return true;
-+    var sample = rows.slice(0, 8);
-+    $(head.cells).each(function(index, th){
-+      var texts = sample.map(function(row){ return $.trim(row.cells[index].textContent); }).filter(Boolean);
-+      var length = texts.reduce(function(sum, text){ return sum + text.length; }, 0);
-+      var longText = texts.length > 0 && length / texts.length > 40;
-+      if (longText ||sample.some(function(row){ return $(row.cells[index]).hasClass('description'); })) {
-+        rows.forEach(function(row){ row.cells[index].style.textAlign = 'start'; });
++    $(table).children('thead').find('th[class]').each(function(j, th){
++      var key = th.classList[0];
++      if (!key) return true;
++      // the column's cells: the body's cells with the heading's class
++      var cells = $(table).children('tbody').children('tr').children('td').filter(function(){
++        return $(this).hasClass(key);
++      });
++      if (cells.length === 0) return true;
++      if (texts.some(function(text){ return $(th).hasClass(text); })) {
++        cells.css('text-align', 'start');
 +        th.style.textAlign = 'start';
 +        return true;
 +      }
 +      if (side(th) !== 'center') return true;
-+      var sides = sample.filter(function(row){ return $.trim(row.cells[index].textContent) !== ''; })
-+                        .map(function(row){ return side(row.cells[index]); });
++      // an empty cell says nothing about its column
++      var sides = cells.slice(0, 8).filter(function(){ return $.trim(this.textContent) !== ''; })
++                       .map(function(){ return side(this); }).get();
 +      if (sides.length === 0 || sides[0] === 'center') return true;
 +      if (sides.every(function(s){ return s === sides[0]; })) {
 +        th.style.textAlign = sides[0];

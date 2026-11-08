@@ -1,0 +1,94 @@
+# config/registrations.yml: vad pluginet lägger i de gemensamma lagren.
+# Tomma listor betyder ingenting där; nycklarna
+# får inte saknas. Fylls när pluginet byggs, ur manifestets Registreringar.
+permissions: []
+menu: []
+drawer: []
+notices: []
+banners: []
+waves: []
+surfaces: []
+color_roles:
+  - {key: progress-text, group: core-stuff, label: label_gk_core_stuff_role_progress_text}   # the value as text on a progress bar
+  - {key: progress-plate, group: core-stuff, label: label_gk_core_stuff_role_progress_plate}   # the plate behind that text, and the glow round it without the plate
+records:
+  targets: []
+  note_kinds: []
+  event_kinds: []
+  link_kinds: []
+strings:
+  terms: []
+text_levels: []
+templates:
+  kinds: []
+scenario_steps:         # scenarios: steget core_stuff (looks:, ampm:) och kontrollerna cst_*
+  - {key: core_stuff, order: 20}
+corners: []
+jobs: []
+folds: []
+copies: []
+view_states: []
+decorations: []
+content_transforms: []
+locked: []
+ribbons: []
+forms: []
+toolbar: []
+timeline: []
+triggers: []
+trigger_actions: []
+gis_layers: []
+gis_columns: []
+appearances: {}
+access_items: []
+disk_areas: []
+revisioned: []
+personal: []
+features: []
+reasons: []
+appearance_settings:    # records AppearanceSettings (Looks.declare_appearances!, looks.rb): every look and the three modules that change how core's pages read; off from the start, and off without records
+  - {key: core_stuff.sidebar_spacing, group: instance, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_sidebar_spacing, help: text_gk_core_stuff_sidebar_spacing_info}
+  - {key: core_stuff.menu_icons, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_menu_icons, help: text_gk_core_stuff_menu_icons_info}
+  - {key: core_stuff.footer_version, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_footer_version, help: text_gk_core_stuff_footer_version_info}
+  - {key: core_stuff.list_badge, group: lists, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_list_badge, help: text_gk_core_stuff_list_badge_info}
+  - {key: core_stuff.list_hash, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_list_hash, help: text_gk_core_stuff_list_hash_info}
+  - {key: core_stuff.list_checkbox, group: lists, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_list_checkbox, help: text_gk_core_stuff_list_checkbox_info}
+  - {key: core_stuff.block_icons, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_block_icons, help: text_gk_core_stuff_block_icons_info}
+  - {key: core_stuff.list_align, group: lists, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_list_align, help: text_gk_core_stuff_list_align_info}
+  - {key: core_stuff.ajax_indicator, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_ajax_indicator, help: text_gk_core_stuff_ajax_indicator_info}
+  - {key: core_stuff.done_ratio_text, group: lists, modes: ["off", forced], default: "off", proposal: "off", values: [done_ratio_text_position, done_ratio_text_zero, done_ratio_text_full, done_ratio_text_plate], label: label_gk_core_stuff_done_ratio_text, help: text_gk_core_stuff_done_ratio_text_info}
+  - {key: core_stuff.time_ampm_nbsp, group: lists, modes: ["off", forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_time_ampm_nbsp, help: text_gk_core_stuff_time_ampm_nbsp_info}
+  - {key: core_stuff.heading_badge, group: issue, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_heading_badge, help: text_gk_core_stuff_heading_badge_info}
+  - {key: core_stuff.label_rows, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_label_rows, help: text_gk_core_stuff_label_rows_info}
+  - {key: core_stuff.warning_balance, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_warning_balance, help: text_gk_core_stuff_warning_balance_info}
+  - {key: core_stuff.field_widths, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_field_widths, help: text_gk_core_stuff_field_widths_info}
+  - {key: core_stuff.settings_widths, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_settings_widths, help: text_gk_core_stuff_settings_widths_info}
+  - {key: core_stuff.control_heights, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_control_heights, help: text_gk_core_stuff_control_heights_info}
+  - {key: core_stuff.submit_word, group: forms, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_submit_word, help: text_gk_core_stuff_submit_word_info}
+  - {key: core_stuff.native_texts, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_native_texts, help: text_gk_core_stuff_native_texts_info}
+  - {key: core_stuff.list_sort, group: forms, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_list_sort, help: text_gk_core_stuff_list_sort_info}
+  - {key: core_stuff.external_links, group: text, modes: ["off", optional, forced], default: "off", proposal: forced, values: [place_field_link, place_url_pattern, place_project_homepage, place_people, place_icons], label: label_gk_core_stuff_external_links, help: text_gk_core_stuff_external_links_info}   # the values are flags, on until switched off: where outside formatted text GK GUI Stuff also gives a link the look (ExternalLinks, modules/external_links/module.rb); GK GUI Stuff only reads them
+  - {key: core_stuff.scm_table, group: admin, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_scm_table, help: text_gk_core_stuff_scm_table_info}
+footprints:             # records AppearanceSettings (footprint: and applies:, Looks::FOOTPRINTS in looks.rb): what a look changes on the pages; a key not here is not described yet
+  core_stuff.sidebar_spacing: {applies: [script], footprint: {anchors: ['#sidebar']}}
+  core_stuff.menu_icons: {applies: [script], footprint: {anchors: ['#context-menu a.icon'], elements: [core_context_menu]}}
+  core_stuff.footer_version: {applies: [server], footprint: {anchors: ['#footer'], pages: [all]}}
+  core_stuff.list_badge: {applies: [script], footprint: {anchors: ['table.list .badge'], elements: [core_badges, core_tables]}}
+  core_stuff.list_checkbox: {applies: [script], footprint: {anchors: ['table.list td.checkbox'], elements: [core_tables]}}
+  core_stuff.list_hash: {applies: [script], footprint: {anchors: ['table.list tr.issue'], elements: [core_tables]}}
+  core_stuff.block_icons: {applies: [script], footprint: {anchors: ['.icon-sort-handle']}}
+  core_stuff.list_align: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="list_align"]'], elements: [core_tables]}}
+  core_stuff.ajax_indicator: {applies: [script], footprint: {anchors: ['table.list'], elements: [core_tables]}}
+  core_stuff.done_ratio_text: {applies: [server], footprint: {anchors: ['[data-gk-core-stuff-effect~="done_ratio_text"]'], elements: [core_tables]}}
+  core_stuff.time_ampm_nbsp: {applies: [server], footprint: {pages: [all]}}
+  core_stuff.heading_badge: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="heading_badge"]', '.badge.gk-heading-badge'], elements: [core_badges]}}
+  core_stuff.label_rows: {applies: [script], footprint: {anchors: ['.tabular'], elements: [core_forms]}}
+  core_stuff.warning_balance: {applies: [script], footprint: {anchors: ['.nodata', '.warning']}}
+  core_stuff.field_widths: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="field_widths"]'], elements: [core_forms]}}
+  core_stuff.settings_widths: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="settings_widths"]'], elements: [core_forms]}}
+  core_stuff.control_heights: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="control_heights"]'], elements: [core_forms, core_buttons]}}
+  core_stuff.submit_word: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="submit_word"]'], elements: [core_buttons]}}
+  core_stuff.native_texts: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="native_texts"]', '.gk-core-stuff-file'], elements: [core_forms]}}
+  core_stuff.list_sort: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-sorted]', '[data-gk-sort]'], elements: [core_forms]}}
+  core_stuff.external_links: {applies: [script], footprint: {anchors: ['.gk-link-external']}}
+  core_stuff.scm_table: {applies: [script], footprint: {anchors: ['th.scm_version', 'td.scm_name'], elements: [core_tables]}}

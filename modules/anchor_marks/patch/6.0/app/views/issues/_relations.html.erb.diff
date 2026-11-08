@@ -1,0 +1,10 @@
+--- a/app/views/issues/_relations.html.erb
++++ b/app/views/issues/_relations.html.erb
+@@ -1,6 +1,6 @@
+ <div class="contextual">
+ <% if User.current.allowed_to?(:manage_issue_relations, @project) %>
+-  <%= toggle_link l(:button_add), 'new-relation-form', {:focus => 'relation_issue_to_id'} %>
++  <%= toggle_link l(:button_add), 'new-relation-form', {:focus => 'relation_issue_to_id', :data => {:section_action => 'add'}} %>
+ <% end %>
+ </div>
+ 

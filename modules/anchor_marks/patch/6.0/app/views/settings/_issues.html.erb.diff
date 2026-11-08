@@ -1,0 +1,9 @@
+--- a/app/views/settings/_issues.html.erb
++++ b/app/views/settings/_issues.html.erb
+@@ -62,5 +62,5 @@
+   </p>
+ </fieldset>
+ 
+-<%= submit_tag l(:button_save) %>
++<%= submit_tag l(:button_save), :data => {:form_action => 'save'} %>
+ <% end %>

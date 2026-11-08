@@ -1,0 +1,1 @@
+This series has the Gantt chart's view controls in app/views/gantts/show.html.erb, not in a gantts/_query_form partial; the marks are added there by this series' own block.

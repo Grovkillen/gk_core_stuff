@@ -65,6 +65,8 @@
       if (el.dataset.gkCoreStuffNt || !el.willValidate) return;
       el.dataset.gkCoreStuffNt = '1';
       check(el);
+      // a field with a rule of its own can show the message: the place of this look, whether it is filled in now or not
+      if (el.required || el.pattern || el.type === 'email' || el.type === 'url' || el.hasAttribute('minlength') || el.hasAttribute('min') || el.hasAttribute('max')) G.mark(el, 'native_texts');
       ['input', 'change', 'invalid'].forEach(function (k) { el.addEventListener(k, function () { check(el); }); });
     });
     root.querySelectorAll('input[type=file]').forEach(fileField);

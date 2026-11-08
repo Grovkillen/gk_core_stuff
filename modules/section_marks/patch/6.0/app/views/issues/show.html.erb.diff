@@ -1,0 +1,46 @@
+--- a/app/views/issues/show.html.erb
++++ b/app/views/issues/show.html.erb
+@@ -87,12 +87,12 @@
+ 
+ <% if @issue.description? %>
+ <hr />
+-<div class="description">
++<div class="description" data-section="description">
+   <div class="contextual">
+   <%= quote_reply(quoted_issue_path(@issue), '#issue_description_wiki') if @issue.notes_addable? %>
+   </div>
+ 
+-  <p><strong><%=l(:field_description)%></strong></p>
++  <p class="section-heading"><strong><%=l(:field_description)%></strong></p>
+   <div id="issue_description_wiki" class="wiki">
+   <%= textilizable @issue, :description, :attachments => @issue.attachments %>
+   </div>
+@@ -100,8 +100,10 @@
+ <% end %>
+ <% if @issue.attachments.any? %>
+   <hr />
+-  <p><strong><%=l(:label_attachment_plural)%></strong></p>
++  <div data-section="attachments">
++  <p class="section-heading"><strong><%=l(:label_attachment_plural)%></strong></p>
+   <%= link_to_attachments @issue, :thumbnails => true %>
++  </div>
+ <% end %>
+ 
+ <%= render_full_width_custom_fields_rows(@issue) %>
+@@ -110,14 +112,14 @@
+ 
+ <% if !@issue.leaf? || User.current.allowed_to?(:manage_subtasks, @project) %>
+ <hr />
+-<div id="issue_tree">
++<div id="issue_tree" data-section="subtasks">
+ <%= render :partial => 'subtasks' %>
+ </div>
+ <% end %>
+ 
+ <% if @relations.present? || User.current.allowed_to?(:manage_issue_relations, @project) %>
+ <hr />
+-<div id="relations">
++<div id="relations" data-section="relations">
+ <%= render :partial => 'relations' %>
+ </div>
+ <% end %>

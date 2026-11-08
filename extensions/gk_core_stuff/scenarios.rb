@@ -6,7 +6,8 @@ module GkCoreStuff
   #   cst_done_ratio_text: <right|over|under|hidden|none>, value: 40, position:, zero:, full:, enabled:
   #     the issue list's % done cell for an issue with that value (column_content, as core's list draws it)
   #   cst_done_ratio_text_cf: the same for a custom field of format Progress bar, where core has it (compat)
-  #   cst_done_ratio_plain: <value>: progress_bar without text: (the issue page, versions) is core's own output
+  #   cst_done_ratio_plain: <value>: progress_bar without text: (the issue page, versions) is exactly what the method
+  #     under the module gives (core's own), compared as a whole
   module ScenarioRender
     module_function
 
@@ -59,6 +60,36 @@ module GkCoreStuff
   def self.register_scenarios!
     return unless defined?(::GkScenarios::Expect)
 
+    # A new installation has every look and AM/PM off, so a scenario says which it uses, as gui_stuff's step
+    # does for its modules: core_stuff: { looks: { list_badge: optional, submit_word: forced }, ampm: true }. A look
+    # gets its level (off, optional or forced) as its appearance setting in GK Records' register; ampm: true or false
+    # sets AM/PM (time_ampm_nbsp) forced or off there. One save with the reason scenario, an event per changed setting.
+    # A key that is not a look, a level that is none of the three, or no register, stops Skapa.
+    ::GkScenarios::Steps.register('core_stuff', plugin: :gk_core_stuff, order: 20) do |ctx|
+      data = ctx.scenario.data['core_stuff'] || {}
+      want = {}
+      (data['looks'] || {}).each do |k, v|
+        raise ::GkScenarios::Error, "core_stuff: looks: #{k} is not a look of GK Core Stuff" unless Looks.find(k)
+
+        # YAML reads a bare off as false
+        lvl = v == false ? 'off' : v.to_s
+        raise ::GkScenarios::Error, "core_stuff: looks: #{k}: #{lvl} is not off, optional or forced" unless Looks::MODES.include?(lvl)
+
+        want[Looks.row_key(k)] = lvl
+      end
+      want[Looks.row_key('time_ampm_nbsp')] = data['ampm'] == true || data['ampm'].to_s == 'on' ? 'forced' : 'off' if data.key?('ampm')
+      next if want.empty?
+
+      register = GkCoreStuff.appearance_settings
+      raise ::GkScenarios::Error, 'core_stuff: the register of GK Records is not there' unless register
+
+      register.forget! # emptying the instance cleared the table behind the process's memory
+      before = want.keys.to_h { |k| [k, register.mode(k)] }
+      changed = register.save!(modes: want, reason: 'scenario')
+      changed.each { |k| ctx.remark("#{k}: #{before[k]} -> #{want[k]}") }
+      ctx.note(:core_stuff_looks, 'looks', nil, changed.any?)
+    end
+
     ::GkScenarios::Expect.register('cst_done_ratio_text') do |_ctx, e|
       want = ScenarioRender.want(e, 'cst_done_ratio_text')
       html = DoneRatioText.with(**ScenarioRender.overrides(e)) { ScenarioRender.list_cell(e['value'].to_i) }
@@ -77,11 +108,18 @@ module GkCoreStuff
       end
     end
 
+    # The module's progress_bar, given a call without text:, answers exactly what the method under it answers (core's,
+    # or the next plugin's): compared as a whole, so nothing in core's markup is searched for
     ::GkScenarios::Expect.register('cst_done_ratio_plain') do |_ctx, e|
       v = e['cst_done_ratio_plain'].to_i
-      html = ScenarioRender.render('<%= progress_bar(v, legend: "#{v}%") %>', v: v)
-      got = { 'wrapped' => html.include?('progress-with-text'), 'legend' => html.include?(%(<p class="percent">#{v}%</p>)) }
-      want = { 'wrapped' => false, 'legend' => true }
+      own = ::ApplicationHelper.instance_method(:progress_bar)
+      own = own.super_method while own && own.owner != DoneRatioText::ApplicationHelperPatch
+      below = own ? own.super_method : ScenarioRender.core_method(::ApplicationHelper, :progress_bar)
+      tpl = '<%= m.bind_call(self, v, legend: "#{v}%") %>'
+      got_html = ScenarioRender.render(tpl, m: own || below, v: v)
+      core_html = ScenarioRender.render(tpl, m: below, v: v)
+      got = { 'same_as_below' => got_html == core_html }
+      want = { 'same_as_below' => true }
       { 'ok' => got == want, 'want' => want.to_json, 'got' => got.to_json }
     end
 
@@ -196,22 +234,26 @@ module GkCoreStuff
       { 'ok' => failed.empty?, 'want' => checks.map(&:first).join(', '), 'got' => failed.empty? ? seen.join(', ') : "not: #{failed.join(', ')}" }
     end
 
-    # footer_version: cst_footer_version: on | off. The head tags a page gets, as the hook gives them, with the module
-    # on or off for the check only (FooterVersion.with): on gives Redmine's version (major.minor.tiny) and the script,
-    # off gives nothing. With the module's patch in core the module stands aside, and the check says so. Nothing written.
+    # footer_version: cst_footer_version: on | off. What the footer hook draws right after the link to Redmine
+    # (view_layouts_base_footer_powered_by_after, rendered with call_hook as layouts/base does), with the module on or
+    # off for the check only (FooterVersion.with): on gives a space and Redmine's version (major.minor.tiny), off gives
+    # nothing (whatever another plugin draws on the hook). On also needs the hook to be called in layouts/base (GkCoreStuff.hook?); where it is not, the version
+    # is not shown and the check says so. With the module's patch in core the module stands aside, and the check says
+    # so. Nothing written.
     ::GkScenarios::Expect.register('cst_footer_version') do |_ctx, e|
       want = e['cst_footer_version'].to_s
       next({ 'ok' => false, 'want' => 'cst_footer_version: on | off', 'got' => want }) unless %w[on off].include?(want)
       next({ 'ok' => true, 'want' => want, 'got' => 'core has the setting' }) if GkCoreStuff.in_core?(:footer_version)
 
-      # without the comments development mode puts around a rendered template
-      html = FooterVersion.with(want == 'on') { ScenarioRender.render('<%= GkCoreStuff::FooterVersion.head_tags(self) %>', {}) }.gsub(/<!--.*?-->/m, '')
       v = FooterVersion.version
-      got = if html.include?(%(data-version="#{v}")) && html.include?('gk_core_stuff_footer_version') then "on #{v}"
-            elsif html.strip.empty? then 'off'
-            else html.strip[0, 80]
-            end
-      { 'ok' => got == (want == 'on' ? "on #{v}" : 'off'), 'want' => want == 'on' ? "on #{v}" : 'off', 'got' => got }
+      exp = want == 'on' ? "on #{v}" : 'off'
+      next({ 'ok' => false, 'want' => exp, 'got' => "#{FooterVersion::HOOK} not called in layouts/base" }) if want == 'on' && !GkCoreStuff.hook?(FooterVersion::HOOK, view: 'layouts/base')
+
+      # without the comments development mode puts around a rendered template
+      html = FooterVersion.with(want == 'on') { ScenarioRender.render("<%= call_hook(:#{FooterVersion::HOOK}) %>", {}) }.gsub(/<!--.*?-->/m, '')
+      # another plugin may draw on the same hook: only whether the version follows a space counts
+      got = html.include?(" #{v}") ? "on #{v}" : 'off'
+      { 'ok' => got == exp, 'want' => exp, 'got' => got }
     end
 
     # settings_tabs: cst_settings_tabs: <tab name>, project:, as:, equals: (true when left out). The project's settings
@@ -242,11 +284,16 @@ module GkCoreStuff
       { 'ok' => failed.empty?, 'want' => checks.map(&:first).join(', '), 'got' => failed.empty? ? names.(out[:all]).join(', ') : "not: #{failed.join(', ')}" }
     end
 
-    # the hooks in core's views (layout_hooks, action_menus, form_hooks, list_hooks): cst_view_hooks: <module>. The
-    # module has views for the running series, and Rails finds the module's copy of a core view no plugin overrides
-    # (the probe below), so the hooks in it are called. Nothing written.
+    # the hooks in core's views (layout_hooks, action_menus, form_hooks, list_hooks) and the issue page's marks
+    # (section_marks): cst_view_hooks: <module>. The module has views for the running series, and Rails finds the
+    # module's copy of a core view no plugin overrides (the probe below), so the hooks or marks in it are on the page.
+    # For section_marks the probe also shows that its issues/show stands before layout_hooks' copy. Nothing written.
+    # anchor_marks (step 09, marks) and more_view_hooks (step 10, hooks) are probed on a view only they change. A copy
+    # of a later step built on the module's (layouts/base from more_view_hooks for layout_hooks) carries its lines and
+    # counts (GkCoreStuff.carrying_dirs).
     view_probes = { 'layout_hooks' => ['layouts/base', false], 'action_menus' => ['news/index', false],
-                    'form_hooks' => ['versions/form', true], 'list_hooks' => ['issues/list', true] }
+                    'form_hooks' => ['versions/form', true], 'list_hooks' => ['issues/list', true], 'section_marks' => ['issues/show', false],
+                    'anchor_marks' => ['workflows/form', true], 'more_view_hooks' => ['my/account', false] }
     ::GkScenarios::Expect.register('cst_view_hooks') do |_ctx, e|
       name = e['cst_view_hooks'].to_s
       next({ 'ok' => false, 'want' => "one of #{view_probes.keys.join(', ')}", 'got' => name }) unless view_probes.key?(name)
@@ -256,9 +303,20 @@ module GkCoreStuff
       next({ 'ok' => false, 'want' => "#{name}: views for the running series", 'got' => 'none' }) unless dir
 
       path, partial = view_probes[name]
-      found = ::ActionController::Base.new.lookup_context.find_template(path, [], partial).identifier.to_s
-      ours = File.expand_path(found).start_with?(File.expand_path(dir))
-      { 'ok' => ours, 'want' => "#{path} from #{name}'s views", 'got' => ours ? 'yes' : found }
+      ours = GkCoreStuff.view_carries?(name, path, partial: partial)
+      found = ours ? 'yes' : ::ActionController::Base.new.lookup_context.find_template(path, [], partial).identifier.to_s
+      { 'ok' => ours, 'want' => "#{path} from #{name}'s views", 'got' => found }
+    end
+
+    # the public question other plugins ask: cst_hook: <hook>, view: (one of the views that call it), called: (true
+    # when left out). GkCoreStuff.hook? answers as a plugin gets it when a page is drawn. Nothing written.
+    ::GkScenarios::Expect.register('cst_hook') do |_ctx, e|
+      hook = e['cst_hook'].to_s
+      next({ 'ok' => false, 'want' => 'cst_hook: <view hook>', 'got' => hook }) if hook.empty?
+
+      want = e.key?('called') ? e['called'] != false && e['called'].to_s != 'false' : true
+      got = GkCoreStuff.hook?(hook, view: e['view'])
+      { 'ok' => got == want, 'want' => "#{hook}#{e['view'] ? " in #{e['view']}" : ''} called: #{want}", 'got' => got.to_s }
     end
 
     # journal_details: cst_journal_details: <issue>, property:, prop_key:, as:. The issue's history line of that

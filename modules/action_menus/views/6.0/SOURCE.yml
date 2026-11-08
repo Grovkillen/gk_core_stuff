@@ -1,8 +1,8 @@
-# core_views.ps1 04 (action_menus): ur redmine-6.0.11.zip och 04_action_menus.patch; ändras aldrig för hand
-zip: redmine-6.0.11.zip
-zip_sha256: ae219a5206b490fc0a4fa8353dd95d1d38ed3df512b08d10c17c14eab5977102
+# core_views.ps1 04 (action_menus): ur redmine-6.0.12.zip och 04_action_menus.patch; ändras aldrig för hand
+zip: redmine-6.0.12.zip
+zip_sha256: 383eb661a6a91f9217d319e57e8fc8c64f7cfba5adf3929c398c03cc8a0bbe66
 patch: 04_action_menus.patch
-patch_sha256: 266575d0328a68a5d9162e4caca857e46242b7599ed13eab5d4611c89b64a9e1
+patch_sha256: e6a43ae9a982ea5569a19aefd49b0fe6b6eab961e40810aca072124424edb0d1
 views:
   - path: app/views/boards/show.html.erb
     sha256: 1cc40f7db52d8a6046d1d62b3ec06cda51dad05d898b4850dd1e1cb4b46bea1c

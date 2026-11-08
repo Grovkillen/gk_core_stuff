@@ -15,22 +15,35 @@ module GkCoreStuff
                view_layouts_base_content_top view_layouts_base_title_after view_layouts_base_footer_top
                view_layouts_base_footer_bottom view_issues_show_top view_issues_show_details_end
                view_issues_show_bottom].freeze
+    # The views that call each hook (GkCoreStuff.hook?); the title hook and the sidebar's top come from the helper
+    # methods, called only when core draws the module's layouts/base and users/edit (own_views?)
+    HOOK_VIEWS = {
+      view_layouts_base_header_top: %w[layouts/base], view_layouts_base_header_bottom: %w[layouts/base],
+      view_layouts_base_sidebar_top: %w[layouts/base], view_layouts_base_content_top: %w[layouts/base],
+      view_layouts_base_title_after: %w[layouts/base users/edit], view_layouts_base_footer_top: %w[layouts/base],
+      view_layouts_base_footer_bottom: %w[layouts/base], view_issues_show_top: %w[issues/show],
+      view_issues_show_details_end: %w[issues/show], view_issues_show_bottom: %w[issues/show]
+    }.freeze
+    # layouts/base stands for the title helper, which calls the hook only when own_views? (both views carry the step);
+    # users/edit calls it itself and needs only itself (GkCoreStuff.register's hook_needs:)
+    HOOK_NEEDS = { view_layouts_base_title_after: { 'layouts/base' => %w[layouts/base users/edit] } }.freeze
 
     def self.views_dir = GkCoreStuff.series_views(:layout_hooks)
 
     # Whether core renders the module's own layouts/base and users/edit (not a plugin's copy, not core's): only then do
     # the title hook and the sidebar's top belong on the page. Core's layout never prints the sidebar's top, and core's
-    # users/edit puts the avatar at the title's last space, which would land inside the hook's output. Asked when a
-    # page is drawn, after every plugin has registered its views, and kept.
+    # users/edit puts the avatar at the title's last space, which would land inside the hook's output (the module's own
+    # users/edit writes the heading as markup and calls the hook itself, so nothing is spliced). Asked when a
+    # page is drawn, after every plugin has registered its views, and kept. A copy of a later step built on this one
+    # (anchor_marks' and more_view_hooks' layouts/base) carries the same lines and counts as the module's own
+    # (GkCoreStuff.carrying_dirs).
     def self.own_views?
       return @own_views unless @own_views.nil?
 
-      dir = GkCoreStuff.series_dirs['layout_hooks']
       @own_views =
-        if dir.nil? then false
+        if GkCoreStuff.series_dirs['layout_hooks'].nil? then false
         else
-          ctx = ::ActionController::Base.new.lookup_context
-          %w[layouts/base users/edit].all? { |v| File.expand_path(ctx.find_template(v).identifier.to_s).start_with?(File.expand_path(dir)) }
+          %w[layouts/base users/edit].all? { |v| GkCoreStuff.view_carries?(:layout_hooks, v) }
         end
     rescue StandardError
       @own_views = false
@@ -53,7 +66,8 @@ module GkCoreStuff
   end
 
   # Always on, without a setting: the hooks are for other plugins and change nothing until one listens
-  register :layout_hooks, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:layout_hooks) }, always: true do
+  register :layout_hooks, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:layout_hooks) }, always: true,
+                          hooks: LayoutHooks::HOOK_VIEWS, hook_needs: LayoutHooks::HOOK_NEEDS do
     # the helper methods only together with the views: without them core's own layout is drawn
     if GkCoreStuff.prepend_series_views(:layout_hooks)
       ::ApplicationHelper.prepend(LayoutHooks::ApplicationHelperPatch) unless ::ApplicationHelper < LayoutHooks::ApplicationHelperPatch

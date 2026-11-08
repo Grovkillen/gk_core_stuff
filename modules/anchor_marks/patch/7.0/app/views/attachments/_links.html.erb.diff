@@ -1,0 +1,11 @@
+--- a/app/views/attachments/_links.html.erb
++++ b/app/views/attachments/_links.html.erb
+@@ -13,7 +13,7 @@
+ </div>
+ <table>
+ <% for attachment in attachments %>
+-<tr>
++<tr data-attachment-id="<%= attachment.id %>">
+   <td>
+     <%= link_to_attachment attachment, class: 'icon icon-attachment ', icon: icon_for_mime_type(attachment.content_type) -%>
+     <span class="size">(<%= number_to_human_size attachment.filesize %>)</span>

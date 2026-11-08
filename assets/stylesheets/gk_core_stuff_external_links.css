@@ -1,0 +1,48 @@
+/* gk_core_stuff external_links: the form of Feature #44691, with GK's colour. Core's external.png before the link gives
+   way to Tabler's external-link icon after it, as a mask, so that it scales with the font and is not read as part of
+   the link. An external link takes the colour role for external links (--gk-role-link-external, with a fallback when
+   GK GUI Stuff is missing) and a dotted underline; the icon takes the same colour. The empty ::after sits against the
+   last letter and the punctuation after it, so no line break comes between them; generated content without text is
+   not read by a screen reader. A link to the instance's own address carries gk-link-own (set by GK GUI Stuff) and is
+   drawn as an internal link: no colour, underline or icon. A link to an e-mail address (class email) gets core's
+   e-mail icon in core's grey. The icons are Tabler Icons (MIT, LICENSE_TABLER_ICONS.txt), as in core's sprite. */
+div.wiki a.external {
+  background-image: none;
+  padding-inline: 0;
+}
+div.wiki a.external:not(.gk-link-own) {
+  color: var(--gk-role-link-external, var(--oc-cyan-9, #0b7285));
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 0.15em;
+}
+div.wiki a.external:not(.gk-link-own)::after,
+div.wiki a.email::after {
+  content: "";
+  margin-inline-start: 0.1em;
+  padding-inline-start: 1em;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6'/%3E%3Cpath d='M11 13l9 -9'/%3E%3Cpath d='M15 4h5v5'/%3E%3C/svg%3E") no-repeat center / 1em;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6'/%3E%3Cpath d='M11 13l9 -9'/%3E%3Cpath d='M15 4h5v5'/%3E%3C/svg%3E") no-repeat center / 1em;
+}
+div.wiki a.external:not(.gk-link-own)::after {
+  background-color: var(--gk-role-link-external, var(--oc-cyan-9, #0b7285));
+}
+/* the e-mail icon keeps core's grey */
+div.wiki a.email::after {
+  background-color: var(--oc-gray-6, #868e96);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10'/%3E%3Cpath d='M3 7l9 6l9 -6'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10'/%3E%3Cpath d='M3 7l9 6l9 -6'/%3E%3C/svg%3E");
+}
+/* right to left: the arrow still points outward. Core's three right to left languages, also where <html> has no dir */
+html[dir="rtl"] div.wiki a.external:not(.gk-link-own)::after,
+html:lang(ar) div.wiki a.external:not(.gk-link-own)::after,
+html:lang(fa) div.wiki a.external:not(.gk-link-own)::after,
+html:lang(he) div.wiki a.external:not(.gk-link-own)::after {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h6a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6'/%3E%3Cpath d='M13 13l-9 -9'/%3E%3Cpath d='M9 4h-5v5'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h6a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6'/%3E%3Cpath d='M13 13l-9 -9'/%3E%3Cpath d='M9 4h-5v5'/%3E%3C/svg%3E");
+}
+/* print: the link without its mark */
+@media print {
+  div.wiki a.external:not(.gk-link-own)::after,
+  div.wiki a.email::after { content: none; }
+}

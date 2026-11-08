@@ -1,6 +1,6 @@
 --- a/app/assets/javascripts/application-legacy.js
 +++ b/app/assets/javascripts/application-legacy.js
-@@ -1432,7 +1432,101 @@
+@@ -1456,7 +1456,101 @@
    };
  }(jQuery));
  
@@ -608,10 +608,10 @@
 +  label_x_files_chosen: "%{count} files chosen"
 --- a/config/locales/it.yml
 +++ b/config/locales/it.yml
-@@ -1480,3 +1480,17 @@
-   label_alert_caution: Caution
-   label_alert_important: Important
-   field_ratio_interval: Ratio interval
+@@ -1474,3 +1474,17 @@
+   reaction_text_x_other_users:
+     one: "1 altro"
+     other: "%{count} altri"
 +  text_validation_value_missing: "Fill in the field."
 +  text_validation_value_missing_select: "Choose something in the list."
 +  text_validation_value_missing_checkbox: "Tick the box to go on."
@@ -628,7 +628,7 @@
 +  label_x_files_chosen: "%{count} files chosen"
 --- a/config/locales/ja.yml
 +++ b/config/locales/ja.yml
-@@ -1484,3 +1484,17 @@
+@@ -1485,3 +1485,17 @@
    label_alert_caution: 注意
    label_alert_important: 重要
    field_ratio_interval: 進捗率の間隔
@@ -988,10 +988,10 @@
 +  label_x_files_chosen: "%{count} files chosen"
 --- a/config/locales/sv.yml
 +++ b/config/locales/sv.yml
-@@ -1505,3 +1505,17 @@
-   label_alert_caution: Caution
-   label_alert_important: Important
-   field_ratio_interval: Ratio interval
+@@ -1504,3 +1504,17 @@
+   label_alert_caution: Se upp
+   label_alert_important: Viktigt
+   field_ratio_interval: "Intervall för \"% Klar\""
 +  text_validation_value_missing: "Fyll i fältet."
 +  text_validation_value_missing_select: "Välj något i listan."
 +  text_validation_value_missing_checkbox: "Kryssa i rutan för att fortsätta."

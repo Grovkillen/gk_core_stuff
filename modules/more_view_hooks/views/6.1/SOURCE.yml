@@ -1,0 +1,98 @@
+# core_views.ps1 10 (more_view_hooks): ur redmine-6.1.6.zip och 10_more_view_hooks.patch; ändras aldrig för hand
+zip: redmine-6.1.6.zip
+zip_sha256: 9fb1c4caf380db9b84bd9421f0964a58ad43d218e60841b0d8e263a436ceb792
+patch: 10_more_view_hooks.patch
+patch_sha256: e4d0a3ee89ab99b97574e7a1e62b5cb67164ce06dd42cf90cf6c507ac3e9cf44
+earlier_patches:
+  - patch: 01_layout.patch
+    patch_sha256: c5ae138b1bd3b3d98503c4d59eabafc702936b28556475432a3b088a62e12ffa
+  - patch: 04_action_menus.patch
+    patch_sha256: e6a43ae9a982ea5569a19aefd49b0fe6b6eab961e40810aca072124424edb0d1
+  - patch: 06_list_hooks.patch
+    patch_sha256: f933fe1393a4b251fe37ccaa61e6b3fab536079894d636eaf1277e38657ad58c
+  - patch: 08_section_marks.patch
+    patch_sha256: 5c340400d235a57982e892e0447e1b38c5e051b646cf795abff77a86f71877d0
+  - patch: 09_anchor_marks.patch
+    patch_sha256: 6acb8cd0f222c7c1ebb560037caa41ee534e4cf0a925b77a2295d379b30195cc
+views:
+  - path: app/views/documents/show.html.erb
+    sha256: ced78830c0e063d783baaa99b97d5a9d3f43aa0eaa65b05b22861eb254a05054
+    earlier:
+      - step: '04'
+  - path: app/views/issues/_list.html.erb
+    sha256: f3c20e5af85bceb947e2ed467e4e2f33e2f2579cdeef2fa635568562d6cc49af
+    earlier:
+      - step: '06'
+  - path: app/views/issues/index.html.erb
+    sha256: 0dc3581718d2b958fe9803a5b393bf9dad494136265c2636d5c58b59c1de1d6d
+    earlier:
+      - step: '04'
+  - path: app/views/issues/show.html.erb
+    sha256: 34e1732aa84807f08cc1cb9b843ea374ba2ae6d230a4ecb74fa4e2664ac162cb
+    earlier:
+      - step: '01'
+      - step: '08'
+        own_hunk_sha256: a4ed59c30175db5a03f7a52c465dedcc194a5bcce1be627d90a0a2d59b6dfb41
+      - step: '09'
+  - path: app/views/layouts/base.html.erb
+    sha256: 8c6c0a43c1f48f1196d08ca154d32e14851c0c3a89a85d441be3393090bf96e7
+    earlier:
+      - step: '01'
+        own_hunk_sha256: 29f62ba059f7665e29a69102d3a608cde249fdb23d26b3b54e3658f3bb426bf2
+      - step: '09'
+  - path: app/views/my/account.html.erb
+    sha256: 43b5144ef408b04cc210b1dbcb15b193db70b7f943044ff63f217e36b0e43038
+  - path: app/views/settings/_api.html.erb
+    sha256: 3bedf68c28266cb611914f6b8e0bf52492a62fde378a96c7c300aba6a4bf364f
+    earlier:
+      - step: '09'
+        own_hunk_sha256: 4571ce5ee71e42a9bd1733a07e1c145e25a3b4508920092b55dc07606f66769b
+  - path: app/views/settings/_attachments.html.erb
+    sha256: 593bc85dfbfab2841707578b832d4829ba66cc8599f66bfe3024d67d7868c1a4
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_authentication.html.erb
+    sha256: 311f9eccc6176bdc708422bac41ee794384fe6ffde8371b045f7f1c303106488
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_display.html.erb
+    sha256: e7c208db50eb736afe03dd4400e291e5e93ebeb0a96acccd13c4f48c076ad6e0
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_general.html.erb
+    sha256: be28595f08d6f727201e8a63e4ca49a42eee877583b9b1e042b5655d142b08df
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_issues.html.erb
+    sha256: 9ca23a156b2eae51d22ba4d5ec1d23831073a2e099985f7c42779c94ea2c6c9c
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_mail_handler.html.erb
+    sha256: 0dc25a3a72919f2ba126f75b634e043b6aa964ce56cbcf4b3dc9cb5179b3d19a
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_notifications.html.erb
+    sha256: d242fa82df48ab5a04989be8dbc41173217290370ac2e06310bafcc1b5b74f63
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_projects.html.erb
+    sha256: 3613c242ebe26ad613c482298e396ac6e8a9ad6186b462809e67fd6a971f2e3f
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_repositories.html.erb
+    sha256: 89c745e407cbe54bb7c51d584be18fa3017bfb01258a42771532d475719a8ce0
+    earlier:
+      - step: '09'
+        own_hunk_sha256: 49d6a8c366dc9bd8639cb9baffd8f6a3e81cfdd9645a088b290d1a3abb7f36ed
+  - path: app/views/settings/_timelog.html.erb
+    sha256: 0c709e4001070d21309eba6b7cf3871e640b2620c656481c8022c3addf9bb1d5
+    earlier:
+      - step: '09'
+  - path: app/views/settings/_users.html.erb
+    sha256: 26b0f7bbaba89b216561b40af20899d20621c219d0d006470e9685536a64a680
+    earlier:
+      - step: '09'
+  - path: app/views/settings/plugin.html.erb
+    sha256: d594fd36daf599fa799c6c2ffa7efd929a5349d99ac389b74a6eaec3aec9a1f9
+    earlier:
+      - step: '09'

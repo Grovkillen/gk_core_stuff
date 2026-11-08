@@ -1,37 +1,70 @@
 --- a/app/assets/javascripts/application.js
 +++ b/app/assets/javascripts/application.js
-@@ -1023,6 +1023,96 @@
+@@ -1023,6 +1023,143 @@
    }
  }
  
-+// Lists and text fields that stand straight under each other in a form, one per row, get the width of the
-+// widest of them, so that they read as one column. An explaining text (em.info) in a row does not end the run;
-+// a heading, a section or a row of another kind does, and the fields elsewhere keep their own widths. A field
-+// that fills its row neither sets nor takes the width. Only min-width is set, never more than the row has room
-+// for; a run in a part not shown yet (another tab, a collapsed fieldset) is measured once it shows.
-+// In a table in a form the fields that stand right in the cells of one column are one run.
++// Lists and text fields that stand straight under each other in a form, one per line, get the width of the
++// widest of them, so that they read as one column. The fields are found by what the browser shows, never by the
++// tags around them: the form a field belongs to and its fieldset, the order of the fields, a field alone on its
++// line (a button beside it is fine) and the same start edge as the field above it. A text area, a check box or a
++// radio button between them ends the run, as does a field that starts elsewhere or stands right beside another
++// field on its line (at most 24 pixels between them); a field further off on the same line stands in another
++// column (the issue form's two columns), so each column is a run. A field that fills the box it stands in neither
++// sets nor takes the width. In a table in a form the fields alone in their cells of one column (the cells that
++// start at the same edge) are one run. Only min-width is set, never more than the box has room for; a run in a
++// part not shown yet (another tab, a collapsed fieldset) is measured once it shows.
 +var fieldWidthsObserver = null;
++var fieldWidthsTimer = null;
 +function setupFieldWidths() {
 +  var skip = /^(hidden|checkbox|radio|submit|button|reset|image|file|color|range)$/i;
-+  function shown(el) {
-+    return !el.hidden && window.getComputedStyle(el).display !== 'none';
++  var breaks = /^(checkbox|radio)$/i;
++  var gap = 24;
++  function isField(el) {
++    return el.tagName === 'SELECT' || (el.tagName === 'INPUT' && !skip.test(el.type || 'text'));
 +  }
-+  // the row's one list or text field, or null when the row has none, several or other controls
-+  function singleField(row) {
-+    if (row.tagName !== 'P' || $(row).find('textarea, input[type=checkbox], input[type=radio]').length > 0) return null;
-+    var fields = $(row).find('select, input').filter(function(){
-+      return this.tagName === 'SELECT' || !skip.test(this.type || 'text');
++  function visible(el) {
++    return el.offsetWidth > 0 && el.offsetHeight > 0;
++  }
++  function startEdge(el, rect) {
++    return window.getComputedStyle(el).direction === 'rtl' ? rect.right : rect.left;
++  }
++  // the controls that count for a run, in the page's order: a list or text field alone on its line, or one that
++  // ends a run (a text area, a check box, a radio button, or a field sharing its line with another field)
++  function controlsOf(els) {
++    var items = [];
++    els.forEach(function(el){
++      if (!visible(el)) return;
++      var kind = null;
++      if (isField(el)) {
++        kind = 'field';
++      } else if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && breaks.test(el.type))) {
++        kind = 'end';
++      }
++      if (kind) items.push({el: el, kind: kind, rect: el.getBoundingClientRect()});
 +    });
-+    return fields.length === 1 ? fields[0] : null;
++    items.forEach(function(item){
++      if (item.kind !== 'field') return;
++      var middle = item.rect.top + item.rect.height / 2;
++      var shared = items.some(function(other){
++        if (other === item || Math.abs(other.rect.top + other.rect.height / 2 - middle) >= 8) return false;
++        return Math.max(item.rect.left, other.rect.left) - Math.min(item.rect.right, other.rect.right) <= gap;
++      });
++      if (shared) item.kind = 'end';
++    });
++    return items;
++  }
++  // the room a field has in the box it stands in: tabular rows keep the label's place as padding
++  function room(el) {
++    var box = el.parentElement, style = window.getComputedStyle(box);
++    return box.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
 +  }
 +  function equalize(group) {
 +    var widths = group.map(function(field){ return field.getBoundingClientRect().width; });
 +    if (widths.some(function(width){ return !width; })) return false;
-+    // the room a field has in its row: tabular rows keep the label's place as padding
 +    var fills = group.map(function(field, i){
-+      var row = field.parentElement, style = window.getComputedStyle(row);
-+      var room = row.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
-+      return !group.column && room > 0 && widths[i] >= room * 0.9;
++      var space = room(field);
++      return !group.column && space > 0 && widths[i] >= space * 0.9;
 +    });
 +    var target = 0;
 +    group.forEach(function(field, i){ if (!fills[i] && widths[i] > target) target = widths[i]; });
@@ -59,40 +92,54 @@
 +    $(group[0]).data('field-width-group', group);
 +    fieldWidthsObserver.observe(group[0]);
 +  }
-+  $('form p').each(function(i, row){
-+    if (!singleField(row) || !shown(row)) return true;
-+    // a run starts where the row before it is not of the kind
-+    var prev = row.previousElementSibling;
-+    while (prev && !shown(prev)) prev = prev.previousElementSibling;
-+    if (prev && singleField(prev)) return true;
-+    var group = [];
-+    for (var r = row; r; r = r.nextElementSibling) {
-+      if (!shown(r)) continue;
-+      var field = singleField(r);
-+      if (!field) break;
-+      group.push(field);
-+    }
-+    take(group);
++  // a form's fields straight under each other, per form and fieldset; the fields in a table's cells belong to the
++  // table's columns
++  var groups = new Map();
++  $('input, select, textarea').each(function(i, el){
++    if (!el.form || $(el).closest('td, th').length > 0) return true;
++    var key = $(el).closest('fieldset')[0] || el.form;
++    if (!groups.has(key)) groups.set(key, []);
++    groups.get(key).push(el);
 +  });
-+  // a column of a table in a form: the one list or text field that stands right in each cell of the column gets
-+  // the width of the widest; a field inside a part of its own in the cell keeps its width
++  groups.forEach(function(els){
++    var run = [], last = null;
++    controlsOf(els).forEach(function(item){
++      if (item.kind !== 'field') {
++        take(run);
++        run = [];
++        last = null;
++        return;
++      }
++      var edge = startEdge(item.el, item.rect);
++      if (last && (Math.abs(edge - last.edge) > 1 || item.rect.top < last.rect.bottom - 1)) {
++        take(run);
++        run = [];
++      }
++      run.push(item.el);
++      last = {edge: edge, rect: item.rect};
++    });
++    take(run);
++  });
++  // a column of a table in a form: the one list or text field alone in each cell of the column (the cells that
++  // start at the same edge) gets the width of the widest
 +  $('form table').each(function(i, table){
 +    var cols = {};
-+    $(table).children('tbody').children('tr').each(function(j, tr){
-+      if (!shown(tr)) return true;
-+      $(tr).children('td').each(function(k, td){
-+        var fields = $(td).find('select, input').filter(function(){
-+          return this.tagName === 'SELECT' || !skip.test(this.type || 'text');
-+        });
-+        if (fields.length !== 1 || fields[0].parentElement !== td || $(td).find('textarea').length > 0) return true;
-+        (cols[td.cellIndex] = cols[td.cellIndex] || []).push(fields[0]);
-+      });
++    $(table).children('tbody').children('tr').children('td, th').each(function(j, cell){
++      if (!visible(cell)) return true;
++      var fields = $(cell).find('select, input').filter(function(){ return isField(this); });
++      if (fields.length !== 1 || $(cell).find('textarea').length > 0) return true;
++      var edge = Math.round(startEdge(cell, cell.getBoundingClientRect()));
++      (cols[edge] = cols[edge] || []).push(fields[0]);
 +    });
-+    $.each(cols, function(k, group){ group.column = true; take(group); });
++    $.each(cols, function(edge, group){ group.column = true; take(group); });
 +  });
 +}
 +$(document).ready(setupFieldWidths);
 +$(document).on('ajaxComplete', setupFieldWidths);
++document.addEventListener('click', function(){
++  clearTimeout(fieldWidthsTimer);
++  fieldWidthsTimer = setTimeout(setupFieldWidths, 80);
++}, true);
 +
  function blockEventPropagation(event) {
    event.stopPropagation();

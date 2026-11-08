@@ -1,35 +1,10 @@
-<%# gk_core_stuff: one box per module, each switchable except settings_tabs, journal_details and layout_hooks (always on, other plugins require them); a module core already has says so and cannot be switched on %>
+<%# gk_core_stuff: one box per module that is not an appearance setting, each switchable except settings_tabs, journal_details and layout_hooks (always on, other plugins require them); a module core already has says so and cannot be switched on. The looks, the done ratio as text, AM/PM and the version in the footer are appearance settings on Administration > Utseende (GK GUI Stuff) %>
 <% plugin = Redmine::Plugin.find(:gk_core_stuff) %>
 <% changelog = ["CHANGELOG.#{current_language}.md", 'CHANGELOG.md'].map { |f| File.join(plugin.directory, f) }.find { |f| File.exist?(f) } %>
 <% s = GkCoreStuff.defaults.merge((settings || {}).to_h.transform_keys(&:to_s)) %>
 <fieldset class="box"><legend><%= l(:label_gk_core_stuff_about) %></legend>
   <div><strong><%= plugin.name %></strong> <%= plugin.version %></div>
   <div><%= l(:text_gk_core_stuff_description) %></div>
-</fieldset>
-<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_done_ratio_text) %></legend>
-  <% if GkCoreStuff.in_core?(:done_ratio_text) %>
-    <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
-  <% else %>
-  <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= hidden_field_tag 'settings[done_ratio_text]', '0', id: nil %>
-    <%= check_box_tag 'settings[done_ratio_text]', '1', s['done_ratio_text'].to_s == '1' %>
-    <em class="info"><%= l(:text_gk_core_stuff_done_ratio_text_info) %></em></p>
-  <p><label for="settings_done_ratio_text_position"><%= l(:label_gk_core_stuff_position) %></label>
-    <%= select_tag 'settings[done_ratio_text_position]',
-                   options_for_select(GkCoreStuff::DoneRatioText::POSITIONS.map { |p| [l("label_gk_core_stuff_position_#{p}"), p] }, s['done_ratio_text_position']),
-                   id: 'settings_done_ratio_text_position' %>
-    <em class="info"><%= l(:text_gk_core_stuff_position_info) %></em></p>
-  <p><label><%= l(:label_gk_core_stuff_zero) %></label>
-    <%= hidden_field_tag 'settings[done_ratio_text_zero]', '0', id: nil %>
-    <%= check_box_tag 'settings[done_ratio_text_zero]', '1', s['done_ratio_text_zero'].to_s == '1' %></p>
-  <p><label><%= l(:label_gk_core_stuff_full) %></label>
-    <%= hidden_field_tag 'settings[done_ratio_text_full]', '0', id: nil %>
-    <%= check_box_tag 'settings[done_ratio_text_full]', '1', s['done_ratio_text_full'].to_s == '1' %></p>
-  <p><label><%= l(:label_gk_core_stuff_done_ratio_plate) %></label>
-    <%= hidden_field_tag 'settings[done_ratio_text_plate]', '0', id: nil %>
-    <%= check_box_tag 'settings[done_ratio_text_plate]', '1', s['done_ratio_text_plate'].to_s == '1' %>
-    <em class="info"><%= l(:text_gk_core_stuff_done_ratio_plate) %></em></p>
-  <% end %>
 </fieldset>
 <%# single_preference: one preference row per user %>
 <fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_single_preference) %></legend>
@@ -86,65 +61,68 @@
     <%= now.any? ? now.join(', ') : l(:label_none) %></p>
   <% end %>
 </fieldset>
-<%# the hooks in core's views (core_proposals/view_hooks steps 01, 04, 05 and 06): always on, one row per step %>
+<%# formatting_processors: the one pass over formatted text's links and runs of text (core_proposals/formatting_processors) %>
+<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_formatting_processors) %></legend>
+  <% if GkCoreStuff.in_core?(:formatting_processors) %>
+    <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
+    <%# formatting_processors_values: the custom values' pass stays GK's own until core has one too %>
+    <% unless GkCoreStuff.in_core?(:formatting_processors_values) %>
+    <% now = GkCoreStuff::FormattingProcessors.registered %>
+    <p><label><%= l(:label_gk_core_stuff_formatting_processors_now) %></label>
+      <%= now.any? ? now.join(', ') : l(:label_none) %>
+      <em class="info"><%= l(:text_gk_core_stuff_formatting_processors_values_info) %></em></p>
+    <% end %>
+  <% else %>
+  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
+  <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
+    <%= check_box_tag 'gk_core_stuff_formatting_processors_always', '1', true, disabled: true, id: nil %>
+    <em class="info"><%= l(:text_gk_core_stuff_formatting_processors_info) %></em></p>
+  <% now = GkCoreStuff::FormattingProcessors.registered %>
+  <p><label><%= l(:label_gk_core_stuff_formatting_processors_now) %></label>
+    <%= now.any? ? now.join(', ') : l(:label_none) %></p>
+  <% end %>
+</fieldset>
+<%# report_marks: the marks on the counts of core's issue reports (a prepend on ReportsHelper#aggregate_link) %>
+<fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_report_marks) %></legend>
+  <% if GkCoreStuff.in_core?(:report_marks) %>
+    <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
+  <% else %>
+  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
+  <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
+    <%= check_box_tag 'gk_core_stuff_report_marks_always', '1', true, disabled: true, id: nil %>
+    <em class="info"><%= l(:text_gk_core_stuff_report_marks_info) %></em></p>
+  <% end %>
+</fieldset>
+<%# principal_marks, breadcrumb_marks and menu_marks: marks on core's links to a user or group, on the breadcrumb's project links (prepends on ApplicationHelper) and on a menu's links (a prepend on the menu helper) %>
+<% %i[principal_marks breadcrumb_marks menu_marks].each do |key| %>
+<fieldset class="box tabular"><legend><%= l(:"label_gk_core_stuff_#{key}") %></legend>
+  <% if GkCoreStuff.in_core?(key) %>
+    <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
+  <% else %>
+  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
+  <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
+    <%= check_box_tag "gk_core_stuff_#{key}_always", '1', true, disabled: true, id: nil %>
+    <em class="info"><%= l(:"text_gk_core_stuff_#{key}_info") %></em></p>
+  <% end %>
+</fieldset>
+<% end %>
+<%# the hooks and marks in core's views (core_proposals/view_hooks steps 01, 04, 05, 06, 08, 09 and 10): always on, one row per step %>
 <fieldset class="box"><legend><%= l(:label_gk_core_stuff_view_hooks) %></legend>
   <p><em class="info"><%= l(:text_gk_core_stuff_view_hooks_info) %></em></p>
   <table class="list gk-core-stuff-view-hooks">
     <thead><tr><th><%= l(:field_name) %></th><th><%= l(:field_status) %></th><th><%= l(:label_gk_core_stuff_view_hooks_views) %></th><th><%= l(:label_gk_core_stuff_view_hooks_used) %></th></tr></thead>
     <tbody>
-    <% { layout_hooks: GkCoreStuff::LayoutHooks, action_menus: GkCoreStuff::ActionMenus, form_hooks: GkCoreStuff::FormHooks, list_hooks: GkCoreStuff::ListHooks }.each do |key, mod| %>
+    <% { layout_hooks: GkCoreStuff::LayoutHooks, action_menus: GkCoreStuff::ActionMenus, form_hooks: GkCoreStuff::FormHooks, list_hooks: GkCoreStuff::ListHooks, section_marks: GkCoreStuff::SectionMarks, anchor_marks: GkCoreStuff::AnchorMarks, more_view_hooks: GkCoreStuff::MoreViewHooks }.each do |key, mod| %>
       <% heard = mod::HOOKS.select { |h| ::Redmine::Hook.hook_listeners(h).any? } %>
       <% heard += mod.items.reject { |_, v| v.empty? }.keys if mod.respond_to?(:items) %>
       <tr class="<%= cycle('odd', 'even') %>">
         <td class="name"><%= l(:"label_gk_core_stuff_#{key}") %><br><em class="info"><%= l(:"text_gk_core_stuff_#{key}_info") %></em></td>
         <td class="status"><%= GkCoreStuff.in_core?(key) ? l(:text_gk_core_stuff_in_core) : l(:label_gk_core_stuff_view_hooks_always) %></td>
-        <td><%= mod.views_dir ? l(:text_gk_core_stuff_layout_hooks_views_ok) : l(:text_gk_core_stuff_layout_hooks_views_missing) %>
+        <% marks = GkCoreStuff.marks?(key) %>
+        <td><%= mod.views_dir ? l(:text_gk_core_stuff_layout_hooks_views_ok) : (marks ? l(:text_gk_core_stuff_view_marks_views_missing) : l(:text_gk_core_stuff_layout_hooks_views_missing)) %>
           <% shadowed = GkCoreStuff.shadowed_views(key) %>
-          <% if shadowed.any? %><br><em class="info"><%= l(:text_gk_core_stuff_view_hooks_shadowed, views: shadowed.map { |v| v.sub(/\.html\.erb\z/, '') }.join(', ')) %></em><% end %></td>
+          <% if shadowed.any? %><% views = shadowed.map { |v| v.sub(/\.html\.erb\z/, '') }.join(', ') %><br><em class="info"><%= marks ? l(:text_gk_core_stuff_view_marks_shadowed, views: views) : l(:text_gk_core_stuff_view_hooks_shadowed, views: views) %></em><% end %></td>
         <td><%= heard.any? ? heard.join(', ') : l(:label_none) %></td>
-      </tr>
-    <% end %>
-    </tbody>
-  </table>
-</fieldset>
-<%# the looks: fixes of how core's own pages look or read, each off, optional (each person may switch it off) or forced %>
-<fieldset class="box"><legend><%= l(:label_gk_core_stuff_looks) %></legend>
-  <p class="gk-core-stuff-looks-intro"><em class="info"><%= l(:text_gk_core_stuff_looks_info) %></em></p>
-  <%# GK's recommendation and Like core, at the end above the modes %>
-  <p class="gk-core-stuff-looks-intro" style="text-align: end;">
-    <a href="#" class="icon" data-gk-recommend data-gk-done="<%= l(:text_gk_core_stuff_recommend_changed) %>"><%= sprite_icon('checked', l(:button_gk_core_stuff_recommend)) %></a>
-    <a href="#" class="icon" data-gk-core-mode data-gk-done="<%= l(:text_gk_core_stuff_core_mode_changed) %>"><%= sprite_icon('reload', l(:button_gk_core_stuff_core_mode)) %></a>
-    <em class="info"><%= l(:text_gk_core_stuff_recommend) %></em></p>
-  <table class="list">
-    <thead><tr><th><%= l(:label_gk_core_stuff_look) %></th><th><%= l(:label_gk_core_stuff_look_mode) %></th></tr></thead>
-    <tbody>
-    <%# two of the looks are for the whole instance (the server writes them): off or forced, never the person's choice %>
-    <% [[:time_ampm_nbsp, {}], [:footer_version, { version: GkCoreStuff::FooterVersion.version }]].each do |key, args| %>
-      <tr id="gk-core-stuff-look-<%= key.to_s.tr('_', '-') %>">
-        <td class="name"><strong><%= l(:"label_gk_core_stuff_#{key}") %></strong><br><em class="info"><%= l(:"text_gk_core_stuff_#{key}_info", **args) %></em></td>
-        <td class="mode">
-          <% if GkCoreStuff.in_core?(key) %>
-            <em class="info"><%= l(:text_gk_core_stuff_look_in_core) %></em>
-          <% else %>
-            <%= select_tag "settings[#{key}]",
-                           options_for_select([[l(:label_gk_core_stuff_look_mode_off), '0'], [l(:label_gk_core_stuff_look_mode_forced), '1']], s[key.to_s].to_s == '1' ? '1' : '0'),
-                           id: "settings_#{key}", 'aria-label': l(:"label_gk_core_stuff_#{key}"), data: { gk_recommended: '1', gk_core: '0' } %>
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
-    <% GkCoreStuff::Looks.all.each_value do |look| %>
-      <tr id="gk-core-stuff-look-<%= look.key.tr('_', '-') %>">
-        <td class="name"><strong><%= l(:"label_gk_core_stuff_#{look.key}") %></strong><br><em class="info"><%= l(:"text_gk_core_stuff_#{look.key}_info") %></em></td>
-        <td class="mode">
-          <% if GkCoreStuff.in_core?(look.key) %>
-            <em class="info"><%= l(:text_gk_core_stuff_look_in_core) %></em>
-          <% else %>
-            <%= select_tag "settings[look_#{look.key}]",
-                           options_for_select(GkCoreStuff::Looks::MODES.map { |m| [l(:"label_gk_core_stuff_look_mode_#{m}"), m] }, GkCoreStuff::Looks.mode(look.key)),
-                           id: "settings_look_#{look.key}", 'aria-label': l(:"label_gk_core_stuff_#{look.key}"), data: { gk_recommended: look.recommended, gk_core: 'off' } %>
-          <% end %>
-        </td>
       </tr>
     <% end %>
     </tbody>
@@ -158,21 +136,3 @@
   </details>
 </fieldset>
 <% end %>
-<%# GK's recommendation (data-gk-recommended) and Like core (data-gk-core): every select with the button's attribute is
-    set to it; the rows that change are marked and counted beside the buttons, and the form is saved as usual %>
-<%= javascript_tag(<<~JS)
-  document.addEventListener('click', function (e) {
-    var a = e.target.closest && e.target.closest('[data-gk-recommend], [data-gk-core-mode]');
-    if (!a) return;
-    e.preventDefault();
-    var key = a.hasAttribute('data-gk-core-mode') ? 'gkCore' : 'gkRecommended';
-    var n = 0, form = a.closest('form') || document;
-    form.querySelectorAll('select[data-gk-recommended]').forEach(function (s) {
-      var want = s.dataset[key], row = s.closest('tr') || s.closest('p');
-      if (want != null && s.value !== want) { s.value = want; s.dispatchEvent(new Event('change', { bubbles: true })); n++; if (row) { row.classList.add('gk-core-stuff-recommend-changed'); row.style.backgroundColor = 'var(--oc-yellow-1)'; } }
-    });
-    var info = a.parentElement.querySelector('em.info');
-    if (info) info.textContent = a.dataset.gkDone.replace('%{count}', n);
-  });
-JS
-%>

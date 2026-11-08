@@ -1,3 +1,5 @@
-/* gk_core_stuff sidebar_spacing: core takes the space above a sidebar heading away when it is first in its box, so a
-   plugin's block (a div with its own heading) stands tight under the block before it; it gets core's 14 px */
+/* gk_core_stuff sidebar_spacing: core takes the space above a sidebar heading away when it is first in its box
+   (application.css: #sidebar h3:first-child), so a plugin's block (a div with its own heading) stands tight under the
+   block before it; it gets core's 14 px back. The place is core's own rule's: the rule answers exactly the headings
+   core's :first-child reaches inside a block that is not the first thing in the sidebar. */
 #sidebar-wrapper > :is(h3, ul, p, div, form, table) ~ div > h3:first-child { margin-block-start: 14px; }

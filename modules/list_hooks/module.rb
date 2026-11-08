@@ -10,6 +10,12 @@ module GkCoreStuff
   module ListHooks
     HOOKS = %i[view_issues_list_row_css_classes view_issues_list_row_after view_projects_list_row_css_classes
                view_projects_list_row_after view_users_list_row_css_classes view_users_list_row_after].freeze
+    # The views that call each hook (GkCoreStuff.hook?)
+    HOOK_VIEWS = {
+      view_issues_list_row_css_classes: %w[issues/_list], view_issues_list_row_after: %w[issues/_list],
+      view_projects_list_row_css_classes: %w[projects/_list], view_projects_list_row_after: %w[projects/_list],
+      view_users_list_row_css_classes: %w[users/_list], view_users_list_row_after: %w[users/_list]
+    }.freeze
 
     def self.views_dir = GkCoreStuff.series_views(:list_hooks)
 
@@ -23,7 +29,8 @@ module GkCoreStuff
   end
 
   # Always on, without a setting: the hooks are for other plugins and change nothing until one listens
-  register :list_hooks, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:list_hooks) }, always: true do
+  register :list_hooks, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:list_hooks) }, always: true,
+                        hooks: ListHooks::HOOK_VIEWS do
     ::ApplicationHelper.prepend(ListHooks::ApplicationHelperPatch) unless ::ApplicationHelper < ListHooks::ApplicationHelperPatch
     GkCoreStuff.prepend_series_views(:list_hooks)
   end

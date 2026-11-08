@@ -1,0 +1,10 @@
+<%# Visa for the check box in a list's row, drawn only from GK GUI Stuff's page Appearance with its helpers: core's list
+    with a check box first in the row, still, a little low as Redmine has it; with the setting, the same row with the
+    box in the middle (the picture's own rule, gk_core_stuff_pictures.css; the look's stylesheet comes only with the row
+    on). The box has no name, so the form is not touched. row: the setting %>
+<% gk_gui_stuff_preview_stylesheet('gk_core_stuff_pictures', plugin: 'gk_core_stuff') %>
+<% box = tag.input(type: 'checkbox', 'aria-label': l(:label_issue)) %>
+<% cells = content_tag(:td, box, class: 'checkbox') + content_tag(:td, "#{l(:label_issue)} #1", class: 'subject') %>
+<% list = content_tag(:table, content_tag(:tbody, content_tag(:tr, cells)), class: 'list') %>
+<% mid = method(:gk_gui_stuff_appearance_preview).parameters.map(&:last).include?(:mid_line) ? { mid_line: true } : {} %>
+<%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, list, class: 'gk-gui-stuff-sg-still', inert: true), on: content_tag(:div, list, inert: true), **mid) %>

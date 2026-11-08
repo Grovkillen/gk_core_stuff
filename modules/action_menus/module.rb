@@ -22,6 +22,22 @@ module GkCoreStuff
                view_projects_show_actions_menu view_repositories_navigation_actions_menu
                view_timelog_index_actions_menu view_users_index_actions_menu view_versions_index_actions_menu
                view_wiki_show_actions_menu].freeze
+    # The views that call each hook (GkCoreStuff.hook?); the issue page's come from its partial _action_menu
+    HOOK_VIEWS = {
+      view_boards_show_contextual: %w[boards/show], view_documents_index_contextual: %w[documents/index],
+      view_documents_show_contextual: %w[documents/show], view_groups_show_contextual: %w[groups/show],
+      view_issues_index_contextual: %w[issues/index], view_issues_show_contextual: %w[issues/_action_menu],
+      view_messages_show_contextual: %w[messages/show], view_news_index_contextual: %w[news/index],
+      view_news_show_contextual: %w[news/show], view_projects_index_contextual: %w[projects/index],
+      view_projects_show_contextual: %w[projects/show], view_timelog_index_contextual: %w[timelog/index],
+      view_users_index_contextual: %w[users/index], view_users_show_contextual: %w[users/show],
+      view_versions_index_contextual: %w[versions/index], view_wiki_show_contextual: %w[wiki/show],
+      view_issues_index_actions_menu: %w[issues/index], view_issues_show_actions_menu: %w[issues/_action_menu],
+      view_projects_show_actions_menu: %w[projects/show],
+      view_repositories_navigation_actions_menu: %w[repositories/_navigation],
+      view_timelog_index_actions_menu: %w[timelog/index], view_users_index_actions_menu: %w[users/index],
+      view_versions_index_actions_menu: %w[versions/index], view_wiki_show_actions_menu: %w[wiki/show]
+    }.freeze
 
     def self.views_dir = GkCoreStuff.series_views(:action_menus)
 
@@ -65,7 +81,8 @@ module GkCoreStuff
   end
 
   # Always on, without a setting: the hooks and menus are for other plugins and change nothing until one adds to them
-  register :action_menus, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:action_menus) }, always: true do
+  register :action_menus, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:action_menus) }, always: true,
+                          hooks: ActionMenus::HOOK_VIEWS do
     unless ::Redmine::MenuManager::MenuHelper < ActionMenus::MenuHelperPatch
       ::Redmine::MenuManager::MenuHelper.prepend(ActionMenus::MenuHelperPatch)
     end

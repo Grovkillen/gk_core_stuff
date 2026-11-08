@@ -1,8 +1,8 @@
-# core_views.ps1 05 (form_hooks): ur redmine-6.0.11.zip och 05_form_hooks.patch; ändras aldrig för hand
-zip: redmine-6.0.11.zip
-zip_sha256: ae219a5206b490fc0a4fa8353dd95d1d38ed3df512b08d10c17c14eab5977102
+# core_views.ps1 05 (form_hooks): ur redmine-6.0.12.zip och 05_form_hooks.patch; ändras aldrig för hand
+zip: redmine-6.0.12.zip
+zip_sha256: 383eb661a6a91f9217d319e57e8fc8c64f7cfba5adf3929c398c03cc8a0bbe66
 patch: 05_form_hooks.patch
-patch_sha256: 913fd0efd51baad54a75ae6edecdb836e0b38ecab02a610bc11493d9c18f6697
+patch_sha256: 27896b067c4bd72e2f12a42adab015f75dc3a6452553598213e4f9408e94e9e3
 views:
   - path: app/views/groups/_form.html.erb
     sha256: f103c522edf97936b7a65dbcb3c03bd477251c9048a5c97c2cd36a2392bd0e5b

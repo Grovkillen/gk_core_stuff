@@ -1,0 +1,10 @@
+<%# Visa for badges in a list's row, drawn only from GK GUI Stuff's page Appearance with its helpers: core's list with
+    a badge in a cell (the style guide's badge, gk_gui_stuff_sg_badges), still, lifted as Redmine has it; with the
+    setting, the same row with the badge in the middle (the picture's own rule, gk_core_stuff_pictures.css; the look's
+    stylesheet comes only with the row on). row: the setting %>
+<% gk_gui_stuff_preview_stylesheet('gk_core_stuff_pictures', plugin: 'gk_core_stuff') %>
+<% cell = safe_join([l(:label_user), gk_gui_stuff_sg_badges(only: [:locked])], ' ') %>
+<% list = content_tag(:table, content_tag(:tbody, content_tag(:tr, content_tag(:td, cell, class: 'name'))), class: 'list') %>
+<% mid = method(:gk_gui_stuff_appearance_preview).parameters.map(&:last).include?(:mid_line) ? { mid_line: true } : {} %>
+<%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, list, class: 'gk-gui-stuff-sg-still', inert: true),
+                                         on: content_tag(:div, list, class: 'gk-gui-stuff-preview-on'), **mid) %>

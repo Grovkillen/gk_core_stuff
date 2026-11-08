@@ -14,12 +14,26 @@ module GkCoreStuff
                view_trackers_form_top view_trackers_form_bottom view_users_form_top view_users_form_after_authentication
                view_users_form_after_mail_notifications view_users_form_bottom view_versions_form_top
                view_versions_form_bottom].freeze
+    # The views that call each hook (GkCoreStuff.hook?)
+    HOOK_VIEWS = {
+      view_groups_form_top: %w[groups/_form], view_groups_form_bottom: %w[groups/_form],
+      view_issues_form_after_subject: %w[issues/_form], view_issues_form_after_description: %w[issues/_form],
+      view_issues_form_after_attributes: %w[issues/_form],
+      view_issues_form_custom_fields_top: %w[issues/_form_custom_fields],
+      view_issues_form_custom_fields_bottom: %w[issues/_form_custom_fields],
+      view_projects_form_top: %w[projects/_form], view_projects_form_bottom: %w[projects/_form],
+      view_trackers_form_top: %w[trackers/_form], view_trackers_form_bottom: %w[trackers/_form],
+      view_users_form_top: %w[users/_form], view_users_form_after_authentication: %w[users/_form],
+      view_users_form_after_mail_notifications: %w[users/_form], view_users_form_bottom: %w[users/_form],
+      view_versions_form_top: %w[versions/_form], view_versions_form_bottom: %w[versions/_form]
+    }.freeze
 
     def self.views_dir = GkCoreStuff.series_views(:form_hooks)
   end
 
   # Always on, without a setting: the hooks are for other plugins and change nothing until one listens
-  register :form_hooks, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:form_hooks) }, always: true do
+  register :form_hooks, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:form_hooks) }, always: true,
+                        hooks: FormHooks::HOOK_VIEWS do
     GkCoreStuff.prepend_series_views(:form_hooks)
   end
 end

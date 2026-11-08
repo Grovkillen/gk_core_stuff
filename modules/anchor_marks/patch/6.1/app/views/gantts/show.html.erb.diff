@@ -1,0 +1,23 @@
+--- a/app/views/gantts/show.html.erb
++++ b/app/views/gantts/show.html.erb
+@@ -83,16 +83,18 @@
+ </p>
+ 
+ <p class="buttons">
++  <span data-query-part="view-options">
+   <%= number_field_tag 'months', @gantt.months, :min => 1, :max => Setting.gantt_months_limit.to_i, :autocomplete => false %>
+   <%= l(:label_months_from) %>
+   <%= select_month(@gantt.month_from, :prefix => "month", :discard_type => true) %>
+   <%= select_year(@gantt.year_from, :prefix => "year", :discard_type => true) %>
+   <%= hidden_field_tag 'zoom', @gantt.zoom %>
++  </span>
+ 
+   <%= link_to_function sprite_icon('checked', l(:button_apply)), '$("#query_form").submit()',
+-                       :class => 'icon icon-checked' %>
++                       :class => 'icon icon-checked', :data => {:query_action => 'apply'} %>
+   <%= link_to sprite_icon('reload', l(:button_clear)), { :project_id => @project, :set_filter => 1 },
+-              :class => 'icon icon-reload' %>
++              :class => 'icon icon-reload', :data => {:query_action => 'clear'} %>
+   <% if @query.new_record? && User.current.allowed_to?(:save_queries, @project, :global => true) %>
+     <%= link_to_function sprite_icon('save', l(:button_save_object, object_name: l(:label_query)).capitalize),
+                          "$('#query_form').attr('action', '#{ @project ? new_project_query_path(@project) : new_query_path }').submit();",

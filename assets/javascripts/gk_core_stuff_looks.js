@@ -2,11 +2,20 @@
 // for this person, their texts and their values (script#gk-core-stuff-looks). One content observer: a look registers
 // an idempotent function with onContent and gets the document once it is ready and again (a moment later) when core
 // or a plugin adds something to the page. Nodes of our own (class gk-core-stuff-*) never start a new pass. An element
-// with data-gk-looks-skip, and what is inside it, is another script's own control and is left alone. Plain DOM.
+// with data-gk-looks-skip, and what is inside it, is another script's own control and is left alone. A look says what it
+// changed with mark: the effect mark data-gk-core-stuff-effect (a list of the looks' keys), which the marks of a saved
+// setting count as that look's places. drawn tells those marks to read the page again. Plain DOM.
 window.gkCoreStuffLooks = (function () {
   var el = document.getElementById('gk-core-stuff-looks'), cfg = {};
   try { cfg = JSON.parse(el.textContent); } catch (e) { cfg = { looks: [] }; }
   var fns = [], timer = null, ready = document.readyState !== 'loading';
+  var EFFECT = 'data-gk-core-stuff-effect', drawnTimer = null;
+
+  function drawn() {
+    if (drawnTimer) return;
+    drawnTimer = setTimeout(function () { drawnTimer = null; document.dispatchEvent(new CustomEvent('gk-gui-stuff-drawn')); }, 100);
+  }
+  function words(node) { return (node.getAttribute(EFFECT) || '').split(/\s+/).filter(Boolean); }
 
   function run() {
     timer = null;
@@ -42,6 +51,20 @@ window.gkCoreStuffLooks = (function () {
       if (text != null) n.textContent = text;
       return n;
     },
+    mark: function (node, key) {
+      var w = words(node);
+      if (w.indexOf(key) >= 0) return;
+      w.push(key);
+      node.setAttribute(EFFECT, w.join(' '));
+      drawn();
+    },
+    unmark: function (node, key) {
+      var w = words(node), left = w.filter(function (k) { return k !== key; });
+      if (left.length === w.length) return;
+      if (left.length) node.setAttribute(EFFECT, left.join(' ')); else node.removeAttribute(EFFECT);
+      drawn();
+    },
+    drawn: drawn,
     onContent: function (fn) { fns.push(fn); if (ready && !timer) { try { fn(document); } catch (e) { /* the next pass */ } } }
   };
 })();

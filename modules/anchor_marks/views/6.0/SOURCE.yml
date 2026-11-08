@@ -1,0 +1,108 @@
+# core_views.ps1 09 (anchor_marks): ur redmine-6.0.12.zip och 09_anchor_marks.patch; ändras aldrig för hand
+zip: redmine-6.0.12.zip
+zip_sha256: 383eb661a6a91f9217d319e57e8fc8c64f7cfba5adf3929c398c03cc8a0bbe66
+patch: 09_anchor_marks.patch
+patch_sha256: 6acb8cd0f222c7c1ebb560037caa41ee534e4cf0a925b77a2295d379b30195cc
+earlier_patches:
+  - patch: 01_layout.patch
+    patch_sha256: c5ae138b1bd3b3d98503c4d59eabafc702936b28556475432a3b088a62e12ffa
+  - patch: 04_action_menus.patch
+    patch_sha256: e6a43ae9a982ea5569a19aefd49b0fe6b6eab961e40810aca072124424edb0d1
+  - patch: 05_form_hooks.patch
+    patch_sha256: 27896b067c4bd72e2f12a42adab015f75dc3a6452553598213e4f9408e94e9e3
+  - patch: 08_section_marks.patch
+    patch_sha256: 5c340400d235a57982e892e0447e1b38c5e051b646cf795abff77a86f71877d0
+views:
+  - path: app/views/attachments/_links.html.erb
+    sha256: 88f5143a32e423ed03a42beee077a2528de9f4377f58e0e7d58be1408124ce1d
+    own_hunk_sha256: a93c25c2510876b53a5e34c2b64528fe49713b95bac6f033b44d84b0ae62d35f
+  - path: app/views/calendars/show.html.erb
+    sha256: 4efe0f773913c783cedb02d014547e1e5d976dffaacbe6edbb44765b35e17992
+  - path: app/views/context_menus/issues.html.erb
+    sha256: f09e7a5ac3b1415a7b9af41db2fc99793d3f260ef36f063438808698dc883512
+    own_hunk_sha256: 0074d20b998af51be3b92c889e48fd6c19fe8e77f9f5d18c9e695d54901cdf77
+    earlier:
+      - step: '04'
+        own_hunk_sha256: f0b1c2434a83adc65a6c2d2ba4689f925bef808e9ecb1f5336380b23831ceb99
+  - path: app/views/gantts/show.html.erb
+    sha256: 369a3203ec81470acc7492840b9426bde1eafa04ff620725bb873412c20d3001
+    extra: true
+    own_hunk_sha256: 6124f4b1a1ccaf53d7f5390123305f4cf523b7de80be9d584c948f69fba156ad
+  - path: app/views/issues/_attributes.html.erb
+    sha256: 952e455c8e1d31395488e1b2b0ba93dbf7d4e3c7ca26aadc5a454c247792a8dc
+  - path: app/views/issues/_edit.html.erb
+    sha256: e4b4febf3197dcd330be22462bac17eb52fe58751e269be41cd8161d74363f52
+  - path: app/views/issues/_form.html.erb
+    sha256: f18141e77cb553654828947aa4835e2674fb306fba79804061a4457992e426c4
+    own_hunk_sha256: 1fbad236e6688af80c941d5368cc40108e0665b4d983aed7a13c02d9039dfd6a
+    earlier:
+      - step: '05'
+  - path: app/views/issues/_relations.html.erb
+    sha256: 38a9b71b946057ceec0e23626b2d7fc490d71d1acff3681f85eda1043dc30b16
+    own_hunk_sha256: 5ceb22447fbb5e871165094ca0c1fb25e6bcfc5d27beaf8fd404612c616267d4
+    earlier:
+      - step: '08'
+  - path: app/views/issues/_subtasks.html.erb
+    sha256: b911d95eb5d98b1eb517162f656a5f2be1f62efeffcddc774fab6d144d6b58ce
+    extra: true
+    own_hunk_sha256: 45583c03b5af384a924bf0049521a0cfd2fddcbb17928a4cd01b170fb61de678
+    earlier:
+      - step: '08'
+  - path: app/views/issues/bulk_edit.html.erb
+    sha256: 1c64efe2d872a56cccf0b51b18e91cb4e009b96eb8f8441bf334b300b5f471f6
+  - path: app/views/issues/show.html.erb
+    sha256: 8bf9722a0131b0d878d10317e59404eea6deaa4b8f74558a86d00154862dd7f3
+    own_hunk_sha256: 462e1827b922a99528ea008dbb0ef88847cb480beeee6b8b4f4dddd9437f64da
+    earlier:
+      - step: '01'
+        own_hunk_sha256: a68ef738f9b9e25586aa60468396dc94451596273eab19b73d7bb3fa1c226077
+      - step: '08'
+        own_hunk_sha256: 07f4aedea5dbaf29ede1ca750e26ce5d9e13e256fe866f7a354742d70185ddc3
+  - path: app/views/layouts/base.html.erb
+    sha256: 480a2220f4b2ea96f3a3de1222c4dea83295c9c910d8032a382cdb5c86738a53
+    earlier:
+      - step: '01'
+        own_hunk_sha256: 00bf6913fc912efab03d92bc9377d47d286104dd4f910c15c2a3b87c82e939e7
+  - path: app/views/queries/_query_form.html.erb
+    sha256: 408362f8e9b68eded308ce414d66d5188b938e97e09cef633be66a0692f551ce
+  - path: app/views/reports/_details.html.erb
+    sha256: f0c3b1adeb1885f498bb7a37d853bd0e408bea7ed33d0883ddeaccf21e6de374
+  - path: app/views/settings/_api.html.erb
+    sha256: 0598348ab29a5416df330392a9830593472c7f8da9aaa31a696da4df0b4f4513
+    own_hunk_sha256: 4571ce5ee71e42a9bd1733a07e1c145e25a3b4508920092b55dc07606f66769b
+  - path: app/views/settings/_attachments.html.erb
+    sha256: c5f26437aad06261ebac40908b0fbf1889743961c1702032f928b7fb0ea2bc03
+  - path: app/views/settings/_authentication.html.erb
+    sha256: b4346ba335be0fb6eead66aceb63427bce9f697c61bcb202b8ba00a3f026bf11
+  - path: app/views/settings/_display.html.erb
+    sha256: 618d5db98cdd04d2496f7777a637173af97c3f4cd94314234b9205e77baa2464
+    own_hunk_sha256: ea4cd9fdbf7dc5d52d8555fbd435c8b1ff182109d1bf4c0a1e98488affa1964d
+  - path: app/views/settings/_general.html.erb
+    sha256: 9cb2f2a0131f684f61fc323db26715ef11a1be232e1535d50758fb7ccb62a380
+  - path: app/views/settings/_issues.html.erb
+    sha256: b1abe04610443f0211cea21346d94948d88327d7fe91c903c5ebb2fa627f3c9d
+    own_hunk_sha256: c278ef39bc95fbd051f7e17816106e6d722ca7909f0e94f4e5644dd518377fd3
+  - path: app/views/settings/_mail_handler.html.erb
+    sha256: 90ba5d644d92df97db718e03b2623a4e87173994676d2068b46438e40493d9e4
+  - path: app/views/settings/_notifications.html.erb
+    sha256: 4806b02b3addd3869bd153e53b9c02301e320d1e8b319d9aad661c6a6bb96879
+  - path: app/views/settings/_projects.html.erb
+    sha256: f50293712fbb895d4492acf1a092c6092d82f327f8a666ff1d45a82b82893633
+  - path: app/views/settings/_repositories.html.erb
+    sha256: c35cac7586081f15b907623f79867d304a7af6f09c6afb927f1d642de95d8bf8
+    own_hunk_sha256: 49d6a8c366dc9bd8639cb9baffd8f6a3e81cfdd9645a088b290d1a3abb7f36ed
+  - path: app/views/settings/_timelog.html.erb
+    sha256: 122abc465eec3874530841f214dddebc19415e5a79d495e009e28e06e9a7489c
+  - path: app/views/settings/_users.html.erb
+    sha256: 1460473fd22268303c33446c03148243bf51cdfceb297a1b1cf9d84e7a965a13
+  - path: app/views/settings/plugin.html.erb
+    sha256: 06965db1b8b13ca1d3f755c32b09e30c29d69eee5d909f4d19d1155db027db5a
+  - path: app/views/timelog/bulk_edit.html.erb
+    sha256: 2710dc676c5e15ef0263c6770add52f74ee3c3edc870c48e677bab4fa76574e6
+  - path: app/views/workflows/_form.html.erb
+    sha256: 0c2dbea844b981f473a5637ab3e37b3d3f8a4dc121097b8f6aa76570d080c0e6
+  - path: app/views/workflows/permissions.html.erb
+    sha256: bb0018c59f23575c672c8f38c9539942ff1888e3b60fde4310976dc126128751
+absent:
+  - path: app/views/gantts/_query_form.html.erb
+    reason_sha256: 68f4e113c5f55adab1bb65791171b521d8bbddc404276c24c21a669a56680bca

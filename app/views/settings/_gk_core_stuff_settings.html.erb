@@ -1,11 +1,45 @@
-<%# gk_core_stuff: one box per module that is not an appearance setting, each switchable except settings_tabs, journal_details and layout_hooks (always on, other plugins require them); a module core already has says so and cannot be switched on. The looks, the done ratio as text, AM/PM and the version in the footer are appearance settings on Administration > Utseende (GK GUI Stuff) %>
+<%# gk_core_stuff: first, with the gate closed, core's own warning line per plugin, which says the first thing that is
+    not met: GK GUI Stuff is missing, it is too old (the line names the version required), or it is installed in the
+    right version but not active (with a link to its own settings page); GK Compat is missing or too old (GK
+    GUI Stuff may be the one missing, so nothing of it can draw the line) and the About box, and nothing else: the stored
+    settings go back as hidden fields, because core's Save on this page writes what is posted over what is stored. With
+    GK GUI Stuff and GK Compat one box per module that is not an
+    appearance setting, each switchable except settings_tabs, journal_details and layout_hooks (always on, other plugins
+    require them); a module core already has says so and cannot be switched on. The looks, the done ratio as text, AM/PM and the version in the footer are appearance settings on Administration > Appearance (GK GUI Stuff) %>
 <% plugin = Redmine::Plugin.find(:gk_core_stuff) %>
-<% changelog = ["CHANGELOG.#{current_language}.md", 'CHANGELOG.md'].map { |f| File.join(plugin.directory, f) }.find { |f| File.exist?(f) } %>
+<% gui_closed = GkCoreStuff.gui_closed %>
+<% gui = gui_closed.nil? %>
+<% if gui_closed == :missing %><p class="warning"><%= l(:text_gk_core_stuff_gui_stuff_missing) %></p>
+<% elsif gui_closed == :old %><p class="warning"><%= l(:text_gk_core_stuff_gui_stuff_required, version: GkCoreStuff::GUI_STUFF_MIN) %></p>
+<% elsif gui_closed == :inactive %><p class="warning"><%= l(:text_gk_core_stuff_gui_stuff_inactive) %> <%= link_to l(:label_gk_core_stuff_gui_stuff_settings), plugin_settings_path('gk_gui_stuff') %></p><% end %>
+<% compat_closed = GkCoreStuff.compat_closed %>
+<% compat = compat_closed.nil? %>
+<% if compat_closed == :missing %><p class="warning"><%= l(:text_gk_core_stuff_compat_missing) %></p>
+<% elsif compat_closed == :old %><p class="warning"><%= l(:text_gk_core_stuff_compat_required, version: GkCoreStuff::COMPAT_MIN) %></p><% end %>
+<% open = gui && compat %>
 <% s = GkCoreStuff.defaults.merge((settings || {}).to_h.transform_keys(&:to_s)) %>
 <fieldset class="box"><legend><%= l(:label_gk_core_stuff_about) %></legend>
   <div><strong><%= plugin.name %></strong> <%= plugin.version %></div>
   <div><%= l(:text_gk_core_stuff_description) %></div>
 </fieldset>
+<% unless open %>
+  <%# every stored value as a form posts it: a list as name[] (empty as [""]), a hash by its keys, the rest as text %>
+  <% keep = nil %>
+  <% keep = lambda do |name, value|
+       case value
+       when Hash then value.flat_map { |k, v| keep.call("#{name}[#{k}]", v) }
+       when Array then value.empty? ? [hidden_field_tag("#{name}[]", '', id: nil)] : value.map { |v| hidden_field_tag("#{name}[]", v.to_s, id: nil) }
+       else [hidden_field_tag(name, value.to_s, id: nil)]
+       end
+     end %>
+  <%= safe_join((settings.is_a?(Hash) ? settings : {}).flat_map { |k, v| keep.call("settings[#{k}]", v) }) %>
+<% else %>
+<%# a module that is always on (GkCoreStuff.always?) shows so as a muted pill with a lock: it cannot be switched off,
+    and nothing is sent with the form %>
+<% always = lambda do
+     gk_gui_stuff_pill(l(:label_gk_core_stuff_view_hooks_always), muted: true, icon_after: 'lock',
+                                                                   icon_after_label: l(:text_gk_core_stuff_always_locked))
+   end %>
 <%# single_preference: one preference row per user %>
 <fieldset class="box tabular"><legend><%= l(:label_gk_core_stuff_single_preference) %></legend>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
@@ -38,9 +72,8 @@
   <% if GkCoreStuff.in_core?(:settings_tabs) %>
     <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
   <% else %>
-  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= check_box_tag 'gk_core_stuff_settings_tabs_always', '1', true, disabled: true, id: nil %>
+    <%= always.call %>
     <em class="info"><%= l(:text_gk_core_stuff_settings_tabs_info) %></em></p>
   <% now = GkCoreStuff::Tabs::PAGES.flat_map { |page| GkCoreStuff::Tabs.registered(page).map { |t| "#{page}: #{t[:name]}" } } %>
   <p><label><%= l(:label_gk_core_stuff_settings_tabs_now) %></label>
@@ -52,9 +85,8 @@
   <% if GkCoreStuff.in_core?(:journal_details) %>
     <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
   <% else %>
-  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= check_box_tag 'gk_core_stuff_journal_details_always', '1', true, disabled: true, id: nil %>
+    <%= always.call %>
     <em class="info"><%= l(:text_gk_core_stuff_journal_details_info) %></em></p>
   <% now = GkCoreStuff::JournalDetails.registered %>
   <p><label><%= l(:label_gk_core_stuff_journal_details_now) %></label>
@@ -73,9 +105,8 @@
       <em class="info"><%= l(:text_gk_core_stuff_formatting_processors_values_info) %></em></p>
     <% end %>
   <% else %>
-  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= check_box_tag 'gk_core_stuff_formatting_processors_always', '1', true, disabled: true, id: nil %>
+    <%= always.call %>
     <em class="info"><%= l(:text_gk_core_stuff_formatting_processors_info) %></em></p>
   <% now = GkCoreStuff::FormattingProcessors.registered %>
   <p><label><%= l(:label_gk_core_stuff_formatting_processors_now) %></label>
@@ -87,9 +118,8 @@
   <% if GkCoreStuff.in_core?(:report_marks) %>
     <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
   <% else %>
-  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= check_box_tag 'gk_core_stuff_report_marks_always', '1', true, disabled: true, id: nil %>
+    <%= always.call %>
     <em class="info"><%= l(:text_gk_core_stuff_report_marks_info) %></em></p>
   <% end %>
 </fieldset>
@@ -99,9 +129,8 @@
   <% if GkCoreStuff.in_core?(key) %>
     <p><em class="info"><%= l(:text_gk_core_stuff_in_core) %></em></p>
   <% else %>
-  <%# always on (GkCoreStuff.always?): a locked box, nothing sent with the form %>
   <p><label><%= l(:label_gk_core_stuff_module_on) %></label>
-    <%= check_box_tag "gk_core_stuff_#{key}_always", '1', true, disabled: true, id: nil %>
+    <%= always.call %>
     <em class="info"><%= l(:"text_gk_core_stuff_#{key}_info") %></em></p>
   <% end %>
 </fieldset>
@@ -117,7 +146,8 @@
       <% heard += mod.items.reject { |_, v| v.empty? }.keys if mod.respond_to?(:items) %>
       <tr class="<%= cycle('odd', 'even') %>">
         <td class="name"><%= l(:"label_gk_core_stuff_#{key}") %><br><em class="info"><%= l(:"text_gk_core_stuff_#{key}_info") %></em></td>
-        <td class="status"><%= GkCoreStuff.in_core?(key) ? l(:text_gk_core_stuff_in_core) : l(:label_gk_core_stuff_view_hooks_always) %></td>
+        <%# the status as GK GUI Stuff's flag in the row: Redmine has it (info, the long text as its tooltip), or always on %>
+        <td class="status"><%= GkCoreStuff.in_core?(key) ? gk_gui_stuff_flag(l(:label_gk_core_stuff_in_core), inline: true, role: :info, title: l(:text_gk_core_stuff_in_core)) : gk_gui_stuff_flag(l(:label_gk_core_stuff_view_hooks_always), inline: true, role: :tip) %></td>
         <% marks = GkCoreStuff.marks?(key) %>
         <td><%= mod.views_dir ? l(:text_gk_core_stuff_layout_hooks_views_ok) : (marks ? l(:text_gk_core_stuff_view_marks_views_missing) : l(:text_gk_core_stuff_layout_hooks_views_missing)) %>
           <% shadowed = GkCoreStuff.shadowed_views(key) %>
@@ -128,11 +158,6 @@
     </tbody>
   </table>
 </fieldset>
-<% if changelog %>
-<fieldset class="box"><legend><%= l(:label_gk_core_stuff_changelog) %></legend>
-  <% unless current_language.to_s.start_with?('en') %><div class="gk-changelog-note"><em><%= l(:text_gk_core_stuff_changelog_english) %></em></div><% end %>
-  <details class="gk-changelog"><summary><%= l(:button_show) %></summary>
-  <div class="wiki"><%= Redmine::WikiFormatting.to_html('common_mark', File.read(changelog, encoding: 'UTF-8').sub(/\A.*?(?=^## )/m, '')).html_safe %></div>
-  </details>
-</fieldset>
+<%# the change log, drawn by GK GUI Stuff %>
+<%= gk_gui_stuff_changelog(:gk_core_stuff) %>
 <% end %>

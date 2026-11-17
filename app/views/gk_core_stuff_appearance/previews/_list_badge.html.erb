@@ -5,6 +5,5 @@
 <% gk_gui_stuff_preview_stylesheet('gk_core_stuff_pictures', plugin: 'gk_core_stuff') %>
 <% cell = safe_join([l(:label_user), gk_gui_stuff_sg_badges(only: [:locked])], ' ') %>
 <% list = content_tag(:table, content_tag(:tbody, content_tag(:tr, content_tag(:td, cell, class: 'name'))), class: 'list') %>
-<% mid = method(:gk_gui_stuff_appearance_preview).parameters.map(&:last).include?(:mid_line) ? { mid_line: true } : {} %>
 <%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, list, class: 'gk-gui-stuff-sg-still', inert: true),
-                                         on: content_tag(:div, list, class: 'gk-gui-stuff-preview-on'), **mid) %>
+                                         on: content_tag(:div, list, class: 'gk-gui-stuff-preview-on'), mid_line: true) %>

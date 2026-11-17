@@ -102,8 +102,12 @@ module GkCoreStuff
       end
     end
 
-    # The tabs part of the proposal's DSL on Redmine::Plugin, for as long as core has none
-    module PluginDsl
+    # The tabs part of the proposal's DSL on Redmine::Plugin, for as long as core has none. Other plugins ask
+    # defined?(GkCoreStuff::Tabs::PluginDsl) before they call it: that name is given to this module only when the
+    # gate opens, with GK GUI Stuff and GK Compat (Gate.dsl!, gate.rb); without either the DSL is not there and their
+    # tabs stay out. The name missing is not an error to log: core_stuff may be installed with its gate closed (no
+    # fallback log), so a caller leaves its tab out silently, or asks its own gate first
+    module Dsl
       def settings_tab(page, name, options = {}) = GkCoreStuff::Tabs.register(page, name, options)
       def project_settings_tab(name, options = {}) = settings_tab(:project_settings, name, options)
       def administration_settings_tab(name, options = {}) = settings_tab(:administration_settings, name, options)
@@ -116,7 +120,7 @@ module GkCoreStuff
   # Always on, without a setting: other plugins require the register for their tabs, and the register changes nothing
   # until a plugin adds to it
   register :settings_tabs, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:settings_tabs) }, always: true do
-    ::Redmine::Plugin.include(Tabs::PluginDsl) unless ::Redmine::Plugin.include?(Tabs::PluginDsl)
+    ::Redmine::Plugin.include(Tabs::Dsl) unless ::Redmine::Plugin.include?(Tabs::Dsl)
     ::ProjectsHelper.prepend(Tabs::ProjectsHelperPatch) unless ::ProjectsHelper < Tabs::ProjectsHelperPatch
     ::SettingsHelper.prepend(Tabs::SettingsHelperPatch) unless ::SettingsHelper < Tabs::SettingsHelperPatch
     ::UsersHelper.prepend(Tabs::UsersHelperPatch) unless ::UsersHelper < Tabs::UsersHelperPatch

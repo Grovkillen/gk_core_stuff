@@ -49,6 +49,8 @@ reasons: []
 appearance_settings:    # records AppearanceSettings (Looks.declare_appearances!, looks.rb): every look and the three modules that change how core's pages read; off from the start, and off without records
   - {key: core_stuff.sidebar_spacing, group: instance, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_sidebar_spacing, help: text_gk_core_stuff_sidebar_spacing_info}
   - {key: core_stuff.menu_icons, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_menu_icons, help: text_gk_core_stuff_menu_icons_info}
+  - {key: core_stuff.dark_mode, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [mode], label: label_gk_core_stuff_dark_mode, help: text_gk_core_stuff_dark_mode_info}
+  - {key: core_stuff.chart_colors, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_chart_colors, help: text_gk_core_stuff_chart_colors_info}
   - {key: core_stuff.footer_version, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_footer_version, help: text_gk_core_stuff_footer_version_info}
   - {key: core_stuff.list_badge, group: lists, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_list_badge, help: text_gk_core_stuff_list_badge_info}
   - {key: core_stuff.list_hash, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_core_stuff_list_hash, help: text_gk_core_stuff_list_hash_info}
@@ -70,6 +72,8 @@ appearance_settings:    # records AppearanceSettings (Looks.declare_appearances!
   - {key: core_stuff.external_links, group: text, modes: ["off", optional, forced], default: "off", proposal: forced, values: [place_field_link, place_url_pattern, place_project_homepage, place_people, place_icons], label: label_gk_core_stuff_external_links, help: text_gk_core_stuff_external_links_info}   # the values are flags, on until switched off: where outside formatted text GK GUI Stuff also gives a link the look (ExternalLinks, modules/external_links/module.rb); GK GUI Stuff only reads them
   - {key: core_stuff.scm_table, group: admin, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_core_stuff_scm_table, help: text_gk_core_stuff_scm_table_info}
 footprints:             # records AppearanceSettings (footprint: and applies:, Looks::FOOTPRINTS in looks.rb): what a look changes on the pages; a key not here is not described yet
+  core_stuff.dark_mode: {applies: [script], footprint: {anchors: ['#wrapper', '#content'], elements: [core_tables, core_forms, core_badges, core_context_menu], pages: [all]}}
+  core_stuff.chart_colors: {applies: [script], footprint: {anchors: ['[data-gk-core-stuff-effect~="chart_colors"]']}}
   core_stuff.sidebar_spacing: {applies: [script], footprint: {anchors: ['#sidebar']}}
   core_stuff.menu_icons: {applies: [script], footprint: {anchors: ['#context-menu a.icon'], elements: [core_context_menu]}}
   core_stuff.footer_version: {applies: [server], footprint: {anchors: ['#footer'], pages: [all]}}

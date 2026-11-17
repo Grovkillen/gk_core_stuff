@@ -2,4 +2,4 @@
    stands in the middle of the row, as the text beside it (vertical-align middle sets it a little low for capitals:
    2 px up). The form page's own table (Administration, Appearance) and a still sample (.gk-gui-stuff-sg-still) keep
    core's lift, so the other settings' pictures on that page are drawn as core draws them */
-table.list:not(.gk-gui-stuff-form-page-table) td .badge:not(.gk-gui-stuff-sg-still *) { inset-block-end: 2px; vertical-align: middle; }
+table.list:not(.gk-gui-stuff-form-page-table) td .badge:not(.gk-gui-stuff-sg-still *) { inset-block-end: 2px; vertical-align: middle; } /* gk-u U18: leaves the form page table and the still sample as core draws them */

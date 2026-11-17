@@ -1,0 +1,209 @@
+/* Dark mode for Redmine's own pages, written as a candidate for Redmine. It draws only while html has the class
+   dark-mode, which the page's small script sets from the device's prefers-color-scheme (and keeps in step when it
+   changes); without the class the page is Redmine's light one, untouched. Colours are Open Color, read directly, each
+   with Open Color's own hex as the fallback for a Redmine without it. Surfaces gray-9 and gray-8, text gray-0 and
+   gray-2, frames gray-7, a field's frame gray-6 (3:1 against both surfaces), links blue-2, the chosen rows and items
+   blue-9. A code block and a file's lines keep core's light ground with dark text and core's own link and icon
+   colours, so that Rouge's colours read as in the light page.
+   Weight: :where(html.dark-mode) before core's own selector weighs as core's rule and wins by coming after
+   application.css. Where core's rule weighs more by position (the striped rows), html.dark-mode carries its own
+   weight. Core's !important is met with !important. What core's sheets loaded per page need (context_menu.css,
+   jstoolbar.css) is in gk_core_stuff_dark_mode_late.css, which comes after them; the series' own differences are in
+   gk_core_stuff_dark_mode_<series>.css, loaded after this sheet. */
+
+/* the page */
+html.dark-mode { color-scheme: dark; background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) body { color: var(--oc-gray-0, #f8f9fa); background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) #wrapper, :where(html.dark-mode) #content { background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) #content h1, :where(html.dark-mode) h2, :where(html.dark-mode) h3, :where(html.dark-mode) h4, :where(html.dark-mode) h5, :where(html.dark-mode) h6 { color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) h4 { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) hr { background: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) blockquote { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #footer { border-color: var(--oc-gray-7, #495057); color: var(--oc-gray-5, #adb5bd); background: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) #sidebar { background: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #sidebar h3 { color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) #sidebar hr { background: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #sidebar a.selected { background-color: var(--oc-blue-9, #1864ab); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #sidebar a.selected:hover { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #sidebar a.selected svg.icon-svg { stroke: var(--oc-gray-0, #f8f9fa) !important; }
+:where(html.dark-mode) #sidebar-switch-button svg { stroke: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) #sidebar-switch-button:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div#sticky-issue-header { background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div.modal { background: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) .ui-widget-content { background: var(--oc-gray-9, #212529); color: var(--oc-gray-0, #f8f9fa); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .ui-widget-header { background: var(--oc-gray-8, #343a40); color: var(--oc-gray-0, #f8f9fa); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .ui-widget-content a { color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) #login-form { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .mypage-box { color: var(--oc-gray-0, #f8f9fa); border-color: var(--oc-gray-7, #495057); }
+
+/* the links, also the overdue ones and core's red decoration */
+:where(html.dark-mode) a, :where(html.dark-mode) a:link, :where(html.dark-mode) a:visited { color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) a:hover, :where(html.dark-mode) a:active { color: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) a.issue.closed, :where(html.dark-mode) a.issue.closed:link, :where(html.dark-mode) a.issue.closed:visited { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) a.project.closed, :where(html.dark-mode) a.project.closed:link, :where(html.dark-mode) a.project.closed:visited { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) a.user.locked, :where(html.dark-mode) a.user.locked:link, :where(html.dark-mode) a.user.locked:visited { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) a.user.user-mention { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .version-overdue a, :where(html.dark-mode) .issue-overdue a, :where(html.dark-mode) .project-overdue a { color: var(--oc-red-3, #ffa8a8); }
+:where(html.dark-mode) .decoration-red, :where(html.dark-mode) a.decoration-red { color: var(--oc-red-3, #ffa8a8) !important; }
+:where(html.dark-mode) a#toggle-completed-versions { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) a#toggle-completed-versions svg, :where(html.dark-mode) a#toggle-completed-versions:hover svg { stroke: var(--oc-gray-5, #adb5bd); }
+
+/* the menus: the project menu's chosen tab and its children, the dropdowns, the jump to a project, and in phone width
+   the fly-out menu's text and its heading bands */
+:where(html.dark-mode) #main-menu li a.selected, :where(html.dark-mode) #main-menu li a.selected:hover { background-color: var(--oc-gray-9, #212529); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #main-menu .menu-children { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #main-menu .menu-children li a { color: var(--oc-gray-2, #e9ecef); background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) #main-menu .menu-children li a:hover { color: var(--oc-gray-0, #f8f9fa); background-color: var(--oc-blue-9, #1864ab); }
+:where(html.dark-mode) .drdn-content { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) .drdn-items>span { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) .contextual .drdn-items > a:hover, :where(html.dark-mode) .journal-actions .drdn-items > a:hover { color: var(--oc-blue-2, #a5d8ff); border-color: var(--oc-blue-7, #1c7ed6); background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #project-jump .drdn-trigger { border-color: var(--oc-gray-6, #868e96); color: var(--oc-gray-2, #e9ecef); background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) #project-jump .drdn-items>* { color: var(--oc-gray-2, #e9ecef) !important; }
+:where(html.dark-mode) #project-jump .drdn-items>a:hover { background-color: var(--oc-blue-9, #1864ab); color: var(--oc-gray-0, #f8f9fa) !important; }
+@media screen and (max-width: 899px) {
+  :where(html.dark-mode) .flyout-menu, :where(html.dark-mode) .flyout-menu h3, :where(html.dark-mode) .flyout-menu h4 { color: var(--oc-gray-0, #f8f9fa); }
+  /* the menu's heading bands: core's blue band is too light under the gray-0 text, so the band is blue-9, as the chosen
+     items; the menu's own ground and the band's lines stay core's */
+  :where(html.dark-mode) .flyout-menu h3 { background-color: var(--oc-blue-9, #1864ab); }
+  /* a link inside a band (a sidebar heading that is a link): the link colour is too weak on blue-9, so it takes the
+     band's text colour, also under the pointer */
+  :where(html.dark-mode) .flyout-menu h3 a, :where(html.dark-mode) .flyout-menu h3 a:hover { color: var(--oc-gray-0, #f8f9fa); }
+}
+
+/* the tabs */
+:where(html.dark-mode) #content .tabs ul { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #content .tabs ul li a { border-color: var(--oc-gray-7, #495057); color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) #content .tabs ul li a:hover { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #content .tabs ul li a.selected { background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-7, #495057); border-block-end-color: var(--oc-gray-9, #212529); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #content .tabs ul li a.selected:hover { background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) div.tabs-buttons { background: var(--oc-gray-9, #212529); border-color: var(--oc-gray-7, #495057); }
+
+/* the tables: heading, lines, rows, the pointer's row, groups; core stripes by position, so the rows of a table
+   without odd and even classes are one surface. On the pointer's row the dimmed and the overdue text a level lighter */
+:where(html.dark-mode) table.list, :where(html.dark-mode) .table-list { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) table.list th, :where(html.dark-mode) .table-list-header { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) table.list td { border-color: var(--oc-gray-7, #495057); }
+html.dark-mode table.list:not(.odd-even) tbody tr { background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) .odd { background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) .even { background-color: var(--oc-gray-8, #343a40); }
+html.dark-mode table.list:not(.odd-even) tbody tr:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .odd:hover, :where(html.dark-mode) .even:hover { background-color: var(--oc-gray-7, #495057); }
+html.dark-mode table.list:not(.odd-even) tbody tr.group:hover { background-color: inherit; }
+:where(html.dark-mode) tr.group td { background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) tr.group span.totals, :where(html.dark-mode) tr.group span.totals .value, :where(html.dark-mode) tr.group a.toggle-all { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) table.list tr.overdue:not(.context-menu-selection) td.due_date { color: var(--oc-red-3, #ffa8a8); }
+:where(html.dark-mode) div.issue.overdue .due-date .value { color: var(--oc-red-3, #ffa8a8); }
+:where(html.dark-mode) tr:hover a.issue.closed, :where(html.dark-mode) tr:hover a.project.closed, :where(html.dark-mode) tr:hover a.user.locked { color: var(--oc-gray-4, #ced4da); }
+:where(html.dark-mode) tr:hover .badge-status-locked { color: var(--oc-gray-4, #ced4da); border-color: var(--oc-gray-4, #ced4da); }
+:where(html.dark-mode) table.list tr.overdue:not(.context-menu-selection):hover td.due_date, :where(html.dark-mode) tr:hover .version-overdue a, :where(html.dark-mode) tr:hover .issue-overdue a, :where(html.dark-mode) tr:hover .project-overdue a { color: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) table#time-report tbody tr.total { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .pagination ul.pages li { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .pagination ul.pages li.current { color: var(--oc-gray-0, #f8f9fa); background-color: var(--oc-blue-9, #1864ab); border-color: var(--oc-blue-9, #1864ab); }
+:where(html.dark-mode) .pagination ul.pages li.page:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .pagination ul.pages li.page a:hover, :where(html.dark-mode) .pagination ul.pages li.page a:active { color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) span.pagination { color: var(--oc-gray-5, #adb5bd); }
+
+/* the forms: the boxes, the fields and buttons, the field lists core gives a white ground, the hints, the error label
+   and the mark of a required field; a field's frame is gray-6, which shows where the field is on the page's gray-9 and
+   on a box's or the sidebar's gray-8 alike */
+:where(html.dark-mode) .box { background-color: var(--oc-gray-8, #343a40); color: var(--oc-gray-2, #e9ecef); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div.issue { background: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div.issue div.subject p, :where(html.dark-mode) div.issue .next-prev-links { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) input, :where(html.dark-mode) select, :where(html.dark-mode) textarea, :where(html.dark-mode) button { color: var(--oc-gray-0, #f8f9fa); background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-6, #868e96); }
+:where(html.dark-mode) select { background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) select[multiple=multiple] { background: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) input.autocomplete { background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) .check_box_group { background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-6, #868e96); }
+:where(html.dark-mode) .attachments_fields input.filename, :where(html.dark-mode) #existing-attachments .filename { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) input[type="submit"], :where(html.dark-mode) button[type="submit"] { background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) input[type="submit"]:hover, :where(html.dark-mode) button[type="submit"]:hover { background-color: var(--oc-gray-7, #495057); border-color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) input:disabled, :where(html.dark-mode) select:disabled, :where(html.dark-mode) textarea:disabled { color: var(--oc-gray-5, #adb5bd); background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) fieldset { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) legend { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) em.info, :where(html.dark-mode) div.attachments span.author { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) .tabular label.error { color: var(--oc-red-3, #ffa8a8); }
+:where(html.dark-mode) span.required { color: var(--oc-red-3, #ffa8a8); }
+
+/* flash and the error box: the alarm colour itself, its level 9 taken toward black (the palette has no darker level):
+   red nearly unmixed, green about a quarter, yellow nearer half, so that its level 0 text holds 4.5:1 with room; framed
+   in its level 7; the text, the links (underlined, as they share the text's colour) and the icon in its level 0. The
+   links the page dims or marks (a closed issue or project, a locked user, a missing wiki page) and the wiki alerts'
+   titles in the conflict's notes weigh more than a plain link, so they are named here with the alarm's weight added */
+:where(html.dark-mode) div.flash.error, :where(html.dark-mode) #errorExplanation { background-color: color-mix(in srgb, var(--oc-red-9, #c92a2a) 95%, black); border-color: var(--oc-red-7, #f03e3e); color: var(--oc-red-0, #fff5f5); }
+:where(html.dark-mode) div.flash.error a, :where(html.dark-mode) #errorExplanation a, :where(html.dark-mode) div.flash.error a.issue.closed, :where(html.dark-mode) #errorExplanation a.issue.closed, :where(html.dark-mode) div.flash.error a.project.closed, :where(html.dark-mode) #errorExplanation a.project.closed, :where(html.dark-mode) div.flash.error a.user.locked, :where(html.dark-mode) #errorExplanation a.user.locked, :where(html.dark-mode) div.flash.error div.wiki a.new, :where(html.dark-mode) #errorExplanation div.wiki a.new { color: var(--oc-red-0, #fff5f5); text-decoration: underline; }
+:where(html.dark-mode) div.flash.error svg.icon-svg, :where(html.dark-mode) #errorExplanation svg.icon-svg { stroke: var(--oc-red-0, #fff5f5); }
+:where(html.dark-mode) div.flash.notice { background-color: color-mix(in srgb, var(--oc-green-9, #2b8a3e) 75%, black); border-color: var(--oc-green-7, #37b24d); color: var(--oc-green-0, #ebfbee); }
+:where(html.dark-mode) div.flash.notice a, :where(html.dark-mode) div.flash.notice a.issue.closed, :where(html.dark-mode) div.flash.notice a.project.closed, :where(html.dark-mode) div.flash.notice a.user.locked, :where(html.dark-mode) div.flash.notice div.wiki a.new { color: var(--oc-green-0, #ebfbee); text-decoration: underline; }
+:where(html.dark-mode) div.flash.notice svg.icon-svg { stroke: var(--oc-green-0, #ebfbee); }
+:where(html.dark-mode) div.flash.warning, :where(html.dark-mode) .conflict { background-color: color-mix(in srgb, var(--oc-yellow-9, #e67700) 55%, black); border-color: var(--oc-yellow-7, #f59f00); color: var(--oc-yellow-0, #fff9db); }
+:where(html.dark-mode) div.flash.warning a, :where(html.dark-mode) .conflict a, :where(html.dark-mode) div.flash.warning a.issue.closed, :where(html.dark-mode) .conflict a.issue.closed, :where(html.dark-mode) div.flash.warning a.project.closed, :where(html.dark-mode) .conflict a.project.closed, :where(html.dark-mode) div.flash.warning a.user.locked, :where(html.dark-mode) .conflict a.user.locked, :where(html.dark-mode) div.flash.warning div.wiki a.new, :where(html.dark-mode) .conflict div.wiki a.new { color: var(--oc-yellow-0, #fff9db); text-decoration: underline; }
+:where(html.dark-mode) div.flash.warning svg.icon-svg, :where(html.dark-mode) .conflict svg.icon-svg { stroke: var(--oc-yellow-0, #fff9db); }
+:where(html.dark-mode) .conflict div.wiki .markdown-alert-title { color: var(--oc-yellow-0, #fff9db); }
+:where(html.dark-mode) .conflict div.wiki .markdown-alert-title svg { stroke: var(--oc-yellow-0, #fff9db); }
+:where(html.dark-mode) .nodata, :where(html.dark-mode) .warning { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-yellow-7, #f59f00); color: var(--oc-yellow-3, #ffe066); }
+
+/* the history and the activity */
+:where(html.dark-mode) .journals h4.journal-header { background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) .journals h4.journal-header .update-info { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) .journals div:target h4.journal-header { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .journals .private-notes { border-color: var(--oc-red-7, #f03e3e); }
+:where(html.dark-mode) .journals .journal-meta .journal-link { color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) .journals .journal-details, :where(html.dark-mode) ul.revision-info { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) .journals .journal-details a, :where(html.dark-mode) ul.revision-info a { color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) .journals .journal-details a:hover, :where(html.dark-mode) ul.revision-info a:hover { color: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) div#activity h3 { background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) div#activity dt { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div#activity dt .time { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) div#activity dd span.description, :where(html.dark-mode) #search-results dd span.description { color: var(--oc-gray-4, #ced4da); }
+
+/* the wiki: tables, inline code, the heading a link points at, the alerts' titles on the dark surface; a code block and
+   a file's lines keep core's light ground with dark text and core's light link and icon colours (the copy button is
+   white on it), and Rouge's own colours in .syntaxhl are left as core has them */
+:where(html.dark-mode) div.wiki table, :where(html.dark-mode) div.wiki td, :where(html.dark-mode) div.wiki th { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div.wiki pre, :where(html.dark-mode) table.filecontent { color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) table.filecontent a { color: var(--oc-blue-9, #1864ab); }
+:where(html.dark-mode) table.filecontent a:hover { color: var(--oc-red-9, #c92a2a); }
+:where(html.dark-mode) table.filecontent th.line-num a { color: inherit; }
+:where(html.dark-mode) table.filecontent svg.icon-svg { stroke: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) table.filecontent a.icon .icon-svg, :where(html.dark-mode) table.filecontent a.icon-only .icon-svg, :where(html.dark-mode) div.pre-wrapper a.copy-pre-content-link .icon-svg { stroke: var(--oc-blue-9, #1864ab); }
+:where(html.dark-mode) table.filecontent a.icon:hover .icon-svg, :where(html.dark-mode) table.filecontent a.icon-only:hover .icon-svg, :where(html.dark-mode) div.pre-wrapper a.copy-pre-content-link:hover .icon-svg { stroke: var(--oc-red-9, #c92a2a); }
+:where(html.dark-mode) div.wiki *:not(pre)>code, :where(html.dark-mode) div.wiki>code { background: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) div.wiki a.new { color: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) div.wiki a:target + h1, :where(html.dark-mode) div.wiki a:target + h2, :where(html.dark-mode) div.wiki a:target + h3, :where(html.dark-mode) div.wiki a:target + h4, :where(html.dark-mode) div.wiki a:target + h5, :where(html.dark-mode) div.wiki a:target + h6 { background-color: var(--oc-blue-9, #1864ab); }
+:where(html.dark-mode) .markdown-alert-tip .markdown-alert-title { color: var(--oc-green-3, #8ce99a); }
+:where(html.dark-mode) .markdown-alert-tip .markdown-alert-title svg { stroke: var(--oc-green-3, #8ce99a); }
+:where(html.dark-mode) .markdown-alert-important .markdown-alert-title { color: var(--oc-grape-3, #e599f7); }
+:where(html.dark-mode) .markdown-alert-important .markdown-alert-title svg { stroke: var(--oc-grape-3, #e599f7); }
+:where(html.dark-mode) .markdown-alert-caution .markdown-alert-title { color: var(--oc-yellow-3, #ffe066); }
+:where(html.dark-mode) .markdown-alert-caution .markdown-alert-title svg { stroke: var(--oc-yellow-3, #ffe066); }
+:where(html.dark-mode) .markdown-alert-warning .markdown-alert-title { color: var(--oc-orange-3, #ffc078); }
+:where(html.dark-mode) .markdown-alert-warning .markdown-alert-title svg { stroke: var(--oc-orange-3, #ffc078); }
+:where(html.dark-mode) .markdown-alert-note .markdown-alert-title { color: var(--oc-indigo-3, #91a7ff); }
+:where(html.dark-mode) .markdown-alert-note .markdown-alert-title svg { stroke: var(--oc-indigo-3, #91a7ff); }
+:where(html.dark-mode) .highlight { color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) div#version-summary { background-color: var(--oc-gray-9, #212529); }
+
+/* the calendar */
+:where(html.dark-mode) .cal .calhead, :where(html.dark-mode) .cal .week-number { background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) .cal .calbody { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .cal .calbody.this-month { background-color: var(--oc-gray-9, #212529); }
+:where(html.dark-mode) .cal .calbody.other-month, :where(html.dark-mode) .cal .calbody.nwday:not(.other-month) { background-color: var(--oc-gray-8, #343a40); }
+
+/* the badges */
+:where(html.dark-mode) .badge-status-open { color: var(--oc-blue-2, #a5d8ff); border-color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) .badge-status-locked { color: var(--oc-gray-5, #adb5bd); border-color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) .badge-status-closed { color: var(--oc-green-3, #8ce99a); border-color: var(--oc-green-3, #8ce99a); }
+:where(html.dark-mode) .badge-issues-count { background: var(--oc-gray-7, #495057); }
+
+/* what core draws on a light ground of its own and leaves the text to the page: the box shown while a page loads
+   (half transparent in core, so its ground is the page's gray-9 and the text stays readable over gray-9, gray-8 and
+   gray-7 under it), the tooltip of the calendar and the Gantt chart with its link, the text of an item under the
+   pointer (core makes it black), the sample of an import's file, and the list of @-mentions with its chosen row */
+:where(html.dark-mode) #ajax-indicator { background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-5, #adb5bd); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) .tooltip:hover { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) div.tooltip:hover span.tip { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-5, #adb5bd); color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) .tooltip span.tip a { color: var(--oc-blue-2, #a5d8ff) !important; }
+:where(html.dark-mode) .sample-data { background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-7, #495057); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) .sample-data td { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .tribute-container ul { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-5, #adb5bd); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) .tribute-container li.highlight { background-color: var(--oc-blue-9, #1864ab); color: var(--oc-gray-0, #f8f9fa); }

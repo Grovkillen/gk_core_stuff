@@ -1,0 +1,33 @@
+/* Dark mode, where an older series is drawn the way Redmine 7.0 draws it: GK Compat's gk_compat_core_vars.css gives
+   core's elements 7.0's colours under html.gk-core-vars in a series with fixed colours, and what 7.0 draws its own way
+   (gk_core_stuff_dark_mode_7_0.css, loaded only in 7.0) then needs its dark rules there too. The same rules as that
+   sheet, each only under both classes, with the same weight: :where(html.dark-mode.gk-core-vars) weighs as
+   :where(html.dark-mode), and html.dark-mode:where(.gk-core-vars) as html.dark-mode. Compat's sheet comes earlier in the
+   head (its head hook answers before this plugin's), so these win by order where compat's rule weighs the same, as the
+   common sheet's rules do over core's. Loaded in every series after the series' own sheet; in 7.0 each rule repeats the
+   7.0 sheet's own and changes nothing. Unlike the other sheets, the selectors carry compat's class: it is the only sign
+   that an older series is drawn with 7.0's colours, and a Redmine that took the dark mode in would not need this sheet. */
+:where(html.dark-mode.gk-core-vars) #main-menu { background: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode.gk-core-vars) #main-menu li a { color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode.gk-core-vars) #main-menu li a:hover { background-color: var(--oc-gray-7, #495057); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode.gk-core-vars) #main-menu li a.new-object { background-color: var(--oc-blue-9, #1864ab); border-color: var(--oc-blue-5, #339af0); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode.gk-core-vars) #main-menu li a.new-object:hover { background-color: var(--oc-blue-8, #1971c2); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode.gk-core-vars) svg.icon-svg { stroke: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode.gk-core-vars) svg.icon-svg-filled { fill: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode.gk-core-vars) a.icon .icon-svg, :where(html.dark-mode.gk-core-vars) a.icon-only .icon-svg, :where(html.dark-mode.gk-core-vars) span.icon-actions .icon-svg { stroke: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode.gk-core-vars) a.icon:hover .icon-svg, :where(html.dark-mode.gk-core-vars) a.icon-only:hover .icon-svg, :where(html.dark-mode.gk-core-vars) span.icon-actions:hover .icon-svg { stroke: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode.gk-core-vars) a.icon .icon-svg-filled, :where(html.dark-mode.gk-core-vars) a.icon-only .icon-svg-filled { fill: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode.gk-core-vars) a.icon:hover .icon-svg-filled, :where(html.dark-mode.gk-core-vars) a.icon-only:hover .icon-svg-filled { fill: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode.gk-core-vars) .icon-ok svg.icon-svg { stroke: var(--oc-green-6, #40c057); }
+:where(html.dark-mode.gk-core-vars) .icon-error svg.icon-svg { stroke: var(--oc-red-6, #fa5252); }
+:where(html.dark-mode.gk-core-vars) .icon-warning svg.icon-svg { stroke: var(--oc-yellow-6, #fab005); }
+html.dark-mode:where(.gk-core-vars) .box table.list:not(.odd-even) tbody tr { background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode.gk-core-vars) .box .odd, :where(html.dark-mode.gk-core-vars) .box .even { background-color: var(--oc-gray-8, #343a40); }
+html.dark-mode:where(.gk-core-vars) .box table.list:not(.odd-even) tbody tr:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode.gk-core-vars) .box .odd:hover, :where(html.dark-mode.gk-core-vars) .box .even:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode.gk-core-vars) div#roadmap header:target { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode.gk-core-vars) div#roadmap header:target .badge-status-locked { color: var(--oc-gray-4, #ced4da); border-color: var(--oc-gray-4, #ced4da); }
+:where(html.dark-mode.gk-core-vars) #document-list .document-group h3 { background-color: var(--oc-gray-8, #343a40); }
+/* compat's rule for the older series' names of the same element (a note's and a reply's heading as the address's
+   target), drawn in every older series under its class: the same level as the journal's target in the common sheet */
+:where(html.dark-mode.gk-core-vars) #history div:target h4.note-header, :where(html.dark-mode.gk-core-vars) #replies .reply:target h4.reply-header { background-color: var(--oc-gray-7, #495057); }

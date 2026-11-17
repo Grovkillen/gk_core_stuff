@@ -6,6 +6,8 @@ module GkCoreStuff
   # export, and what it is about as core has it when it sends the file. The plugins that name or log exports read it
   # here, so the list is one: revisions names them by its rule, records logs them as events. What is not in the list is
   # not core's export, so an attachment or a file from a repository is never one. Nothing is hooked into core.
+  # The list never asks the gate (gate.rb): it is data and draws nothing, and the log of exports is a trace, written
+  # also without GK GUI Stuff or GK Compat. What a reader does with the list is behind the reader's own gate.
   module Exports
     # "controller#action" => [kind, values: ->(controller) { { token => value } }]
     TABLE = {

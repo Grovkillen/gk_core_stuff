@@ -60,8 +60,12 @@ module GkCoreStuff
       end
     end
 
-    # The journal details part of the proposal's DSL on Redmine::Plugin, for as long as core has none
-    module PluginDsl
+    # The journal details part of the proposal's DSL on Redmine::Plugin, for as long as core has none. Other plugins
+    # ask defined?(GkCoreStuff::JournalDetails::PluginDsl) before they call it: that name is given to this module only
+    # when the gate opens (Gate.dsl!, gate.rb); without GK GUI Stuff or GK Compat the DSL is not there and their lines
+    # stay core's. The name missing is not an error to log: core_stuff may be installed with its gate closed (no
+    # fallback log), so a caller leaves its line to core silently, or asks its own gate first
+    module Dsl
       def journal_detail(property:, renderer:, prop_key: nil)
         GkCoreStuff::JournalDetails.register(property, renderer, prop_key: prop_key)
       end
@@ -71,7 +75,7 @@ module GkCoreStuff
   # Always on, without a setting: other plugins require the register for their history lines, and the register
   # changes nothing until a plugin adds to it
   register :journal_details, issue: 44660, defaults: {}, in_core: -> { GkCoreStuff.core_has?(:journal_details) }, always: true do
-    ::Redmine::Plugin.include(JournalDetails::PluginDsl) unless ::Redmine::Plugin.include?(JournalDetails::PluginDsl)
+    ::Redmine::Plugin.include(JournalDetails::Dsl) unless ::Redmine::Plugin.include?(JournalDetails::Dsl)
     ::IssuesHelper.prepend(JournalDetails::IssuesHelperPatch) unless ::IssuesHelper < JournalDetails::IssuesHelperPatch
   end
 end

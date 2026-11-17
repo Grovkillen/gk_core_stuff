@@ -1,8 +1,8 @@
 /* gk_core_stuff: the pictures under Visa on GK GUI Stuff's page Administration, Appearance. A picture shows what a look does
    also while its row is off, so each look's rule stands here as well, held to the On picture of its own row: nothing else
    on the page changes. The look's stylesheet comes only with the row on. */
-tr[data-gk-gui-row='core_stuff.heading_badge'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) :is(.badge-status-open, .badge-status-closed, .badge-private) { inset-block-end: 2px; }
-tr[data-gk-gui-row='core_stuff.list_badge'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) table.list td .badge { inset-block-end: 2px; vertical-align: middle; }
-tr[data-gk-gui-row='core_stuff.list_checkbox'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) table.list td.checkbox { padding-block: 0; }
-tr[data-gk-gui-row='core_stuff.list_checkbox'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) table.list td.checkbox input { display: block; margin-block: 0; margin-inline: auto; }
-tr[data-gk-gui-row='core_stuff.label_rows'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) .tabular p { line-height: 24px; }
+tr[data-gk-gui-row='core_stuff.heading_badge'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) :is(.badge-status-open, .badge-status-closed, .badge-private) { inset-block-end: 2px; } /* gk-u U18: holds the look to its own picture on the page Appearance */
+tr[data-gk-gui-row='core_stuff.list_badge'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) table.list td .badge { inset-block-end: 2px; vertical-align: middle; } /* gk-u U18: holds the look to its own picture on the page Appearance */
+tr[data-gk-gui-row='core_stuff.list_checkbox'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) table.list td.checkbox { padding-block: 0; } /* gk-u U18: holds the look to its own picture on the page Appearance */
+tr[data-gk-gui-row='core_stuff.list_checkbox'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) table.list td.checkbox input { display: block; margin-block: 0; margin-inline: auto; } /* gk-u U18: holds the look to its own picture on the page Appearance */
+tr[data-gk-gui-row='core_stuff.label_rows'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) .tabular p { line-height: 24px; } /* gk-u U18: holds the look to its own picture on the page Appearance */

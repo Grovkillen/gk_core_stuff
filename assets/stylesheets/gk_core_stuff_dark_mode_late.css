@@ -1,0 +1,19 @@
+/* Dark mode, for the sheets core adds to a page's head after the plugins' (context_menu.css, jstoolbar.css): this sheet
+   comes after them in the page's own header tags, so its rules have core's weight and win by order, as those of
+   gk_core_stuff_dark_mode.css do over application.css. Core's !important is met with !important. The context menu
+   with the chosen rows, and the toolbar's preview, buttons and table generator. */
+:where(html.dark-mode) #context-menu ul { border-color: var(--oc-gray-7, #495057); background: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) #context-menu li { border-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) #context-menu li:hover { border-color: var(--oc-blue-7, #1c7ed6); background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #context-menu a:hover { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #context-menu a.disabled, :where(html.dark-mode) #context-menu a.disabled:hover { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) .context-menu-selection { background-color: var(--oc-blue-9, #1864ab) !important; color: var(--oc-gray-0, #f8f9fa) !important; }
+:where(html.dark-mode) .context-menu-selection a, :where(html.dark-mode) .context-menu-selection a:hover { color: var(--oc-gray-0, #f8f9fa) !important; }
+:where(html.dark-mode) .context-menu-selection:hover { background-color: var(--oc-blue-9, #1864ab) !important; color: var(--oc-gray-0, #f8f9fa) !important; }
+:where(html.dark-mode) .context-menu-selection svg.icon-svg { stroke: var(--oc-gray-0, #f8f9fa) !important; }
+:where(html.dark-mode) div#gantt_area .context-menu-selection a { color: var(--oc-blue-2, #a5d8ff) !important; }
+:where(html.dark-mode) .wiki-preview { color: var(--oc-gray-0, #f8f9fa); background-color: var(--oc-gray-9, #212529); border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .jstElements button { border-color: var(--oc-gray-6, #868e96); background-color: var(--oc-gray-4, #ced4da); opacity: 1; }
+:where(html.dark-mode) .jstElements button:hover { border-color: var(--oc-gray-5, #adb5bd); background-color: var(--oc-gray-3, #dee2e6); }
+:where(html.dark-mode) .table-generator td { background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) .table-generator td.selected-cell, :where(html.dark-mode) .table-generator td:hover { background-color: var(--oc-blue-9, #1864ab); }

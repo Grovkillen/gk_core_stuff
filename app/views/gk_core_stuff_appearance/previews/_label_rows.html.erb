@@ -4,5 +4,4 @@
     with the row on). row: the setting %>
 <% gk_gui_stuff_preview_stylesheet('gk_core_stuff_pictures', plugin: 'gk_core_stuff') %>
 <% rows = content_tag(:div, content_tag(:p, safe_join([content_tag(:label, l(:field_status)), l(:label_open_issues)], ' ')), class: 'tabular') %>
-<% mid = method(:gk_gui_stuff_appearance_preview).parameters.map(&:last).include?(:mid_line) ? { mid_line: true } : {} %>
-<%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, rows, class: 'gk-gui-stuff-sg-still', inert: true), on: content_tag(:div, rows, inert: true), **mid) %>
+<%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, rows, class: 'gk-gui-stuff-sg-still', inert: true), on: content_tag(:div, rows, inert: true), mid_line: true) %>

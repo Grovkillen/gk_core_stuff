@@ -20,7 +20,7 @@ module GkCoreStuff
     # The group on the page Appearance and GK's proposal per look; a look not named here is in Lists and off in the
     # proposal
     GROUPS = {
-      'instance' => %w[sidebar_spacing menu_icons],
+      'instance' => %w[sidebar_spacing menu_icons dark_mode chart_colors],
       'lists' => %w[list_badge list_checkbox list_align list_hash ajax_indicator block_icons],
       'issue' => %w[heading_badge],
       'forms' => %w[warning_balance label_rows field_widths settings_widths control_heights native_texts submit_word list_sort],
@@ -46,8 +46,12 @@ module GkCoreStuff
     # (applies script). An effect mark or a class the look sets itself exists only while the look is on, so such a look
     # counts no places on the first page after it is switched off.
     # Where core offers nothing finer, the anchor names the part of the page the look works in: sidebar_spacing the
-    # sidebar, label_rows a tabular form, ajax_indicator a list, footer_version the footer.
+    # sidebar, label_rows a tabular form, ajax_indicator a list, footer_version the footer; dark_mode the whole page,
+    # named by core's page and content. chart_colors names only the effect mark it sets on each chart and graph it
+    # changed, so that a page where nothing changed (the light without a theme) counts no place.
     FOOTPRINTS = {
+      'dark_mode' => { applies: %w[script], footprint: { anchors: ['#wrapper', '#content'], elements: %w[core_tables core_forms core_badges core_context_menu], pages: %w[all] } },
+      'chart_colors' => { applies: %w[script], footprint: { anchors: ['[data-gk-core-stuff-effect~="chart_colors"]'] } },
       'sidebar_spacing' => { applies: %w[script], footprint: { anchors: ['#sidebar'] } },
       'menu_icons' => { applies: %w[script], footprint: { anchors: ['#context-menu a.icon'], elements: %w[core_context_menu] } },
       'footer_version' => { applies: %w[server], footprint: { anchors: ['#footer'], pages: %w[all] } },

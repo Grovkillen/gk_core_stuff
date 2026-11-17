@@ -1,0 +1,27 @@
+/* Dark mode, what Redmine 7.0 draws its own way (after gk_core_stuff_dark_mode.css, the same weight rules): the project
+   menu as its own band under the header, its new object button (its frame two levels lighter than its ground, so that
+   it stands out from the band), plain icons grey and a link's icon in the link
+   colour with the state icons after them as core has them, the rows inside a box, which core does not stripe, the
+   version a link points at on the roadmap (gray-7, as the history marks its target, with the locked badge a level
+   lighter), and a document category's heading on its quiet band */
+:where(html.dark-mode) #main-menu { background: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) #main-menu li a { color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) #main-menu li a:hover { background-color: var(--oc-gray-7, #495057); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #main-menu li a.new-object { background-color: var(--oc-blue-9, #1864ab); border-color: var(--oc-blue-5, #339af0); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #main-menu li a.new-object:hover { background-color: var(--oc-blue-8, #1971c2); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) svg.icon-svg { stroke: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) svg.icon-svg-filled { fill: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) a.icon .icon-svg, :where(html.dark-mode) a.icon-only .icon-svg, :where(html.dark-mode) span.icon-actions .icon-svg { stroke: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) a.icon:hover .icon-svg, :where(html.dark-mode) a.icon-only:hover .icon-svg, :where(html.dark-mode) span.icon-actions:hover .icon-svg { stroke: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) a.icon .icon-svg-filled, :where(html.dark-mode) a.icon-only .icon-svg-filled { fill: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) a.icon:hover .icon-svg-filled, :where(html.dark-mode) a.icon-only:hover .icon-svg-filled { fill: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) .icon-ok svg.icon-svg { stroke: var(--oc-green-6, #40c057); }
+:where(html.dark-mode) .icon-error svg.icon-svg { stroke: var(--oc-red-6, #fa5252); }
+:where(html.dark-mode) .icon-warning svg.icon-svg { stroke: var(--oc-yellow-6, #fab005); }
+html.dark-mode .box table.list:not(.odd-even) tbody tr { background-color: var(--oc-gray-8, #343a40); }
+:where(html.dark-mode) .box .odd, :where(html.dark-mode) .box .even { background-color: var(--oc-gray-8, #343a40); }
+html.dark-mode .box table.list:not(.odd-even) tbody tr:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .box .odd:hover, :where(html.dark-mode) .box .even:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div#roadmap header:target { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) div#roadmap header:target .badge-status-locked { color: var(--oc-gray-4, #ced4da); border-color: var(--oc-gray-4, #ced4da); }
+:where(html.dark-mode) #document-list .document-group h3 { background-color: var(--oc-gray-8, #343a40); }

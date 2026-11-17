@@ -9,11 +9,11 @@ div.progress-text-right table.progress {flex: none;}
 div.progress-text-right .progress-text {flex: none; min-inline-size: 2.6em; text-align: end; font-size: 86%; line-height: 1;}
 div.progress-text-over {display: inline-grid; inline-size: 80px;}
 div.progress-text-over > * {grid-area: 1 / 1;}
-div.progress-text-over .progress-text {align-self: center; text-align: center; font-size: 75%; line-height: 1; color: var(--gk-role-core-stuff-progress-text, #222); text-shadow: 0 0 2px var(--gk-role-core-stuff-progress-plate, #fff), 0 0 2px var(--gk-role-core-stuff-progress-plate, #fff);}
+div.progress-text-over .progress-text {align-self: center; text-align: center; font-size: 75%; line-height: 1; color: var(--gk-role-core-stuff-progress-text, var(--oc-gray-9, #222)); text-shadow: 0 0 2px var(--gk-role-core-stuff-progress-plate, var(--oc-white, #fff)), 0 0 2px var(--gk-role-core-stuff-progress-plate, var(--oc-white, #fff));}
 /* the plate behind the text on the bar, chosen in the settings (done_ratio_text_plate), as wide as the text and in the
    bar's middle: a grid item stretches over its whole area otherwise. The text and the plate are colour roles, for a
    theme to set; without them the values here stand */
-div.progress-text-over .progress-text.gk-core-stuff-progress-plate {justify-self: center; background-color: var(--gk-role-core-stuff-progress-plate, rgba(255, 255, 255, 0.85)); border-radius: 2px; padding-inline: 2px; text-shadow: none;}
+div.progress-text-over .progress-text.gk-core-stuff-progress-plate {justify-self: center; background-color: var(--gk-role-core-stuff-progress-plate, color-mix(in srgb, var(--oc-white, #fff) 85%, transparent)); border-radius: 2px; padding-inline: 2px; text-shadow: none;} /* gk-u U3: without the role the plate is core's white, see-through so the bar shows under the text */
 div.progress-text-under {display: inline-block; inline-size: 80px;}
 div.progress-text-under .progress-text {display: block; text-align: center; font-size: 86%;}
 div.progress-text-under .progress-text-none::before {content: "\00a0";}

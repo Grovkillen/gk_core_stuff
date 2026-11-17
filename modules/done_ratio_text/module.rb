@@ -116,7 +116,7 @@ module GkCoreStuff
            in_core: -> { GkCoreStuff.core_has?(:progress_bar_text) } do
     ::ApplicationHelper.prepend(DoneRatioText::ApplicationHelperPatch) unless ::ApplicationHelper < DoneRatioText::ApplicationHelperPatch
     ::QueriesHelper.prepend(DoneRatioText::QueriesHelperPatch) unless ::QueriesHelper < DoneRatioText::QueriesHelperPatch
-    # compat knows whether core has the format; without compat the format is left alone
+    # compat knows whether core has the format
     if GkCoreStuff.core_has?(:progressbar_field_format) && !(::Redmine::FieldFormat::ProgressbarFormat < DoneRatioText::ProgressbarFormatPatch)
       ::Redmine::FieldFormat::ProgressbarFormat.prepend(DoneRatioText::ProgressbarFormatPatch)
     end

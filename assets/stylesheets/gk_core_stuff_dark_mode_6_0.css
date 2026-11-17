@@ -1,0 +1,22 @@
+/* Dark mode, what Redmine 6.0 draws its own way (after gk_core_stuff_dark_mode.css, the same weight rules): every icon
+   in the link colour with the error and warning icons after them as core has them, the history's journal markup, a note
+   and a forum reply that are the address's target, the changesets' rows striped by position, today in the calendar */
+:where(html.dark-mode) svg.icon-svg { stroke: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) a.icon:hover svg, :where(html.dark-mode) a.icon-only:hover svg, :where(html.dark-mode) span.icon-actions:hover svg { stroke: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) .icon-error svg.icon-svg { stroke: var(--oc-red-6, #fa5252); }
+:where(html.dark-mode) .icon-warning svg.icon-svg { stroke: var(--oc-yellow-6, #fab005); }
+:where(html.dark-mode) div.journal ul.details, :where(html.dark-mode) ul.revision-info { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) div.journal ul.details a, :where(html.dark-mode) ul.revision-info a { color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) div.journal ul.details a:hover, :where(html.dark-mode) ul.revision-info a:hover { color: var(--oc-red-2, #ffc9c9); }
+:where(html.dark-mode) div.journal span.update-info { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) div.journal.private-notes .wiki { border-color: var(--oc-red-7, #f03e3e); }
+:where(html.dark-mode) #history .tab-content { border-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) #history div:target h4.note-header, :where(html.dark-mode) #replies .reply:target h4.reply-header { background-color: var(--oc-gray-7, #495057); }
+html.dark-mode #issue-changesets div.changeset { background-color: var(--oc-gray-9, #212529); }
+html.dark-mode #issue-changesets div.changeset:hover { background-color: var(--oc-gray-7, #495057); }
+:where(html.dark-mode) .cal .calbody.today { background: var(--oc-gray-7, #495057); }
+/* an alarm without an svg icon: core draws its png icon with the light ground in one shorthand that weighs more than the
+   alarm's own rule, so the same selector, after core's, takes the ground back and leaves the icon */
+:where(html.dark-mode) div.flash.error:not(:has(svg)), :where(html.dark-mode) #errorExplanation:not(:has(svg)) { background-color: color-mix(in srgb, var(--oc-red-9, #c92a2a) 95%, black); }
+:where(html.dark-mode) div.flash.notice:not(:has(svg)) { background-color: color-mix(in srgb, var(--oc-green-9, #2b8a3e) 75%, black); }
+:where(html.dark-mode) div.flash.warning:not(:has(svg)), :where(html.dark-mode) .conflict:not(:has(svg)) { background-color: color-mix(in srgb, var(--oc-yellow-9, #e67700) 55%, black); }

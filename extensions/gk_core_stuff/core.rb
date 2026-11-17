@@ -111,20 +111,21 @@ module GkCoreStuff
       defaults
     end
 
-    # Has core what a module adds? compat answers for the running series, as an ability; without compat, or with one
-    # that does not know the ability yet, core has not, and the module hooks in as before
+    # Has core what a module adds? GK Compat, which core_stuff requires, answers for the running series, as an ability;
+    # an ability it does not know is one core has not. Other plugins reach the question also with the gate closed
+    # (hook?, the formatting processors' register), and the pass over formatted text asks it for every text it is
+    # given, so the answer is false, never an error, without GK Compat and for a GK Compat that cannot answer (one
+    # without can?, or whose can? fails in any way; an ability it does not know is a KeyError)
     def core_has?(ability)
-      defined?(::GkCompat) && ::GkCompat.can?(ability) ? true : false
-    rescue KeyError
+      defined?(::GkCompat) && ::GkCompat.respond_to?(:can?) && ::GkCompat.can?(ability) ? true : false
+    rescue StandardError
       false
     end
 
     # A module's copies of core's views for the running series (modules/<name>/views/<series>/app/views, made by
     # core_views.ps1), chosen by compat (GkCompat.series_dir; version checks live only there), or nil when there are
-    # none for the series or compat lacks series_dir
+    # none for the series; asked only behind the gate, which opens only with GkCompat.series_dir
     def series_views(name)
-      return nil unless defined?(::GkCompat) && ::GkCompat.respond_to?(:series_dir)
-
       dir = ::GkCompat.series_dir(File.expand_path("../../modules/#{name}/views", __dir__))
       dir && File.directory?(File.join(dir, 'app', 'views')) ? File.join(dir, 'app', 'views') : nil
     end
@@ -145,8 +146,7 @@ module GkCoreStuff
       dir = series_views(name)
       if dir.nil?
         lost = adds == :marks ? 'the marks in the views are not on the page' : 'the hooks in the views are not called'
-        Rails.logger.warn("[gk_core_stuff] #{name}: no views for the running Redmine series (core_views.ps1, and GK Compat " \
-                          "with series_dir); #{lost}")
+        Rails.logger.warn("[gk_core_stuff] #{name}: no views for the running Redmine series (core_views.ps1); #{lost}")
         return nil
       end
       series_dirs[name.to_s] = dir

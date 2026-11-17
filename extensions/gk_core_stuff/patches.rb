@@ -1,7 +1,14 @@
 # frozen_string_literal: true
 
 module GkCoreStuff
-  # Core patches, all applied from here. Each module is a core candidate of its own and keeps how it hooks in beside
+  # Core patches, all applied from here, in two layers (gate.rb):
+  # * protect!, whatever the gate says: the pass over formatted text and over a custom field's formatted value
+  #   (formatting_processors and formatting_processors_values), which other plugins write a protection through (rel on
+  #   a link to another site). It assumes ApplicationHelper#textilizable and
+  #   Redmine::FieldFormat::Base#formatted_custom_value, and nothing of GK GUI Stuff or GK Compat.
+  # * apply!, only with the gate open: every module, the two above among them (each prepend is guarded, so they are
+  #   not hooked in twice).
+  # Each module is a core candidate of its own and keeps how it hooks in beside
   # its code (modules/<name>/module.rb, the block given to register); a module core already has hooks nothing in
   # (in_core). What each assumes of core is said in its module:
   # * done_ratio_text: ApplicationHelper#progress_bar, QueriesHelper#column_value,
@@ -22,10 +29,24 @@ module GkCoreStuff
   # unchanged. The list of
   # core's exports (exports.rb) hooks nothing in: revisions names the exports and records logs them, each with its own
   # patch.
-  # Applied directly from init.rb, which Redmine runs inside to_prepare at start and again after every reload in
-  # development mode; every prepend is guarded, so a reload never adds a module twice.
+  # Applied by the gate's start (Gate.start!, core's hook after_plugins_loaded) at start and again after every reload
+  # in development mode; every prepend is guarded, so a reload never adds a module twice.
   module Patches
+    # The modules hooked in also with the gate closed
+    PROTECTED = %w[formatting_processors formatting_processors_values].freeze
+
     module_function
+
+    # Only the modules of PROTECTED, each unless core has it. Whether core has it is asked of GK Compat, which may be
+    # missing or too old to answer here: then the answer is that core has it not (GkCoreStuff.core_has?, which never
+    # fails) and the module hooks in (a processor leaves what it marked before as it is, so a second pass beside
+    # core's own changes nothing). The pass asks the same question for every text, and is given the same answer.
+    def protect!
+      PROTECTED.each do |name|
+        mod = GkCoreStuff.modules[name]
+        mod.apply.call if mod && !mod.in_core.call
+      end
+    end
 
     def apply!
       GkCoreStuff.apply_modules!

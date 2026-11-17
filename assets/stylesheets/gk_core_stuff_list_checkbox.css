@@ -1,5 +1,5 @@
 /* gk_core_stuff list_checkbox: core gives the row's check box 2 px above and none below, and as a part of the line it stands
    on the text's middle, a little below the row's; as a block the cell's own middle places it in the middle of the row.
    A still sample (.gk-gui-stuff-sg-still) is left as core draws it, for the picture under Visa */
-table.list td.checkbox:not(.gk-gui-stuff-sg-still *) { padding-block: 0; }
-table.list td.checkbox:not(.gk-gui-stuff-sg-still *) input { display: block; margin-block: 0; margin-inline: auto; }
+table.list td.checkbox:not(.gk-gui-stuff-sg-still *) { padding-block: 0; } /* gk-u U18: leaves the still sample as core draws it */
+table.list td.checkbox:not(.gk-gui-stuff-sg-still *) input { display: block; margin-block: 0; margin-inline: auto; } /* gk-u U18: leaves the still sample as core draws it */

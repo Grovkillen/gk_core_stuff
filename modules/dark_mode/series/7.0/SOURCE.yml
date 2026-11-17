@@ -1,0 +1,5 @@
+# The series' own dark mode sheet: assets/stylesheets/gk_core_stuff_dark_mode_7_0.css, read against core's own
+# stylesheets of the release below (application.css, context_menu.css, jstoolbar.css, responsive.css)
+series: '7.0'
+read_from: '7.0.3'
+sheet: gk_core_stuff_dark_mode_7_0

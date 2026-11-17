@@ -3,8 +3,8 @@
    the class scm_version that the module anchor_marks sets on its cells (core does not yet); without it that column
    keeps the width the browser gives it */
 .settings.enabled_scm table { border-collapse: collapse; margin-block-end: 8px; }
-.settings.enabled_scm th { background-color: var(--oc-gray-2); padding: 4px; white-space: nowrap; text-align: start; border-block-end: 2px solid var(--oc-gray-4); }
-.settings.enabled_scm td { padding-block: 3px; padding-inline: 4px 10px; vertical-align: middle; border-block-start: 1px solid var(--oc-gray-4); }
+.settings.enabled_scm th { background-color: var(--gk-role-ui-raised, var(--oc-gray-2, #e9ecef)); padding: 4px; white-space: nowrap; text-align: start; border-block-end: 2px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); }
+.settings.enabled_scm td { padding-block: 3px; padding-inline: 4px 10px; vertical-align: middle; border-block-start: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); }
 .settings.enabled_scm td.scm_name { inline-size: 20%; white-space: nowrap; }
 .settings.enabled_scm td.scm_name label { display: inline-flex; align-items: center; gap: 4px; }
 .settings.enabled_scm th.scm_version, .settings.enabled_scm td.scm_version { inline-size: 15%; }

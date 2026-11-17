@@ -58,7 +58,8 @@ module GkCoreStuff
   end
 
   def self.register_scenarios!
-    return unless defined?(::GkScenarios::Expect)
+    # nothing is registered with the gate closed (gate.rb); GK Scenarios calls this once every plugin is in
+    return unless defined?(::GkScenarios::Expect) && GkCoreStuff.open?
 
     # A new installation has every look and AM/PM off, so a scenario says which it uses, as gui_stuff's step
     # does for its modules: core_stuff: { looks: { list_badge: optional, submit_word: forced }, ampm: true }. A look

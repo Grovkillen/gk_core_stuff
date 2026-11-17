@@ -1,11 +1,11 @@
 /* gk_core_stuff external_links: the form of Feature #44691, with GK's colour. Core's external.png before the link gives
    way to Tabler's external-link icon after it, as a mask, so that it scales with the font and is not read as part of
-   the link. An external link takes the colour role for external links (--gk-role-link-external, with a fallback when
-   GK GUI Stuff is missing) and a dotted underline; the icon takes the same colour. The empty ::after sits against the
-   last letter and the punctuation after it, so no line break comes between them; generated content without text is
-   not read by a screen reader. A link to the instance's own address carries gk-link-own (set by GK GUI Stuff) and is
-   drawn as an internal link: no colour, underline or icon. A link to an e-mail address (class email) gets core's
-   e-mail icon in core's grey. The icons are Tabler Icons (MIT, LICENSE_TABLER_ICONS.txt), as in core's sprite. */
+   the link. An external link takes the colour role for external links (--gk-role-link-external) and a dotted
+   underline; the icon takes the same colour. The empty ::after sits against the last letter and the punctuation
+   after it, so no line break comes between them; generated content without text is not read by a screen reader.
+   A link to the instance's own address carries gk-link-own (set by GK GUI Stuff) and is drawn as an internal link: no
+   colour, underline or icon. A link to an e-mail address (class email) gets core's e-mail icon in the role muted.
+   The icons are Tabler Icons (MIT, LICENSE_TABLER_ICONS.txt), as in core's sprite. */
 div.wiki a.external {
   background-image: none;
   padding-inline: 0;
@@ -27,9 +27,9 @@ div.wiki a.email::after {
 div.wiki a.external:not(.gk-link-own)::after {
   background-color: var(--gk-role-link-external, var(--oc-cyan-9, #0b7285));
 }
-/* the e-mail icon keeps core's grey */
+/* the e-mail icon in the role muted (core's grey as its fallback) */
 div.wiki a.email::after {
-  background-color: var(--oc-gray-6, #868e96);
+  background-color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96));
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10'/%3E%3Cpath d='M3 7l9 6l9 -6'/%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10'/%3E%3Cpath d='M3 7l9 6l9 -6'/%3E%3C/svg%3E");
 }

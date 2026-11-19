@@ -25,3 +25,13 @@ html.dark-mode .box table.list:not(.odd-even) tbody tr:hover { background-color:
 :where(html.dark-mode) div#roadmap header:target { background-color: var(--oc-gray-7, #495057); }
 :where(html.dark-mode) div#roadmap header:target .badge-status-locked { color: var(--oc-gray-4, #ced4da); border-color: var(--oc-gray-4, #ced4da); }
 :where(html.dark-mode) #document-list .document-group h3 { background-color: var(--oc-gray-8, #343a40); }
+/* the account menu, Redmine 7.0's own dropdown (div#account.dropdown, dropdown.css: .dropdown-content on a white ground,
+   the name and login in .user-info in gray-9, the links and the divider): the surface and frame of the other menus
+   (.drdn-content), the name in the page's text and the login quieter, the links blue-2 and under the pointer the row
+   a level lighter, the divider and the line over Sign out gray-7 */
+:where(html.dark-mode) .dropdown-content { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode) #account .dropdown-content .user-info { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) #account .dropdown-content .user-info .user-login { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode) .dropdown-content li a, :where(html.dark-mode) .dropdown-content .dropdown-items a { color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode) .dropdown-content li a:hover, :where(html.dark-mode) .dropdown-content .dropdown-items a:hover { background-color: var(--oc-gray-7, #495057); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode) .dropdown-divider, :where(html.dark-mode) #account .dropdown-content .logout { border-color: var(--oc-gray-7, #495057); }

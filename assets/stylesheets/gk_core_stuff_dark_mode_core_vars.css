@@ -31,3 +31,10 @@ html.dark-mode:where(.gk-core-vars) .box table.list:not(.odd-even) tbody tr:hove
 /* compat's rule for the older series' names of the same element (a note's and a reply's heading as the address's
    target), drawn in every older series under its class: the same level as the journal's target in the common sheet */
 :where(html.dark-mode.gk-core-vars) #history div:target h4.note-header, :where(html.dark-mode.gk-core-vars) #replies .reply:target h4.reply-header { background-color: var(--oc-gray-7, #495057); }
+/* the account menu as 7.0 draws it (the same rules as gk_core_stuff_dark_mode_7_0.css) */
+:where(html.dark-mode.gk-core-vars) .dropdown-content { background-color: var(--oc-gray-8, #343a40); border-color: var(--oc-gray-7, #495057); color: var(--oc-gray-2, #e9ecef); }
+:where(html.dark-mode.gk-core-vars) #account .dropdown-content .user-info { color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode.gk-core-vars) #account .dropdown-content .user-info .user-login { color: var(--oc-gray-5, #adb5bd); }
+:where(html.dark-mode.gk-core-vars) .dropdown-content li a, :where(html.dark-mode.gk-core-vars) .dropdown-content .dropdown-items a { color: var(--oc-blue-2, #a5d8ff); }
+:where(html.dark-mode.gk-core-vars) .dropdown-content li a:hover, :where(html.dark-mode.gk-core-vars) .dropdown-content .dropdown-items a:hover { background-color: var(--oc-gray-7, #495057); color: var(--oc-gray-0, #f8f9fa); }
+:where(html.dark-mode.gk-core-vars) .dropdown-divider, :where(html.dark-mode.gk-core-vars) #account .dropdown-content .logout { border-color: var(--oc-gray-7, #495057); }

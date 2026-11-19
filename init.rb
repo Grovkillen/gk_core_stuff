@@ -52,7 +52,7 @@ Redmine::Plugin.register :gk_core_stuff do
   name        'GK Core Stuff'
   author      'Jimmy Westberg'
   description "Small fixes and additions to Redmine's own behaviour, one switchable module each, written as patches to Redmine"
-  version     '1.05.000'
+  version     '1.05.001'
   requires_redmine version_or_higher: '6.0.0'
 
   settings default: GkCoreStuff.defaults, partial: 'settings/gk_core_stuff_settings'

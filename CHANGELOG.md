@@ -2,6 +2,12 @@
 
 All notable changes to GK Core Stuff are documented in this file.
 
+## 1.05.001 (2026-11-18)
+
+### Fixed
+
+* Dark mode: the account menu of Redmine 7.0 (the dropdown under the avatar in the top menu) is dark like the other menus: its surface and frame, the name and login, the links and the lines. Before, it kept Redmine's white box with dark text. The same holds in Redmine 6.0 and 6.1 while GK Compat draws the pages the way Redmine 7.0 does.
+
 ## 1.05.000 (2026-11-15)
 
 ### Added
